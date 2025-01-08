@@ -142,6 +142,8 @@ void loop() {
 
   Serial.print(",z:");
   Serial.println(ACC_Z); */
+
+  Serial.println(GYRO_Z);
   dT = micros()-TIME;
 }
 
@@ -214,18 +216,24 @@ void readSensors(){
 
 float V_Z = 0.0f;
 float ALTITUDE = 0.0f;
+float VELOCITY = 0;
 
 
 long uS_dT = 0;
 
 
 void updateState(){
-  V_Z += (ACC_Z-ACC_Z_ZERO) * ((float) dT / 1000000.0);
-  ALTITUDE = ALTITUDE + 0.9 * (V_Z * ((float) dT / 1000000.0) + 1/2 * (ACC_Z-ACC_Z_ZERO) * pow((float) dT / 1000000.0, 2)) + 0.1 * MPL_ALTI;
-  Serial.print("Alt:");
-  Serial.print(ALTITUDE);
-  Serial.print(",BAR:");
-  Serial.println(MPL_ALTI);
+  //V_Z += (ACC_Z-ACC_Z_ZERO) * ((float) dT / 1000000.0);
+  //ALTITUDE = ALTITUDE + 0.9 * (V_Z * ((float) dT / 1000000.0) + 1/2 * (ACC_Z-ACC_Z_ZERO) * pow((float) dT / 1000000.0, 2)) + 0.1 * MPL_ALTI;
 
-  uS_dT = micros();
+  VELOCITY += (ACC_Z-ACC_Z_ZERO) * ((float) dT / 1000000.0);
+
+  ALTITUDE += VELOCITY * ((float) dT / 1000000.0);
+
+  //Serial.println((ACC_Z)); // -ACC_Z_ZERO
+  
+  //Serial.print("Alt:");
+  //Serial.println(ALTITUDE);
+ // Serial.print(",BAR:");
+  //Serial.println(MPL_ALTI);
 }
