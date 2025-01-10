@@ -1,0 +1,3 @@
+To update rotation quaternion based off of gyro readings, use:
+q_{i+1} = 1/2 * (q_{i} + q_{gyro}*q_{i}* dt)
+Where q_{i} is current rotation quaternion, q{i+1} is next rotation quaternion, and q_{gyro} is quaternion of gyro readings, (0, wx, wy, wz).
