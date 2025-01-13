@@ -2,6 +2,8 @@
 #include <Adafruit_Sensor.h>
 #include <SensorFusion.h>
 #include <Servo.h>
+#include <Adafruit_I2CDevice.h>
+#include <Adafruit_ZeroDMA.h>
 #include <Adafruit_ADXL343.h>
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_BME280.h>
@@ -30,6 +32,8 @@
 #include <Adafruit_LSM6DS33.h>
 #include <Adafruit_LPS2X.h>
 #include <Adafruit_LIS3MDL.h>
+#include <Adafruit_Sensor_Calibration.h>
+
 //#include <Wire.h>
 
 #include"maths.h"
@@ -41,6 +45,16 @@ extern Adafruit_LPS25 lps;
 extern Adafruit_LIS3MDL lis3mdl;
 
 extern Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
+extern Adafruit_Sensor_Calibration_SDFat cal;
+
+extern sensors_event_t accel;
+extern sensors_event_t gyro;
+extern sensors_event_t mag;
+extern sensors_event_t tempp;
+
+extern Servo brake;
+
+extern FatVolume fatfs;
 
 enum phase {
     PAD,
@@ -79,12 +93,15 @@ class state{
         float qy;
         float qz;
 
-        float altitude;
+        float baroAltitude; // Barometric altitude
+        float altitude; // Real altitude
+
+        float gravity = 9.8;
 
     public:
 
         // change in time, used to calculate velocity and position
-        float delta_t;
+        float delta_t = 0.0f;
 
         // Rocket flight phase
 
@@ -142,7 +159,8 @@ class state{
         void setQuatY(float qy) { this->qy = qy; }
         void setQuatZ(float qz) { this->qz = qz; }
 
-        void setAltitude(float altitude) { this->altitude = altitude; }
+        void setBaroAltitude(float baroAltitude) { this->baroAltitude = baroAltitude; }
+
 
         void updateState();
 };
@@ -155,5 +173,9 @@ void deployBrake(); // Deploy airbrake
 void brakeTest(); // Test airbrake
 
 
-bool init_sensors(void); // initialize sensors
-void setup_sensors(void); // setup the sensors
+bool initSensors(void); // initialize sensors
+void setupSensors(void); // setup the sensors
+void initCalibration(void); // Initialize sensor calibration
+void calibrateSensors(void); // calibrate sensors
+
+void initFlash(void); // initialize flash memory

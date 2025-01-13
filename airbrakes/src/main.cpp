@@ -32,6 +32,7 @@
 #include <SPI.h>
 #include <Servo.h>
 #include <Wire.h>
+#include <Adafruit_Sensor_Calibration_SDFat.h>
 
 //#include"maths.h"
 #include"main.h"
@@ -44,6 +45,8 @@ Adafruit_LIS3MDL lis3mdl;
 Servo brake;
 
 Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
+
+Adafruit_Sensor_Calibration_SDFat cal;
 
 SF sensor_filter;
 
@@ -84,45 +87,55 @@ float *copyQuat; // float array to copy quaternion to RocketState
 
 void setup() {
   digitalWrite(13, HIGH);
-
   Wire.begin();
   Wire.setClock( 400000UL);
   
   Serial.begin(115200);
   while(!Serial);
-  //Serial.println("Airbrakes!");
+  Serial.println("Airbrakes!");
 
-  if (!init_sensors()){
+  if (!initSensors()){
     Serial.println("Failed to initialize sensors!");
   }
 
   brake.attach(9); // attach airbrake
 
-  setup_sensors(); // setup sensors
+  //initFlash(); // Initialize system flash
+
+  initCalibration();
+
+  setupSensors(); // setup sensors
 
 
   brakeTest(); // Test airbrake
  
   
   readSensors(); // Read sensors
+
 }
 
 
 void loop() {
   t = micros();
   readSensors();
+ // Serial.println("readSensors complete");
 
   RocketState.updateState();
 
-  Serial.print(RocketState.getAX());
+  Serial.print(RocketState.getVX());
   Serial.print(", ");
-  Serial.print(RocketState.getAY());
+  Serial.print(RocketState.getVY());
   Serial.print(", ");
-  Serial.println(RocketState.getAZ());
+  Serial.println(RocketState.getVZ());
+
+  if (RocketState.flightPhase == PAD){
+
+  }
 
   delay(10);
 
   dt = (float)(micros()-t)/1000000.0f;
+  RocketState.delta_t = dt;
 }
 
 
@@ -141,9 +154,6 @@ void retractBrake(){
 
 // READ SENSORS
 
-
-long dT_baro = 0;
-
 float filter_dt;
 
   
@@ -152,6 +162,7 @@ float filter_dt;
 void readSensors(){
   
   if (!baro.conversionComplete()){
+
   sensors_event_t temp;
   sensors_event_t pressure;
   lps.getEvent(&pressure, &temp);// get pressure
@@ -182,6 +193,8 @@ void readSensors(){
   MAG_Y = mag.magnetic.y;
   MAG_Z = mag.magnetic.z;
 
+  calibrateSensors();
+
   }
 
   else{
@@ -190,11 +203,18 @@ void readSensors(){
     MPL_PRESSURE = baro.getLastConversionResults(MPL3115A2_PRESSURE);  // float, hPa
     MPL_ALTI = baro.getLastConversionResults(MPL3115A2_ALTITUDE);      // float, m
     baro.startOneShot();
+    RocketState.setBaroAltitude(MPL_ALTI);
 
     //Serial.println(micros() - dT_baro);
     
     
   }
+
+  
+
+  RocketState.setAX_Local(ACC_X);
+  RocketState.setAY_Local(ACC_Y);
+  RocketState.setAZ_Local(ACC_Z);
 
   // Use Madgwick filter to update sensor filter
 
@@ -203,18 +223,20 @@ void readSensors(){
 
   // Set RocketState quaternion to sensor_filter quaternion
   copyQuat = sensor_filter.getQuat();
+
   RocketState.setQuatW(copyQuat[0]);
   RocketState.setQuatX(copyQuat[1]);
   RocketState.setQuatY(copyQuat[2]);
   RocketState.setQuatZ(copyQuat[3]);
 
-  Serial.print(RocketState.getQuatW());
+ /*Serial.print(RocketState.getQuatW());
   Serial.print(", ");
   Serial.print(RocketState.getQuatX());
   Serial.print(", ");
   Serial.print(RocketState.getQuatY());
   Serial.print(", ");
   Serial.println(RocketState.getQuatZ());
+*/
 
 
 }
@@ -318,10 +340,12 @@ Quaternion TempQuaternion; // Temprorary quaternion
 //}
 
 void brakeTest(){
-  
+  Serial.println("brakeTest check 1");
   retractBrake();
   delay(500);
   deployBrake();
   delay(500);
   retractBrake();
+  delay(500);
+  Serial.println("brakeTest check 2");
 }
