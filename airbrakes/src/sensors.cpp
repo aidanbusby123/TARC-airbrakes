@@ -5,6 +5,10 @@
 
 bool initSensors(void) {
   if (!lsm6ds.begin_I2C(0x6B) || !lis3mdl.begin_I2C(0x1E) || !baro.begin() || !lps.begin_I2C()) {
+    Serial.println(lsm6ds.begin_I2C(0x6B));
+    Serial.println(lis3mdl.begin_I2C(0x1E));
+    Serial.println(baro.begin());
+    Serial.println(lps.begin_I2C());
     return false;
   } 
   accelerometer = lsm6ds.getAccelerometerSensor();
@@ -26,6 +30,8 @@ void setupSensors(void) {
   lsm6ds.setAccelDataRate(LSM6DS_RATE_104_HZ);
   lsm6ds.setGyroDataRate(LSM6DS_RATE_104_HZ);
 
+  Serial.println("setupSensors check 1.5");
+
   lis3mdl.setDataRate(LIS3MDL_DATARATE_1000_HZ);
   lis3mdl.setPerformanceMode(LIS3MDL_MEDIUMMODE);
   lis3mdl.setOperationMode(LIS3MDL_CONTINUOUSMODE);
@@ -34,6 +40,7 @@ void setupSensors(void) {
 
   baro.setSeaPressure(1013.26);  
   baro.setMode(MPL3115A2_ALTIMETER);
+  baro.startOneShot();
   
 
   calibrateSensors();

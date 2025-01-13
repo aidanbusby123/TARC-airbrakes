@@ -93,7 +93,8 @@ void setup() {
   Serial.begin(115200);
   while(!Serial);
   Serial.println("Airbrakes!");
-
+  delay(100);
+  
   if (!initSensors()){
     Serial.println("Failed to initialize sensors!");
   }
@@ -121,16 +122,18 @@ void loop() {
  // Serial.println("readSensors complete");
 
   RocketState.updateState();
-
-  Serial.print(RocketState.getVX());
+  
+ Serial.println(RocketState.getAltitude());
+/*
+  Serial.print(RocketState.getAX());
   Serial.print(", ");
-  Serial.print(RocketState.getVY());
+  Serial.print(RocketState.getAY());
   Serial.print(", ");
-  Serial.println(RocketState.getVZ());
+  Serial.println(RocketState.getAZ());
+*/
+  /*if (RocketState.flightPhase == PAD){
 
-  if (RocketState.flightPhase == PAD){
-
-  }
+  }*/
 
   delay(10);
 
@@ -193,6 +196,8 @@ void readSensors(){
   MAG_Y = mag.magnetic.y;
   MAG_Z = mag.magnetic.z;
 
+  
+
   calibrateSensors();
 
   }
@@ -204,9 +209,10 @@ void readSensors(){
     MPL_ALTI = baro.getLastConversionResults(MPL3115A2_ALTITUDE);      // float, m
     baro.startOneShot();
     RocketState.setBaroAltitude(MPL_ALTI);
+    //Serial.println(MPL_ALTI);
 
     //Serial.println(micros() - dT_baro);
-    
+    calibrateSensors();
     
   }
 

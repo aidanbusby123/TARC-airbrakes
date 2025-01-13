@@ -32,5 +32,9 @@ void state::updateState () {
 
   x += vx * delta_t;
   y += vy * delta_t;
-  z = 0.9 * (z + vz * delta_t) + 0.1 * altitude; 
+  z += vz * delta_t;
+
+  // Very simple complimentary filter
+  
+  altitude = 0.9 * (altitude + vz * delta_t) + 0.1 * baroAltitude; 
 }

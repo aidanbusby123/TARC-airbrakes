@@ -72,9 +72,9 @@ class state{
         float ay;
         float az;
 
-        float ax_local;
-        float ay_local;
-        float az_local;
+        float ax_local = 0.0f;
+        float ay_local = 0.0f;
+        float az_local = 0.0f;
 
         float pitch;
         float roll;
@@ -96,7 +96,7 @@ class state{
         float baroAltitude; // Barometric altitude
         float altitude; // Real altitude
 
-        float gravity = 9.8;
+        float gravity = 9.8067;
 
     public:
 
