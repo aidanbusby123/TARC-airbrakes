@@ -36,6 +36,11 @@
 
 //#include"maths.h"
 #include"main.h"
+#include"sim.h"
+
+#define TEST_TIME 20.0f
+#define START_TIME 30.0f
+
 
 Adafruit_MPL3115A2 baro;
 Adafruit_LSM6DS33 lsm6ds;
@@ -51,11 +56,22 @@ Adafruit_Sensor_Calibration_SDFat cal;
 SF sensor_filter;
 
 
-state RocketState;
+state rocketState;
+
+
+stateHistory* rocketStateHistory; // Rocket State history
+stateHistory* simStateHistory; // Simulation state history
+
+uint rocketStateHistory_index = 0;
+uint rocketStateHistory_size = 0;
+
+uint simStateHistory_index = 0;
+uint simStateHistory_size = 0;
 // GLOBAL SENSOR VALUES
 
 float MPL_PRESSURE;
 float MPL_ALTI;
+float MPL_TEMP;
 
 float LPS_PRESSURE;
 float LPS_TEMP;
@@ -78,11 +94,19 @@ sensors_event_t gyro;
 sensors_event_t mag;
 sensors_event_t tempp;
 
-long t = 0;
+float t = 0.0f;
+float t_start = 0.0f;
+float t_launch = 0.0f;
+float t_last = 0.0f;
 float dt = 0;
+
+float test_dt = 0.0f;
+float test_dt_now = 0.0f;
+float test_dt_last = 0.0f;
 
 
 float *copyQuat; // float array to copy quaternion to RocketState
+
 
 
 void setup() {
@@ -90,55 +114,182 @@ void setup() {
   Wire.begin();
   Wire.setClock( 400000UL);
   
+  t_start = (float)micros()/1000000.0f;
+
   Serial.begin(115200);
-  while(!Serial);
-  Serial.println("Airbrakes!");
+  ///while(!Serial);
+  //Serial.println("Airbrakes!");
   delay(100);
   
   if (!initSensors()){
     Serial.println("Failed to initialize sensors!");
   }
 
+  rocketState.stateType = ROCKET;
+  Serial.println("State type established");
+  // Initialize rocket state history
+
+
+  Serial.println("rocketStateHistory created");
+  initSD();
+
+  initLogs(); // Initialize state history logs
+
+  Serial.println("Logs initialized");
+  //initBT();
+
   brake.attach(9); // attach airbrake
+  brake.write(130);
 
   //initFlash(); // Initialize system flash
 
   initCalibration();
+ //magnetometer->printSensorDetails();
 
   setupSensors(); // setup sensors
+  //delay(10000);
 
-
-  brakeTest(); // Test airbrake
- 
+  /*for (;;){
+    brakeTest(); // Test airbrake
+  }*/
   
   readSensors(); // Read sensors
+  rocketState.setAltitude(baro.getAltitude());
+
+ // runTestSim();
+
+
+  //delay(1000);
+  
 
 }
 
 
 void loop() {
-  t = micros();
-  readSensors();
- // Serial.println("readSensors complete");
-
-  RocketState.updateState();
+  t = (float)micros()/1000000.0f;
   
- Serial.println(RocketState.getAltitude());
+  
+  readSensors();
+
+  
+ // Serial.println("readSensors complete");
+  dt = (float)(micros())/1000000.0f - t;
+  rocketState.delta_t = dt;
+  rocketState.updateState();
+
+  // If time is past start time (time for the rocket to get set up)
+
+  if (!((t-t_start) <= START_TIME)){
+    //Serial.println("here we go!");
+
+    while (rocketState.flightPhase == PAD){ // While rocket flight phase is PAD, continue to read sensors until it is not.
+        t = (float)micros()/1000000.0f;
+        t_last = t;
+        
+  
+      readSensors();
+      if ((((t * 1000000)/25000) -((t_last * 1000000)/25000)) >= 1){
+          t_last = t;
+          //Serial.println("logging");
+          logRocketState();
+          logSimState();
+          //logState(simState);
+        }
+  
+      // Serial.println("readSensors complete");
+      dt = (float)(micros())/1000000.0f - t;
+      rocketState.delta_t = dt;
+      rocketState.updateState();
+      //Serial.println("flightphase pad");
+      if (rocketState.getAZ() > 1.0){
+        Serial.println("flighphase launch");
+        rocketState.flightPhase = LAUNCH;
+        t_launch = t;
+        brake.write(60);
+
+      }
+    }
+    if (rocketState.flightPhase == LAUNCH){
+      if(t-t_launch <= TEST_TIME){
+
+        //Serial.println("logging");
+        if ((((t * 1000000)/25000) -((t_last * 1000000)/25000)) >= 1){
+          t_last = t;
+          //Serial.println("logging");
+          logRocketState();
+          logSimState();
+          //logState(simState);
+        }
+      } else {
+        rocketState.flightPhase = LAND;
+        writeRocketStateLog();
+        closeLogs();
+        Serial.println("closed logs");
+        exit(0);
+      }
+    }
+  }
+  if (rocketState.flightPhase == LAND){
+    return;
+  }
+ /*Serial.print(rocketState.getBaroAltitude());
+ Serial.print(", ");
+ Serial.println(rocketState.getAltitude());*/
 /*
-  Serial.print(RocketState.getAX());
+ Serial.print(rocketState.getAX());
+ Serial.print(", ");
+ Serial.print(rocketState.getAY());
+ Serial.print(", ");
+ Serial.println(rocketState.getAZ());
+ */
+ //loopBT();
+ 
+/*
+  Serial.print("Quaternion: ");
+  Serial.print(rocketState.getQuatW(), 4);
   Serial.print(", ");
-  Serial.print(RocketState.getAY());
+  Serial.print(rocketState.getQuatX(), 4);
   Serial.print(", ");
-  Serial.println(RocketState.getAZ());
+  Serial.print(rocketState.getQuatY(), 4);
+  Serial.print(", ");
+  Serial.println(rocketState.getQuatZ(), 4); 
+  //Serial.println(" ");
+
+  Serial.print("Acceleration: ");
+  Serial.print(rocketState.getAX());
+  Serial.print(", ");
+  Serial.print(rocketState.getAY());
+  Serial.print(", ");
+  Serial.println(rocketState.getAZ());
 */
-  /*if (RocketState.flightPhase == PAD){
 
-  }*/
 
-  delay(10);
 
-  dt = (float)(micros()-t)/1000000.0f;
-  RocketState.delta_t = dt;
+/* Serial.print(rocketState.getAX());
+  Serial.print(", ");
+  Serial.print(rocketState.getAY());
+  Serial.print(", ");
+  Serial.println(rocketState.getAZ());
+*/
+/*if (t <= 5000000.0f){
+  rocketState.flightPhase = PAD;
+ // Serial.println("Flighphase: PAD");
+}
+  else rocketState.flightPhase = LAUNCH;
+  */
+/*
+  if (rocketState.flightPhase == PAD){
+    cal.gyro_zerorate[0] = GYRO_X;
+    cal.gyro_zerorate[1] = GYRO_Y;
+    cal.gyro_zerorate[2] = GYRO_Z;
+  }
+  */
+ //Serial.println(rocketState.getAltitude()-80.00);
+
+
+
+  
+ // Serial.println(dt, 6);
 }
 
 
@@ -159,9 +310,13 @@ void retractBrake(){
 
 float filter_dt;
 
-  
-
-
+/*  
+Quaternion DeltaRotQuaternion;
+Quaternion RotQuaternion;
+Quaternion TempQuaternion;
+Quaternion AccelLocalQuaternion;
+Quaternion AccelQuaternion;
+*/
 void readSensors(){
   
   if (!baro.conversionComplete()){
@@ -207,42 +362,45 @@ void readSensors(){
     // calibrated altitude data
     MPL_PRESSURE = baro.getLastConversionResults(MPL3115A2_PRESSURE);  // float, hPa
     MPL_ALTI = baro.getLastConversionResults(MPL3115A2_ALTITUDE);      // float, m
+    MPL_TEMP = baro.getLastConversionResults(MPL3115A2_TEMPERATURE);
     baro.startOneShot();
-    RocketState.setBaroAltitude(MPL_ALTI);
+
+    rocketState.setBaroAltitude(MPL_ALTI);
+    rocketState.setBaroPressure(MPL_PRESSURE);
+    rocketState.setBaroTemperature(MPL_TEMP);
     //Serial.println(MPL_ALTI);
 
     //Serial.println(micros() - dT_baro);
-    calibrateSensors();
-    
+   calibrateSensors();
+ /* Serial.print(copyQuat[0]);
+  Serial.print(", ");
+  Serial.print(copyQuat[1]);
+  Serial.print(", ");
+  Serial.print(copyQuat[2]);
+  Serial.print(", ");
+  Serial.println(copyQuat[3]);
+    */
   }
 
   
-
-  RocketState.setAX_Local(ACC_X);
-  RocketState.setAY_Local(ACC_Y);
-  RocketState.setAZ_Local(ACC_Z);
+  rocketState.setAX_Local(ACC_X);
+  rocketState.setAY_Local(ACC_Y);
+  rocketState.setAZ_Local(ACC_Z);
 
   // Use Madgwick filter to update sensor filter
 
-  filter_dt = sensor_filter.deltatUpdate();
-  sensor_filter.MadgwickUpdate(GYRO_X, GYRO_Y, GYRO_Z, ACC_X, ACC_Y, ACC_Z, MAG_X, MAG_Y, MAG_Z, filter_dt); // Use Madgwick filter to update sensor filter
+filter_dt = sensor_filter.deltatUpdate();
+ 
+sensor_filter.MadgwickUpdate(GYRO_X, GYRO_Y, GYRO_Z, ACC_X, ACC_Y, ACC_Z, filter_dt); // Use Madgwick filter to update sensor filter
 
-  // Set RocketState quaternion to sensor_filter quaternion
-  copyQuat = sensor_filter.getQuat();
+   //Set RocketState quaternion to sensor_filter quaternion
+ copyQuat = sensor_filter.getQuat();
 
-  RocketState.setQuatW(copyQuat[0]);
-  RocketState.setQuatX(copyQuat[1]);
-  RocketState.setQuatY(copyQuat[2]);
-  RocketState.setQuatZ(copyQuat[3]);
+rocketState.setQuatW(copyQuat[0]);
+rocketState.setQuatX(copyQuat[1]);
+rocketState.setQuatY(copyQuat[2]);
+rocketState.setQuatZ(copyQuat[3]);
 
- /*Serial.print(RocketState.getQuatW());
-  Serial.print(", ");
-  Serial.print(RocketState.getQuatX());
-  Serial.print(", ");
-  Serial.print(RocketState.getQuatY());
-  Serial.print(", ");
-  Serial.println(RocketState.getQuatZ());
-*/
 
 
 }

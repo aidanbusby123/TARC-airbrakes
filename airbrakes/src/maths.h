@@ -74,7 +74,7 @@
     }
   
 };
-
+*/
 class Quaternion {
 private:
     float w, x, y, z; // Components of the quaternion
@@ -139,4 +139,3 @@ public:
 
 
 };
-*/

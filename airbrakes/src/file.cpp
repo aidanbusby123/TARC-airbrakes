@@ -2,18 +2,15 @@
 #include <Arduino.h>
 #include <Adafruit_SPIFlash.h>
 
-Adafruit_FlashTransport_SPI flashTransport(4, SPI);
-Adafruit_SPIFlash flash(&flashTransport);
+/*Adafruit_FlashTransport_SPI flashTransport(4, SPI);
+Adafruit_SPIFlash flash(&flashTransport);*/
 
-FatVolume fatfs;
+SdFat sd;
 
 
-void initFlash(void){
+void initSD(void){
     // Initialize the external flash
-    flash.begin();
+    if (!sd.begin(4, SPI_HALF_SPEED)) sd.initErrorHalt();
 
     // Open file system on flash (Fat16)
-    if (!fatfs.begin(&flash)){
-        Serial.println("Fat16 filesystem does not exist");
-    }
 }
