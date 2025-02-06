@@ -48,6 +48,36 @@ void state::globalizeAcceleration(){
   az = temp_w * (-qz) + temp_x * (-qy) - temp_y * (-qx) + temp_z * qw;
 }
 
+void state::globalizeVelocity(){
+  // Temporary quaternion values
+  float temp_w;
+  float temp_x;
+  float temp_y;
+  float temp_z;
+
+  // Use quaternions to find global acceleration
+
+  temp_w = qw * 0 - qx * vx_local - qy * vy_local - qz * vz_local;
+  temp_x = qw * vx_local + qx * 0 + qy * vz_local - qz * vy_local;
+  temp_y = qw * vy_local - qx * vz_local + qy * 0 + qz * vx_local;
+  temp_z = qw * vz_local + qx * vy_local - qy * vx_local + qz * 0;
+
+  vx = temp_w * (-qx) + temp_x * qw + temp_y * (-qz) - temp_z * (-qy);
+  vy = temp_w * (-qy) - temp_x * (-qz) + temp_y * qw + temp_z * (-qx);
+  vz = temp_w * (-qz) + temp_x * (-qy) - temp_y * (-qx) + temp_z * qw;
+}
+
+void state::updatePos(){
+  x += vx * delta_t;
+  y += vy * delta_t;
+  z += vz * delta_t;
+  if (stateType == ROCKET){
+    altitude = 0.99 * (altitude + vz * delta_t) + 0.01 * baroAltitude; 
+  } else {
+    altitude = altitude + vz * delta_t;
+  }
+}
+
 /*void state::globalizeForces(){
     // Temporary quaternion values
   float temp_w;

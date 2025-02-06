@@ -27,25 +27,33 @@
 #include <Adafruit_MPL3115A2.h>
 #include <Adafruit_LSM6DS33.h>
 #include <Adafruit_LPS2X.h>
+#include<Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
 #include <SensorFusion.h>
 #include <SPI.h>
 #include <Servo.h>
 #include <Wire.h>
 #include <Adafruit_Sensor_Calibration_SDFat.h>
+#include <SdFat.h>
 
 //#include"maths.h"
 #include"main.h"
 #include"sim.h"
 
 #define TEST_TIME 20.0f
-#define START_TIME 30.0f
+#define START_TIME 20.0f
 
 
 Adafruit_MPL3115A2 baro;
+
+//V1
+
+
 Adafruit_LSM6DS33 lsm6ds;
 Adafruit_LPS25 lps;
 Adafruit_LIS3MDL lis3mdl;
+
+//Adafruit_BNO055 bno055;
 
 Servo brake;
 
@@ -117,7 +125,7 @@ void setup() {
   t_start = (float)micros()/1000000.0f;
 
   Serial.begin(115200);
-  ///while(!Serial);
+     while(!Serial);
   //Serial.println("Airbrakes!");
   delay(100);
   
@@ -131,9 +139,10 @@ void setup() {
 
 
   Serial.println("rocketStateHistory created");
-  initSD();
+ // initSD();
+  Serial.println("SD initialized");
 
-  initLogs(); // Initialize state history logs
+  //initLogs(); // Initialize state history logs
 
   Serial.println("Logs initialized");
   //initBT();
@@ -143,10 +152,10 @@ void setup() {
 
   //initFlash(); // Initialize system flash
 
-  initCalibration();
+  //initCalibration();
  //magnetometer->printSensorDetails();
 
-  setupSensors(); // setup sensors
+ // setupSensors(); // setup sensors
   //delay(10000);
 
   /*for (;;){
@@ -156,7 +165,9 @@ void setup() {
   readSensors(); // Read sensors
   rocketState.setAltitude(baro.getAltitude());
 
- // runTestSim();
+  runTestSim();
+  delay(10000000000000);
+  exit(0);
 
 
   //delay(1000);
@@ -166,15 +177,17 @@ void setup() {
 
 
 void loop() {
-  t = (float)micros()/1000000.0f;
+  t = (float)micros()/1000000.0f; 
   
   
   readSensors();
+  //Serial.print(rocketState.getAZ());
 
   
  // Serial.println("readSensors complete");
   dt = (float)(micros())/1000000.0f - t;
   rocketState.delta_t = dt;
+  rocketState.time = (float)micros()/1000000.0f;
   rocketState.updateState();
 
   // If time is past start time (time for the rocket to get set up)
@@ -187,12 +200,13 @@ void loop() {
         t_last = t;
         
   
-      readSensors();
-      if ((((t * 1000000)/25000) -((t_last * 1000000)/25000)) >= 1){
+      readSensors(); // get sensor input
+
+      if ((((t * 1000000)/100000) -((t_last * 1000000)/100000)) >= 1){
           t_last = t;
           //Serial.println("logging");
           logRocketState();
-          logSimState();
+          //logSimState();
           //logState(simState);
         }
   
@@ -200,8 +214,12 @@ void loop() {
       dt = (float)(micros())/1000000.0f - t;
       rocketState.delta_t = dt;
       rocketState.updateState();
+
+      simState.time = (float)micros()/1000000.0f;
+      
+
       //Serial.println("flightphase pad");
-      if (rocketState.getAZ() > 1.0){
+      if (rocketState.getAZ() > TRIGGER_ACCEL){
         Serial.println("flighphase launch");
         rocketState.flightPhase = LAUNCH;
         t_launch = t;
@@ -211,13 +229,13 @@ void loop() {
     }
     if (rocketState.flightPhase == LAUNCH){
       if(t-t_launch <= TEST_TIME){
-
+        updateSim();
         //Serial.println("logging");
-        if ((((t * 1000000)/25000) -((t_last * 1000000)/25000)) >= 1){
+        if ((((t * 1000000)/100000) -((t_last * 1000000)/100000)) >= 1){
           t_last = t;
           //Serial.println("logging");
           logRocketState();
-          logSimState();
+          //logSimState();
           //logState(simState);
         }
       } else {
@@ -321,24 +339,31 @@ void readSensors(){
   
   if (!baro.conversionComplete()){
 
+  /*V1 Code*/
+
   sensors_event_t temp;
   sensors_event_t pressure;
-  lps.getEvent(&pressure, &temp);// get pressure
-
+  //lps.getEvent(&pressure, &temp);// get pressure
 
   lsm6ds.getEvent(&accel, &gyro, &tempp);
 
   lis3mdl.getEvent(&mag);
 
-  
+
 
   // updated every 40ms (25 hz)
   // fast-updating pressure and temp data
-  LPS_PRESSURE = pressure.pressure; // float, hPa
-  LPS_TEMP = temp.temperature;      // float, C
+  //LPS_PRESSURE = pressure.pressure; // float, hPa
+  //LPS_TEMP = temp.temperature;      // float, C
   
   // updated ~1KHz
   // acceleration and gyro data
+
+  /*V3 code
+  bno055.getEvent(&accel, Adafruit_BNO055::VECTOR_ACCELEROMETER);
+  bno055.getEvent(&gyro, Adafruit_BNO055::VECTOR_GYROSCOPE);
+  bno055.getEvent(&mag, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+*/
   ACC_X = accel.acceleration.x;  //float, m/s2
   ACC_Y = accel.acceleration.y;
   ACC_Z = accel.acceleration.z;
@@ -391,7 +416,7 @@ void readSensors(){
 
 filter_dt = sensor_filter.deltatUpdate();
  
-sensor_filter.MadgwickUpdate(GYRO_X, GYRO_Y, GYRO_Z, ACC_X, ACC_Y, ACC_Z, filter_dt); // Use Madgwick filter to update sensor filter
+sensor_filter.MadgwickUpdate(GYRO_X, GYRO_Y, GYRO_Z, ACC_X, ACC_Y, ACC_Z, MAG_X, MAG_Y, MAG_Z, filter_dt); // Use Madgwick filter to update sensor filter
 
    //Set RocketState quaternion to sensor_filter quaternion
  copyQuat = sensor_filter.getQuat();
@@ -513,3 +538,4 @@ void brakeTest(){
   delay(500);
   Serial.println("brakeTest check 2");
 }
+

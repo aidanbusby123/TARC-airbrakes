@@ -3,6 +3,9 @@
 #include <Adafruit_Sensor_Calibration.h>
 #include <Adafruit_Sensor_Calibration_SDFat.h>
 
+#define BNO055_SAMPLERATE_DELAY_MS 20
+
+
 bool initSensors(void) {
   if (!lsm6ds.begin_I2C(0x6B) || !lis3mdl.begin_I2C(0x1E) || !baro.begin() || !lps.begin_I2C()) {
     Serial.println(lsm6ds.begin_I2C(0x6B));
@@ -18,7 +21,21 @@ bool initSensors(void) {
   return true;
 }
 
+/*V3
+bool initSensors(void) {
+  bno055 = Adafruit_BNO055(55, 0x28);
+  if (!bno055.begin() || !baro.begin()) {
+    Serial.println(baro.begin());
+    Serial.println(bno055.begin());
+    return false;
+  } 
+  return true;
+}
+*/
+
 void setupSensors(void) {
+
+
   // set lowest range
   lsm6ds.setAccelRange(LSM6DS_ACCEL_RANGE_4_G);
   lsm6ds.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);

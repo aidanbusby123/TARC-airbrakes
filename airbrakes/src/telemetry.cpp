@@ -45,6 +45,8 @@ void logRocketState()
 
         if (rocketStateHistory_index <= rocketStateHistory_size - 1)
         {
+            rocketStateHistory[rocketStateHistory_index].time = micros()/1000000.0f;
+
             rocketStateHistory[rocketStateHistory_index].ax = rocketState.getAX();
             rocketStateHistory[rocketStateHistory_index].ay = rocketState.getAY();
             rocketStateHistory[rocketStateHistory_index].az = rocketState.getAZ();
@@ -194,6 +196,8 @@ void logRocketState()
         }
     } else { // rocket not on pad
         if (rocketStateHistory_index <= rocketStateHistory_size){
+            rocketStateHistory[rocketStateHistory_index].time = micros()/1000000.0f;
+
             rocketStateHistory[rocketStateHistory_index].ax = rocketState.getAX();
             rocketStateHistory[rocketStateHistory_index].ay = rocketState.getAY();
             rocketStateHistory[rocketStateHistory_index].az = rocketState.getAZ();
@@ -467,46 +471,55 @@ void logSimState()
 
 void initLogs()
 {
-    char num[4] = {0};
-    for (int i = 0; i <= 999; i++){
-        itoa(i, num, 10);
-        if (rocketStateLog.exists(strcat(strcat("rocket_state_log", num), ".csv"))){
-            continue;
-        } else {
+    Serial.println("initializng logs");
+ 
+
             if (!rocketStateLog.open("rocket_state_log.csv", O_RDWR | O_CREAT))
             {
                 sd.errorHalt("opening rocket state log failed");
             }
-        }
-    }
-    for (int i = 0; i <= 999; i++){
-        itoa(i, num, 10);
-        if (simStateLog.exists(strcat(strcat("sim_state_log", num), ".csv"))){
-            continue;
-        } else {
-            if (!rocketStateLog.open("sim_state_log.csv", O_RDWR | O_CREAT))
+        
+       if (!simStateLog.open("sim_state_log.csv", O_RDWR | O_CREAT))
             {
                 sd.errorHalt("opening sim state log failed");
             }
-        }
-    }
+    
 
     rocketStateHistory = new stateHistory[STATEHISTORY_SIZE];
     rocketStateHistory_size = STATEHISTORY_SIZE;
+    Serial.println("log one initialized");
 
     rocketStateHistoryTemp = new stateHistory[STATEHISTORY_SIZE];
     rocketStateHistoryTemp_size = STATEHISTORY_SIZE;
-
+    Serial.println("log two initialized");
+/*
     simStateHistory = new stateHistory[STATEHISTORY_SIZE];
     simStateHistory_size = STATEHISTORY_SIZE;
-
+    Serial.println("log three initialized");
     simStateHistoryTemp = new stateHistory[STATEHISTORY_SIZE];
     simStateHistoryTemp_size = STATEHISTORY_SIZE;
+    Serial.println("log four initialized");
+    */
 }
 
 void writeRocketStateLog()
 {
-
+    if (rocketStateHistoryTemp_index>0){
+        for (int i = 0; i < rocketStateHistory_size; i++){
+            rocketStateLog.write((uint8_t*)&rocketStateHistoryTemp[i], sizeof(rocketStateHistory));
+        }
+        rocketStateHistoryTemp_index = 0;
+        delete rocketStateHistoryTemp;
+    }
+    if (rocketStateHistoryTemp_index == 0){
+        if ((rocketStateHistory_size) > 0){
+            for (int i = 0; i < rocketStateHistory_size; i++){
+                rocketStateLog.write((uint8_t*)&rocketStateHistory[i], sizeof(rocketStateHistory));
+            }
+            rocketStateHistory_index = 0;
+        }
+    }
+/*V1
         if (rocketStateHistoryTemp_index > 0){
             for (uint i = 0; i < rocketStateHistory_size; i++) {
                 rocketStateLog.print(rocketStateHistoryTemp[i].ax, 4);
@@ -556,9 +569,10 @@ void writeRocketStateLog()
                 rocketStateLog.print(rocketStateHistoryTemp[i].baroAltitude, 4);
                 rocketStateLog.print(", ");
                 rocketStateLog.println(rocketStateHistoryTemp[i].altitude, 4);
-                delete rocketStateHistoryTemp;
-                rocketStateHistoryTemp_index = 0;
+                
             }
+            delete rocketStateHistoryTemp;
+            rocketStateHistoryTemp_index = 0;
         } if (rocketStateHistory_size > 0) {
             for (uint i = 0; i < rocketStateHistory_size; i++){
                 rocketStateLog.print(rocketStateHistory[i].ax, 4);
@@ -610,12 +624,64 @@ void writeRocketStateLog()
                 rocketStateLog.println(rocketStateHistory[i].altitude, 4);
         }
     }
+    */
 }
 
 void writeSimStateLog()
 {
+    /* V1
     if (simStateHistoryTemp_index > 0){
-
+        for (uint i = 0; i < simStateHistoryTemp_size; i++){
+            simStateLog.print(simStateHistoryTemp[i].ax);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].ay);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].az);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].ax_local);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].ay_local);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].az_local);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].vx);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].vy);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].vz);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].vx_local);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].vy_local);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].vz_local);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].x);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].y);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].z);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].qw);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].qx);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].qy);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].qz);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].fx_local);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].fy_local);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].fz_local);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].baroAltitude);
+            simStateLog.print(", ");
+            simStateLog.print(simStateHistoryTemp[i].altitude);
+            delete simStateHistoryTemp;
+            simStateHistoryTemp_index = 0;
+        }
     }
 
     if (simStateHistory_index > 0){
@@ -671,6 +737,7 @@ void writeSimStateLog()
     }
     }
     // rocketStateLog.close();
+    */
 }
 
 void closeLogs()

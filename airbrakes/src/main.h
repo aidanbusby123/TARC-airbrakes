@@ -32,25 +32,36 @@
 #include <Adafruit_LSM6DS33.h>
 #include <Adafruit_LPS2X.h>
 #include <Adafruit_LIS3MDL.h>
+#include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor_Calibration.h>
+#include <Adafruit_Sensor_Calibration_SDFat.h>
+#include <SdFat.h>
 
 #pragma once
 //#include <Wire.h>
 
 #include"maths.h"
 
-#define INIT_MASS 0.441
-#define GRAVITY 9.8
+#define INIT_MASS 0.416
+#define GRAVITY 9.79
 
-#define SEAPRESSURE 1039.8
+#define SEAPRESSURE 1013.25
 
 #define STATEHISTORY_SIZE 64// size of state history buffers
 
+#define TRIGGER_ACCEL 1.0
+
 
 extern Adafruit_MPL3115A2 baro;
+
+//V1
 extern Adafruit_LSM6DS33 lsm6ds;
 extern Adafruit_LPS25 lps;
 extern Adafruit_LIS3MDL lis3mdl;
+ 
+
+extern Adafruit_BNO055 bno055;
+
 
 extern Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
 extern Adafruit_Sensor_Calibration_SDFat cal;
@@ -133,6 +144,7 @@ class state{
 
         // change in time, used to calculate velocity and position
         float delta_t = 0.0f;
+        float time = 0;
 
         // Rocket flight phase
 
@@ -143,6 +155,8 @@ class state{
         statetype stateType;
 
         // Get state values
+
+        void reset();
 
         float getMass() { return mass; }
 
@@ -230,6 +244,9 @@ class state{
         void updateState();
         
         void globalizeAcceleration();
+        void globalizeVelocity();
+
+        void updatePos();
         //void globalizeForces();
 };
 struct stateHistory{

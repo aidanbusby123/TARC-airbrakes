@@ -1,11 +1,13 @@
 #include "main.h"
 
 #define SIM_REPS 100
-#define SIM_TIME_S 50
+#define SIM_TIME_S 20
+#define DRAG_COEFFICIENT 0.75
 
 extern state simState;
 
-void runSim();
+void updateSim();
+void stepSim();
 void runTestSim();
 void calcForces();
 float getAirDensity();
