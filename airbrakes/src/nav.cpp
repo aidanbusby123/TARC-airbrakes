@@ -67,6 +67,22 @@ void state::globalizeVelocity(){
   vz = temp_w * (-qz) + temp_x * (-qy) - temp_y * (-qx) + temp_z * qw;
 }
 
+void state::localizeVelocity(){
+  float temp_w;
+  float temp_x;
+  float temp_y;
+  float temp_z;
+
+  temp_w = -qw * 0 + qx * vx + qy * vy + qz * vz;
+  temp_x = -qw * vx - qx * 0 - qy * vz + qz * vy;
+  temp_y = -qw * vy + qx * vz - qy * 0 - qz * vx;
+  temp_z = -qw * vz - qx * vy + qy * vx - qz * 0;
+
+  vx_local = temp_w * 0 + temp_x * qx + temp_y * qy - temp_z * qz;
+  vy_local = temp_w * qy - temp_x * qz + temp_y * qw + temp_z * qx;
+  vz_local = temp_w * qx + temp_x * qy - temp_y * qx + temp_z * qw;
+}
+
 void state::updatePos(){
   x += vx * delta_t;
   y += vy * delta_t;

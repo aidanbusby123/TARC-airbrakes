@@ -2,11 +2,12 @@
 #include "main.h"
 #include "sim.h"
 
-
+/*TO-DO: TRANSITION TO USING THE ACTUAL SENSOR DATA, LOOP THROUGH stepSim IN updateSim, PREPARE FOR ACTUAL DATA.
+Also, figure out how to convert euler angles to quaternions, will help with simulation testing*/
 
 state simState;
-//float dragCoefficient = 0.75f;
-float dragCoefficient = 0.0f;
+float dragCoefficient = 0.53f;
+//float dragCoefficient = 0.0f;
 float crossSection = 0.00342f;
 
 state k1, k2, k3, k4;
@@ -51,28 +52,39 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     
     k2.setVZ_Local(k1.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
-    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass())-float(GRAVITY));
+    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass()));
 
     k2.globalizeVelocity();
     k2.globalizeAcceleration();
 
+    k2.setAZ(k2.getAZ()-(float)GRAVITY);
+
+    k2.localizeVelocity();
 
     //k2.updatePos();
 
 
     k3.setVZ_Local(k1.getVZ_Local() + k2.getAZ_Local() * k1.delta_t * 0.5f);
-    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass()) - float(GRAVITY));
+    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass()));
 
     k3.globalizeVelocity();
     k3.globalizeAcceleration();
 
+    k3.setAZ(k3.getAZ()-(float)GRAVITY);
+
+    k3.localizeVelocity();
+
     //k3.updatePos();
 
     k4.setVZ_Local(k1.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
-    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * dragCoefficient * crossSection /k1.getMass()) - float(GRAVITY));
+    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * dragCoefficient * crossSection /k1.getMass()));
 
     k4.globalizeVelocity();
     k4.globalizeAcceleration();
+
+    k4.setAZ(k4.getAZ()-(float)GRAVITY);
+
+    k4.localizeVelocity();
 
     k1.updatePos();
     k2.updatePos();
@@ -86,9 +98,13 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     simState.globalizeVelocity();
 
-    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * dragCoefficient * crossSection /simState.getMass()) - float(GRAVITY));
+    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * dragCoefficient * crossSection /simState.getMass()));
 
     simState.globalizeAcceleration();
+
+    simState.setAZ(simState.getAZ()-float(GRAVITY));
+
+    simState.localizeVelocity();
     
     //simState.updatePos();
 
@@ -117,7 +133,7 @@ float getAirDensity(){ // IMPORTANT!!! fix this, should not be defined here, sho
    // Serial.println(simState.getBaroPressure());
    // Serial.println(simState.getBaroTemperature());
     //return ((28.97 * rocketState.getBaroPressure()) / (pow(8.31432, -3) * rocketState.getBaroTemperature())); // rho = MP/RT, gas density equation
-    return(1.294627f);
+    return(1.20f);
 }
 
 void copyState(state& newState, state& curState){
@@ -155,13 +171,16 @@ void copyState(state& newState, state& curState){
 }
 
 void runTestSim(){
-    simState.setAltitude(45);
-    simState.setVZ_Local(80.73);
-    simState.setAZ_Local(-9.79);
+    float lastVel = 0.0f;
+    float apogee = 0.0f;
+    simState.setAltitude(43);
+    simState.setVZ_Local(74.34);
+    simState.setAZ_Local(-24.4);
     simState.stateType = SIM;
     //Serial.println(simState.getVZ_Local());
     //Serial.println(simState.getVZ());
-    simState.delta_t = 0.05;
+    simState.delta_t = 0.1;
+    lastVel = simState.getVZ();
     simState.updateState();
     while (1){
     if (simState.time - simStartTime < SIM_TIME_S){
@@ -173,6 +192,10 @@ void runTestSim(){
         Serial.print(simState.getAZ());
         Serial.print(", ");
         Serial.println(simState.getVZ());
+        if (simState.getVZ() < 0 && lastVel >= 0){
+            apogee = simState.getAltitude();
+        }
+        
     } else {
         //logSimState();
         simState.reset();

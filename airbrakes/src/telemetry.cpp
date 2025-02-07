@@ -1,8 +1,10 @@
+/* TO-DO: CREATE rocketStateHistory[][], that way can alleviate having to copy data from current to temp, keep track of the array we are working with.*/
+
 #include "main.h"
 #include <wiring_private.h>
 #include <RTClib.h>
 
-Uart BTSerial(&sercom1, 11, 10, SERCOM_RX_PAD_0, UART_TX_PAD_2);
+//Uart BTSerial(&sercom1, 11, 10, SERCOM_RX_PAD_0, UART_TX_PAD_2);
 
 SdFile rocketStateLog;
 SdFile simStateLog;
@@ -15,7 +17,7 @@ uint simStateHistoryTemp_index = 0;
 uint rocketStateHistoryTemp_size = 0;
 uint simStateHistoryTemp_size = 0;
 
-void SERCOM1_Handler()
+/*void SERCOM1_Handler()
 {
     BTSerial.IrqHandler();
 }
@@ -37,7 +39,7 @@ void loopBT()
     {
         Serial.write(BTSerial.read());
     }
-}
+}*/
 
 void logRocketState()
 {
@@ -142,7 +144,7 @@ void logRocketState()
             rocketStateHistory = new stateHistory[STATEHISTORY_SIZE];
             rocketStateHistory_index = 0;
             }
-        } else         if (rocketStateHistory_index == rocketStateHistory_size)
+    } else if (rocketStateHistory_index == rocketStateHistory_size)
         {
             for (int i = 0; i < simStateHistory_size; i++)
             { // copy current simStateHistory to temp

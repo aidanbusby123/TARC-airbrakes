@@ -1,5 +1,6 @@
-
 #include <Arduino.h>
+#include <Adafruit_Sensor_Calibration.h>
+#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <Adafruit_ADXL343.h>
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_BME280.h>
@@ -27,13 +28,12 @@
 #include <Adafruit_MPL3115A2.h>
 #include <Adafruit_LSM6DS33.h>
 #include <Adafruit_LPS2X.h>
-#include<Adafruit_BNO055.h>
+#include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
 #include <SensorFusion.h>
 #include <SPI.h>
 #include <Servo.h>
 #include <Wire.h>
-#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <SdFat.h>
 
 //#include"maths.h"
@@ -53,7 +53,7 @@ Adafruit_LSM6DS33 lsm6ds;
 Adafruit_LPS25 lps;
 Adafruit_LIS3MDL lis3mdl;
 
-//Adafruit_BNO055 bno055;
+Adafruit_BNO055 bno055;
 
 Servo brake;
 
@@ -118,9 +118,10 @@ float *copyQuat; // float array to copy quaternion to RocketState
 
 
 void setup() {
-  digitalWrite(13, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
   Wire.begin();
   Wire.setClock( 400000UL);
+  
   
   t_start = (float)micros()/1000000.0f;
 
@@ -131,6 +132,8 @@ void setup() {
   
   if (!initSensors()){
     Serial.println("Failed to initialize sensors!");
+  } else {
+    Serial.println("Worked!");
   }
 
   rocketState.stateType = ROCKET;
@@ -165,7 +168,10 @@ void setup() {
   readSensors(); // Read sensors
   rocketState.setAltitude(baro.getAltitude());
 
-  runTestSim();
+  while (1){
+
+    runTestSim();
+  }
   delay(10000000000000);
   exit(0);
 
@@ -213,6 +219,8 @@ void loop() {
       // Serial.println("readSensors complete");
       dt = (float)(micros())/1000000.0f - t;
       rocketState.delta_t = dt;
+
+      
       rocketState.updateState();
 
       simState.time = (float)micros()/1000000.0f;

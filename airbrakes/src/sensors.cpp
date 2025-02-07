@@ -5,7 +5,7 @@
 
 #define BNO055_SAMPLERATE_DELAY_MS 20
 
-
+/*
 bool initSensors(void) {
   if (!lsm6ds.begin_I2C(0x6B) || !lis3mdl.begin_I2C(0x1E) || !baro.begin() || !lps.begin_I2C()) {
     Serial.println(lsm6ds.begin_I2C(0x6B));
@@ -20,10 +20,10 @@ bool initSensors(void) {
 
   return true;
 }
-
-/*V3
+*/
+//V3
 bool initSensors(void) {
-  bno055 = Adafruit_BNO055(55, 0x28);
+  bno055 = Adafruit_BNO055(55, 0x29);
   if (!bno055.begin() || !baro.begin()) {
     Serial.println(baro.begin());
     Serial.println(bno055.begin());
@@ -31,7 +31,7 @@ bool initSensors(void) {
   } 
   return true;
 }
-*/
+
 
 void setupSensors(void) {
 
@@ -77,7 +77,11 @@ void initCalibration(void){
     sd.errorHalt("opening sensor calibration failed");
   }
 
-  if (!cal.begin("calibrat.dat", dynamic_cast<FatFileSystem*>(&sd))){
+ /* if (!cal.begin("calibrat.dat", dynamic_cast<FatFileSystem*>(&sd))){
+    Serial.println("Failed to initialize calibration helper");
+    while (1) { yield(); }
+  }*/
+  if (!cal.begin(0)){
     Serial.println("Failed to initialize calibration helper");
     while (1) { yield(); }
   }

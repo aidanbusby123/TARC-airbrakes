@@ -3,7 +3,7 @@
 #include <SensorFusion.h>
 #include <Servo.h>
 #include <Adafruit_I2CDevice.h>
-#include <Adafruit_ZeroDMA.h>
+//#include <Adafruit_ZeroDMA.h>
 #include <Adafruit_ADXL343.h>
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_BME280.h>
@@ -50,6 +50,7 @@
 #define STATEHISTORY_SIZE 64// size of state history buffers
 
 #define TRIGGER_ACCEL 1.0
+
 
 
 extern Adafruit_MPL3115A2 baro;
@@ -245,6 +246,8 @@ class state{
         
         void globalizeAcceleration();
         void globalizeVelocity();
+
+        void localizeVelocity();
 
         void updatePos();
         //void globalizeForces();
