@@ -42,14 +42,22 @@
 
 #include"maths.h"
 
-#define INIT_MASS 0.416
-#define GRAVITY 9.79
+#define INIT_MASS 0.417
+#define BURN_TIME 1.1
 
+#define TARGET_APOGEE 240
+
+#define GRAVITY 9.79
 #define SEAPRESSURE 1013.25
 
 #define STATEHISTORY_SIZE 64// size of state history buffers
 
 #define TRIGGER_ACCEL 1.0
+
+#define LOG_TIME_STEP 0.1
+
+#define BRAKE_RETRACTED 130
+#define BRAKE_DEPLOYED 0
 
 
 
@@ -80,6 +88,7 @@ extern SdFat sd;
 enum phase {
     PAD,
     LAUNCH,
+    IGNITION,
     POWERED,
     COAST,
     APOGEE,
@@ -137,8 +146,8 @@ class state{
         float baroPressure = 0.0f; // Barometric pressure
 
         float baroTemperature = 0.0f; // temperature
-
-        float dragCoefficient = 0.0f; // Fix this
+        float lastTime;
+        float Now;
 
 
     public:
@@ -146,6 +155,9 @@ class state{
         // change in time, used to calculate velocity and position
         float delta_t = 0.0f;
         float time = 0;
+
+        float dragCoefficient = 0.0f;
+        float crossSection = 0.0f;
 
         // Rocket flight phase
 
@@ -248,9 +260,25 @@ class state{
         void globalizeVelocity();
 
         void localizeVelocity();
+        void localizeAcceleration();
 
         void updatePos();
+
+        void updateDeltaT();
         //void globalizeForces();
+};
+
+class controller{
+    private:
+        Servo brake;
+    public:
+        void deployBrake(float percent){
+            brake.write(BRAKE_RETRACTED * (1-percent) + BRAKE_DEPLOYED*percent);
+        }
+        void initBrake(){
+            brake.attach(9);
+        }
+
 };
 struct stateHistory{
 
@@ -301,6 +329,10 @@ struct stateHistory{
         float dragCoefficient = 0.0f; // Fix this
 };
 
+struct status{
+    float apogee;
+};
+
 
 extern stateHistory* rocketStateHistory;
 extern stateHistory* simStateHistory;
@@ -314,6 +346,8 @@ extern uint simStateHistory_size;
 extern state rocketState; // Rocket state
 
 extern state simState; // Simulation state
+
+extern status simStatus;
 
 
 void readSensors(); // Read sensor data

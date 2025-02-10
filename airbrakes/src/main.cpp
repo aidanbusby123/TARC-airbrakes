@@ -43,6 +43,7 @@
 #define TEST_TIME 20.0f
 #define START_TIME 20.0f
 
+SdFile Config;
 
 Adafruit_MPL3115A2 baro;
 
@@ -55,8 +56,6 @@ Adafruit_LIS3MDL lis3mdl;
 
 Adafruit_BNO055 bno055;
 
-Servo brake;
-
 Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
 
 Adafruit_Sensor_Calibration_SDFat cal;
@@ -65,6 +64,10 @@ SF sensor_filter;
 
 
 state rocketState;
+
+controller rocketControl;
+
+status simStatus;
 
 
 stateHistory* rocketStateHistory; // Rocket State history
@@ -129,12 +132,12 @@ void setup() {
      while(!Serial);
   //Serial.println("Airbrakes!");
   delay(100);
-  
+ /* 
   if (!initSensors()){
     Serial.println("Failed to initialize sensors!");
   } else {
     Serial.println("Worked!");
-  }
+  }*/
 
   rocketState.stateType = ROCKET;
   Serial.println("State type established");
@@ -150,8 +153,8 @@ void setup() {
   Serial.println("Logs initialized");
   //initBT();
 
-  brake.attach(9); // attach airbrake
-  brake.write(130);
+  //rocketControl.initBrake();
+  //rocketControl.deployBrake(BRAKE_RETRACTED);
 
   //initFlash(); // Initialize system flash
 
@@ -165,8 +168,8 @@ void setup() {
     brakeTest(); // Test airbrake
   }*/
   
-  readSensors(); // Read sensors
-  rocketState.setAltitude(baro.getAltitude());
+ // readSensors(); // Read sensors
+  //rocketState.setAltitude(baro.getAltitude());
 
   while (1){
 
@@ -191,25 +194,25 @@ void loop() {
 
   
  // Serial.println("readSensors complete");
-  dt = (float)(micros())/1000000.0f - t;
+  /*dt = (float)(micros())/1000000.0f - t;
   rocketState.delta_t = dt;
   rocketState.time = (float)micros()/1000000.0f;
+*/
+  rocketState.updateDeltaT();
   rocketState.updateState();
 
   // If time is past start time (time for the rocket to get set up)
 
-  if (!((t-t_start) <= START_TIME)){
+  if (rocketState.flightPhase == PAD){
     //Serial.println("here we go!");
 
-    while (rocketState.flightPhase == PAD){ // While rocket flight phase is PAD, continue to read sensors until it is not.
-        t = (float)micros()/1000000.0f;
-        t_last = t;
+    while (rocketState.flightPhase == LAUNCH){ // While rocket flight phase is LAUNCH, continue to read sensors until moving.
         
   
       readSensors(); // get sensor input
 
-      if ((((t * 1000000)/100000) -((t_last * 1000000)/100000)) >= 1){
-          t_last = t;
+      if ((((rocketState.time * 1000000)/(LOG_TIME_STEP * 1000000)) -((t_last * 1000000)/(LOG_TIME_STEP * 1000000))) >= 1){
+          t_last = rocketState.time;
           //Serial.println("logging");
           logRocketState();
           //logSimState();
@@ -217,36 +220,43 @@ void loop() {
         }
   
       // Serial.println("readSensors complete");
-      dt = (float)(micros())/1000000.0f - t;
-      rocketState.delta_t = dt;
 
-      
+      rocketState.updateDeltaT();
       rocketState.updateState();
 
       simState.time = (float)micros()/1000000.0f;
       
 
       //Serial.println("flightphase pad");
-      if (rocketState.getAZ() > TRIGGER_ACCEL){
+      if (rocketState.getAZ() > TRIGGER_ACCEL){ // If launch is detected
         Serial.println("flighphase launch");
-        rocketState.flightPhase = LAUNCH;
-        t_launch = t;
-        brake.write(60);
+        rocketState.flightPhase = IGNITION;
+        t_launch = rocketState.time;
+        //brake.write(60);
 
       }
     }
-    if (rocketState.flightPhase == LAUNCH){
-      if(t-t_launch <= TEST_TIME){
-        updateSim();
-        //Serial.println("logging");
-        if ((((t * 1000000)/100000) -((t_last * 1000000)/100000)) >= 1){
-          t_last = t;
-          //Serial.println("logging");
-          logRocketState();
-          //logSimState();
-          //logState(simState);
-        }
+    if (rocketState.flightPhase == IGNITION || rocketState.flightPhase == COAST){
+
+      updateSim();
+
+      //Needless to say, this bit could use some work.
+      if (simStatus.apogee >= TARGET_APOGEE){
+        rocketControl.deployBrake(100);
       } else {
+        rocketControl.deployBrake(0);
+      }
+      //Serial.println("logging");
+      if (rocketState.time > BURN_TIME)
+        rocketState.flightPhase = COAST;
+        
+      if ((((rocketState.time * 1000000)/100000) -((t_last * 1000000)/100000)) >= 1){
+        t_last = t;
+        //Serial.println("logging");
+        logRocketState();
+        //logSimState();
+      }
+      if (simState.time > TEST_TIME){
         rocketState.flightPhase = LAND;
         writeRocketStateLog();
         closeLogs();
@@ -254,10 +264,10 @@ void loop() {
         exit(0);
       }
     }
-  }
   if (rocketState.flightPhase == LAND){
     return;
   }
+    }
  /*Serial.print(rocketState.getBaroAltitude());
  Serial.print(", ");
  Serial.println(rocketState.getAltitude());*/
@@ -320,29 +330,10 @@ void loop() {
 
 
 
-// SERVO FUNCTIONS
-
-void deployBrake(){
-  brake.write(0);
-}
-
-void retractBrake(){
-  brake.write(130);
-}
-
-
-
 // READ SENSORS
 
 float filter_dt;
 
-/*  
-Quaternion DeltaRotQuaternion;
-Quaternion RotQuaternion;
-Quaternion TempQuaternion;
-Quaternion AccelLocalQuaternion;
-Quaternion AccelQuaternion;
-*/
 void readSensors(){
   
   if (!baro.conversionComplete()){
@@ -438,103 +429,6 @@ rocketState.setQuatZ(copyQuat[3]);
 
 }
 
-float V_Z = 0.0f;
-float ALTITUDE = 0.0f;
-
-
-long uS_dT = 0;
-
-/*Quaternion DeltaRotQuaternion; // Quaternion to describe change in rotation angle from gyroscope data.
-Quaternion TempQuaternion; // Temprorary quaternion
-*/
-
-
-
-/*void updateState(){
-
-  // Get filtered quaternion
-  copyQuat = sensor_filter.getQuat();
-  RocketState.setQuatW(copyQuat[0]);
-  RocketState.setQuatX(copyQuat[1]);
-  RocketState.setQuatY(copyQuat[2]);
-  RocketState.setQuatZ(copyQuat[3]);
-
-
-
-
-
-  RocketState.AccelLocal.setX(ACC_X);
-  RocketState.AccelLocal.setY(ACC_Y);
-  RocketState.AccelLocal.setZ(ACC_Z);
-
-
-  // Update rocket rotation quaternions
-
-
-  DeltaRotQuaternion = Quaternion(0, GYRO_X, GYRO_Y, GYRO_Z); // Rotation quaternion for change in rotation angle, using gyroscope
-  
-  TempQuaternion = RocketState.RotQuaternion + (((DeltaRotQuaternion * RocketState.RotQuaternion)) * 0.5) * DeltaT; // Update rotation quaternion, q_{i+1} = q_{i} + q_{gyro}*q_{i}* dt/2 
-  RocketState.RotQuaternion = TempQuaternion.normalize(); // Normalize the temporary quaternion
-
-
-
-  // Convert local acceleration to global acceleration
-
-  RocketState.AccelLocalQuaternion.setX(RocketState.AccelLocal.getX());
-  RocketState.AccelLocalQuaternion.setY(RocketState.AccelLocal.getY());
-  RocketState.AccelLocalQuaternion.setZ(RocketState.AccelLocal.getZ());
-
-  RocketState.AccelQuaternion = (RocketState.RotQuaternion * RocketState.AccelLocalQuaternion) * RocketState.RotQuaternion.conjugate();
-  */
-
-
-  //RocketState.Vel_Local.set_z((ACC_Z-ACC_Z_ZERO) * ((float) dT / 1000000.0));
-  //ALTITUDE = 0.9 * (ALTITUDE + V_Z * ((float) dT / 1000000.0) + 1/2 * (ACC_Z-ACC_Z_ZERO) * pow((float) dT / 1000000.0, 2)) + 0.1 * MPL_ALTI;
-
-
- 
-  /*Serial.print("DeltaT: ");
-  Serial.println(DeltaT);
-*/
-/*
-  Serial.print("Gyro: ");
-  Serial.print(DeltaRotQuaternion.getX());
-  Serial.print(", ");
-  Serial.print(DeltaRotQuaternion.getY());
-  Serial.print(", ");
-  Serial.print(DeltaRotQuaternion.getZ());
-  Serial.print(", ");
-  */
-  /*Serial.print("Quaternion:");
-  Serial.print(RocketState.RotQuaternion.getX());
-  Serial.print(", ");
-  Serial.print(RocketState.RotQuaternion.getY());
-  Serial.print(", ");
-  Serial.println(RocketState.RotQuaternion.getZ());
-*/
-/*  Serial.print(GYRO_X, 5);
-  Serial.print(", ");
-  Serial.print(GYRO_Y, 5);
-  Serial.print(", ");
-  Serial.print(GYRO_Z, 5);
-  Serial.print(", ");
-  Serial.print(ACC_X, 5);
-  Serial.print(", ");
-  Serial.print(ACC_Y, 5);
-  Serial.print(", ");
-  Serial.println(ACC_Z, 5);
-  //Serial.print(",BAR:");
-  //Serial.println(MPL_ALTI);
-  */
-/*
-  Serial.print(RocketState.AccelQuaternion.getX());
-  Serial.print(", ");
-  Serial.print(RocketState.AccelQuaternion.getY());
-  Serial.print(", ");
-  Serial.println(RocketState.AccelQuaternion.getZ());
-  */
-  //uS_dT = micros();
-//}
 
 void brakeTest(){
   Serial.println("brakeTest check 1");
@@ -547,3 +441,8 @@ void brakeTest(){
   Serial.println("brakeTest check 2");
 }
 
+void state::updateDeltaT(){
+  Now =  micros();
+  delta_t = (float)((Now - lastTime)/1000000.0f);
+  lastTime = Now;
+}

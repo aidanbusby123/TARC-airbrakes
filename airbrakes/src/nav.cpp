@@ -73,16 +73,31 @@ void state::localizeVelocity(){
   float temp_y;
   float temp_z;
 
-  temp_w = -qw * 0 + qx * vx + qy * vy + qz * vz;
-  temp_x = -qw * vx - qx * 0 - qy * vz + qz * vy;
-  temp_y = -qw * vy + qx * vz - qy * 0 - qz * vx;
-  temp_z = -qw * vz - qx * vy + qy * vx - qz * 0;
+  temp_w = qw * 0 + qx * vx + qy * vy + qz * vz;
+  temp_x = qw * vx - qx * 0 - qy * vz + qz * vy;
+  temp_y = qw * vy + qx * vz - qy * 0 - qz * vx;
+  temp_z = qw * vz - qx * vy + qy * vx - qz * 0;
 
-  vx_local = temp_w * 0 + temp_x * qx + temp_y * qy - temp_z * qz;
+  vx_local = temp_w * qx + temp_x * qw + temp_y * qz - temp_z * qy;
   vy_local = temp_w * qy - temp_x * qz + temp_y * qw + temp_z * qx;
-  vz_local = temp_w * qx + temp_x * qy - temp_y * qx + temp_z * qw;
+  vz_local = temp_w * qz + temp_x * qy - temp_y * qx + temp_z * qw;
 }
 
+void state::localizeAcceleration(){
+  float temp_w;
+  float temp_x;
+  float temp_y;
+  float temp_z;
+
+  temp_w = qw * 0 + qx * ax + qy * ay + qz * az;
+  temp_x = qw * ax - qx * 0 - qy * az + qz * ay;
+  temp_y = qw * ay + qx * az - qy * 0 - qz * ax;
+  temp_z = qw * az - qx * ay + qy * ax - qz * 0;
+
+  ax_local = temp_w * qx + temp_x * qw + temp_y * qz - temp_z * qy;
+  ay_local = temp_w * qy - temp_x * qz + temp_y * qw + temp_z * qx;
+  az_local = temp_w * qz + temp_x * qy - temp_y * qx + temp_z * qw;
+}
 void state::updatePos(){
   x += vx * delta_t;
   y += vy * delta_t;
