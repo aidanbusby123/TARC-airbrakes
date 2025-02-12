@@ -27,8 +27,8 @@ double simStartTime = 0.0f;
 }*/
 
 void initSim(){
-    simState.dragCoefficient = 0.53f;
-    simState.crossSection = 0.00342f;
+    simState.dragCoefficient = airBrakeState.getDragForce();
+    simState.crossSection = rocketConfig.getRefArea();
 }
 
 void updateSim(){
@@ -242,10 +242,10 @@ void stepSim(){ // do i need to update position for intermediaries?
     simStepNum++;
 }
 
-void calcForces(){
+/*void calcForces(){
     simState.setFZ_Local(-0.5 * getAirDensity()); // Calculate Fz (local inertial frame)
     
-}
+}*/
 
 // !!!!!
 float getAirDensity(){ // IMPORTANT!!! fix this, should not be defined here, should have option to get sim air density

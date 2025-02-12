@@ -73,7 +73,7 @@ SdFile calfile;
 void initCalibration(void){
   //if (!sd.begin(4, SPI_HALF_SPEED)) sd.initErrorHalt();
 
-  if (!calfile.open("calibrat.dat", O_RDWR | O_CREAT)){
+  if (!calfile.open("calibration.dat", O_RDWR | O_CREAT)){
     sd.errorHalt("opening sensor calibration failed");
   }
 

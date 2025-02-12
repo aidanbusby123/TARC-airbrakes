@@ -41,6 +41,7 @@
 //#include <Wire.h>
 
 #include"maths.h"
+#include "config.h"
 
 #define INIT_MASS 0.417
 #define BURN_TIME 1.1
@@ -58,6 +59,9 @@
 
 #define BRAKE_RETRACTED 130
 #define BRAKE_DEPLOYED 0
+#define DRAG_FORCE_COEF_COEFS_SIZE 3
+#define BRAKE_DEPLOY_TIME 200
+
 
 
 
@@ -272,13 +276,18 @@ class controller{
     private:
         Servo brake;
     public:
-        void deployBrake(float percent){
-            brake.write(BRAKE_RETRACTED * (1-percent) + BRAKE_DEPLOYED*percent);
-        }
-        void initBrake(){
-            brake.attach(9);
-        }
+        void deployBrake(float percent);
+        void initBrake();
 
+};
+
+class brakeState{
+    private:
+        float percentDeployed;
+        float dragForceCoefCoefficients[DRAG_FORCE_COEF_COEFS_SIZE] = {0};
+    public:
+        void setPercentDeployed(float percent);
+        float getDragForce();
 };
 struct stateHistory{
 
@@ -344,10 +353,13 @@ extern uint simStateHistory_index;
 extern uint simStateHistory_size;
 
 extern state rocketState; // Rocket state
-
 extern state simState; // Simulation state
 
+extern brakeState airBrakeState; // airbrake state
+
 extern status simStatus;
+
+extern config rocketConfig;
 
 
 void readSensors(); // Read sensor data

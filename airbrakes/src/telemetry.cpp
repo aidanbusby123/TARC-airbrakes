@@ -473,19 +473,44 @@ void logSimState()
 
 void initLogs()
 {
-    Serial.println("initializng logs");
- 
+    int filecount = 1;
+    char rocketStateLogName[64] = "rocket_state_log.dat";
+    char simStateLogName[64] = "sim_state_log.dat";
+    if (rocketStateLog.exists(rocketStateLogName)){
+        for (filecount = 1; filecount < 999; filecount++){
+            snprintf(rocketStateLogName, 64, "rocket_state_log%d.dat", filecount);
+            if (!rocketStateLog.exists(rocketStateLogName)){
+                if (!rocketStateLog.open(rocketStateLogName, O_RDWR | O_CREAT)){
+                    sd.errorHalt("unable to open rocket state log, not enough space");
+                }
+            }
+        }
+        if (rocketStateLog.isOpen() == false){
+            sd.errorHalt("unable to open rocket state log, not open");
+        }
+    } else {
+        if (!rocketStateLog.open(rocketStateLogName, O_RDWR | O_CREAT)){
+            sd.errorHalt("unable to open rocket state log, unknown error");
+        }
+    }
 
-            if (!rocketStateLog.open("rocket_state_log.csv", O_RDWR | O_CREAT))
-            {
-                sd.errorHalt("opening rocket state log failed");
+    if (simStateLog.exists(simStateLogName)){
+        for (filecount = 1; filecount < 999; filecount++){
+            snprintf(simStateLogName, 64, "sim_state_log%d.dat", filecount);
+            if (!simStateLog.exists(simStateLogName)){
+                if (!simStateLog.open(simStateLogName, O_RDWR | O_CREAT)){
+                    sd.errorHalt("unable to open sim state log, not enough space");
+                }
             }
-        
-       if (!simStateLog.open("sim_state_log.csv", O_RDWR | O_CREAT))
-            {
-                sd.errorHalt("opening sim state log failed");
-            }
-    
+        }
+        if (simStateLog.isOpen() == false){
+            sd.errorHalt("unable to open sim state log, not open");
+        }
+    } else {
+        if (!simStateLog.open(simStateLogName, O_RDWR | O_CREAT)){
+            sd.errorHalt("unable to open sim state log, unknown error");
+        }
+    }
 
     rocketStateHistory = new stateHistory[STATEHISTORY_SIZE];
     rocketStateHistory_size = STATEHISTORY_SIZE;

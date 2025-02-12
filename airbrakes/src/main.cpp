@@ -39,6 +39,7 @@
 //#include"maths.h"
 #include"main.h"
 #include"sim.h"
+#include "config.h"
 
 #define TEST_TIME 20.0f
 #define START_TIME 20.0f
@@ -65,9 +66,13 @@ SF sensor_filter;
 
 state rocketState;
 
+brakeState airBrakeState;
+
 controller rocketControl;
 
 status simStatus;
+
+config rocketConfig;
 
 
 stateHistory* rocketStateHistory; // Rocket State history
