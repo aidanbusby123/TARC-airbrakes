@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include <Adafruit_Sensor_Calibration.h>
-#include <Adafruit_Sensor_Calibration_SDFat.h>
+//#include <Adafruit_Sensor_Calibration.h>
+//#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <Adafruit_ADXL343.h>
 #include <Adafruit_AHTX0.h>
 #include <Adafruit_BME280.h>
@@ -59,7 +59,7 @@ Adafruit_BNO055 bno055;
 
 Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
 
-Adafruit_Sensor_Calibration_SDFat cal;
+//Adafruit_Sensor_Calibration_SDFat cal; Broken AF
 
 SF sensor_filter;
 
@@ -158,8 +158,8 @@ void setup() {
   Serial.println("Logs initialized");
   //initBT();
 
-  //rocketControl.initBrake();
-  //rocketControl.deployBrake(BRAKE_RETRACTED);
+  rocketControl.initBrake();
+  rocketControl.deployBrake(BRAKE_DEPLOYED);
 
   //initFlash(); // Initialize system flash
 
@@ -173,7 +173,7 @@ void setup() {
     brakeTest(); // Test airbrake
   }*/
   
- // readSensors(); // Read sensors
+  readSensors(); // Read sensors
   //rocketState.setAltitude(baro.getAltitude());
 
   while (1){

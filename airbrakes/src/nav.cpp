@@ -1,6 +1,6 @@
 #include "main.h"
 
-void state::updateState () {
+void state::updateState () { // Really only for rocketState, not for runge-kutta
 
   globalizeAcceleration();
 

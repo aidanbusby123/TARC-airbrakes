@@ -33,8 +33,8 @@
 #include <Adafruit_LPS2X.h>
 #include <Adafruit_LIS3MDL.h>
 #include <Adafruit_BNO055.h>
-#include <Adafruit_Sensor_Calibration.h>
-#include <Adafruit_Sensor_Calibration_SDFat.h>
+//#include <Adafruit_Sensor_Calibration.h>
+//#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <SdFat.h>
 
 #pragma once
@@ -57,7 +57,7 @@
 
 #define LOG_TIME_STEP 0.1
 
-#define BRAKE_RETRACTED 130
+#define BRAKE_RETRACTED 65
 #define BRAKE_DEPLOYED 0
 #define DRAG_FORCE_COEF_COEFS_SIZE 3
 #define BRAKE_DEPLOY_TIME 200
@@ -77,7 +77,7 @@ extern Adafruit_BNO055 bno055;
 
 
 extern Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
-extern Adafruit_Sensor_Calibration_SDFat cal;
+//extern Adafruit_Sensor_Calibration_SDFat cal;
 
 extern sensors_event_t accel;
 extern sensors_event_t gyro;

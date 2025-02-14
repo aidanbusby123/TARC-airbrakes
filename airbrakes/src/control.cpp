@@ -7,7 +7,7 @@ void controller::deployBrake(float percent){
 }
         
 void controller::initBrake(){
-    brake.attach(9);
+    brake.attach(23);
 }
 
 void brakeState::setPercentDeployed(float percent){

@@ -1,6 +1,7 @@
 #include "main.h"
 #include <Arduino.h>
-#include <Adafruit_SPIFlash.h>
+//#include <Adafruit_SPIFlash.h>
+#include <SdFat.h>
 
 /*Adafruit_FlashTransport_SPI flashTransport(4, SPI);
 Adafruit_SPIFlash flash(&flashTransport);*/

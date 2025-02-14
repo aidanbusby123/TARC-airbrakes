@@ -1,4 +1,6 @@
 #include "main.h"
+#include <ArduinoJson.h>
+#pragma once
 
 class config {
     private:

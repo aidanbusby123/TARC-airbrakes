@@ -1,7 +1,8 @@
 #include "main.h"
 #include <Arduino.h>
-#include <Adafruit_Sensor_Calibration.h>
-#include <Adafruit_Sensor_Calibration_SDFat.h>
+//#include <Adafruit_Sensor_Calibration.h>
+//include <Adafruit_Sensor_Calibration_SDFat.h>
+//#include <BNO055.h>
 
 #define BNO055_SAMPLERATE_DELAY_MS 20
 
@@ -81,6 +82,7 @@ void initCalibration(void){
     Serial.println("Failed to initialize calibration helper");
     while (1) { yield(); }
   }*/
+ /*
   if (!cal.begin(0)){
     Serial.println("Failed to initialize calibration helper");
     while (1) { yield(); }
@@ -89,12 +91,15 @@ void initCalibration(void){
     Serial.println("No calibration loaded/found");
   }
   cal.printSavedCalibration();
+  */
   calfile.close();
 
 }
 
 void calibrateSensors(void){
+  /*
   cal.calibrate(accel);
   cal.calibrate(gyro);
   cal.calibrate(mag);
+*/
 }

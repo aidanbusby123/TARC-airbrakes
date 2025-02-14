@@ -1,7 +1,7 @@
 #include "main.h"
 #include "config.h"
 #include <SdFat.h>
-#include <ArduinoJson.hpp>
+#include <ArduinoJson.h>
 
 SdFile configFile;
 
