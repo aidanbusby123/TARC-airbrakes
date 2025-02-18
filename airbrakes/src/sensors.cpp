@@ -3,8 +3,9 @@
 //#include <Adafruit_Sensor_Calibration.h>
 //include <Adafruit_Sensor_Calibration_SDFat.h>
 //#include <BNO055.h>
+#include <Adafruit_BNO055.h>
 
-#define BNO055_SAMPLERATE_DELAY_MS 20
+#define BNO055_SAMPLERATE_DELAY_MS 10
 
 /*
 bool initSensors(void) {
@@ -23,8 +24,9 @@ bool initSensors(void) {
 }
 */
 //V3
+
 bool initSensors(void) {
-  bno055 = Adafruit_BNO055(55, 0x29);
+  bno055 = Adafruit_BNO055(19, 0x28);
   if (!bno055.begin() || !baro.begin()) {
     Serial.println(baro.begin());
     Serial.println(bno055.begin());
@@ -36,7 +38,7 @@ bool initSensors(void) {
 
 void setupSensors(void) {
 
-
+/*
   // set lowest range
   lsm6ds.setAccelRange(LSM6DS_ACCEL_RANGE_4_G);
   lsm6ds.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);
@@ -54,6 +56,7 @@ void setupSensors(void) {
   lis3mdl.setDataRate(LIS3MDL_DATARATE_1000_HZ);
   lis3mdl.setPerformanceMode(LIS3MDL_ULTRAHIGHMODE);
   lis3mdl.setOperationMode(LIS3MDL_CONTINUOUSMODE);
+  */
 
  // Serial.println("setup_sensors check 2");
 
@@ -78,20 +81,19 @@ void initCalibration(void){
     sd.errorHalt("opening sensor calibration failed");
   }
 
- /* if (!cal.begin("calibrat.dat", dynamic_cast<FatFileSystem*>(&sd))){
+  if (!cal.begin("calibrat.dat")){
     Serial.println("Failed to initialize calibration helper");
     while (1) { yield(); }
-  }*/
+  }
  /*
   if (!cal.begin(0)){
     Serial.println("Failed to initialize calibration helper");
     while (1) { yield(); }
-  }
+  }*/
   if (!cal.loadCalibration()){
     Serial.println("No calibration loaded/found");
   }
-  cal.printSavedCalibration();
-  */
+ // cal.printSavedCalibration();
   calfile.close();
 
 }

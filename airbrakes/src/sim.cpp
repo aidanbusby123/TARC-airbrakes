@@ -83,7 +83,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     
     k2.localizeVelocity();
     k2.localizeAcceleration();
-
+/*
     Serial.print(" k2 accel ");
     Serial.print(k2.getAZ());
     Serial.print(", ");
@@ -103,7 +103,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     Serial.print(" k2 vel local: ");
     Serial.println(k2.getVZ_Local());
-
+*/
     //k2.updatePos();
 
 
@@ -121,7 +121,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     k3.localizeVelocity();
     k3.localizeAcceleration();
-    
+    /*
     Serial.print(" k3 accel: ");
     Serial.print(k3.getAZ());
     Serial.print(", ");
@@ -137,6 +137,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     Serial.print(" k3 vel local: ");
     Serial.println(k3.getVZ_Local());
+    */
     //k3.updatePos();
 
     k4.setVZ_Local(k1.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
@@ -151,7 +152,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     
     k4.setAZ(k4.getAZ()-(float)GRAVITY);
 
-    Serial.print(" k4 accel: ");
+   /* Serial.print(" k4 accel: ");
     Serial.print(k4.getAZ());
     Serial.print(", ");
     Serial.print(k4.getAX());
@@ -170,7 +171,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     Serial.print(" k4 vel local: ");
     Serial.println(k4.getVZ_Local());
-
+*/
     k4.localizeVelocity();
     k4.localizeAcceleration();
 
@@ -179,7 +180,6 @@ void stepSim(){ // do i need to update position for intermediaries?
     k3.updatePos();
     k4.updatePos();
 
-    
     simState.setAltitude(simState.getAltitude() + (float)(1.0f/6.0f) * (k1.getVZ() + 2 * k2.getVZ() + 2 * k3.getVZ() + k4.getVZ()) * simState.delta_t);
     simState.setVZ_Local(simState.getVZ_Local() + (float)(1.0f/6.0f) * (k1.getAZ_Local() + 2 * k2.getAZ_Local() + 2* k3.getAZ_Local() + k4.getAZ_Local()) * simState.delta_t);
     
@@ -205,7 +205,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     k4.reset();
     
     //simState.updatePos();
-
+/*
    Serial.print("V Local: ");
     Serial.print(simState.getVZ_Local());
     Serial.print(", ");
@@ -238,7 +238,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     Serial.println(simState.getAltitude());
     Serial.print(" time: ");
     Serial.println(simState.time);
-
+*/
     simStepNum++;
 }
 

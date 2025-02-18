@@ -42,6 +42,9 @@
 
 #include"maths.h"
 #include "config.h"
+#include "sensor_calibration.h"
+
+#define STEP_TIME 10
 
 #define INIT_MASS 0.417
 #define BURN_TIME 1.1
@@ -59,6 +62,7 @@
 
 #define BRAKE_RETRACTED 65
 #define BRAKE_DEPLOYED 0
+#define DEPLOYMENT_COEFS_SIZE 3
 #define DRAG_FORCE_COEF_COEFS_SIZE 3
 #define BRAKE_DEPLOY_TIME 200
 
@@ -77,6 +81,7 @@ extern Adafruit_BNO055 bno055;
 
 
 extern Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
+extern sensorCalibration cal;
 //extern Adafruit_Sensor_Calibration_SDFat cal;
 
 extern sensors_event_t accel;
@@ -269,6 +274,8 @@ class state{
         void updatePos();
 
         void updateDeltaT();
+
+        void stepTime(); // IMPORTANT, delay the main loop to ensure proper time stepping
         //void globalizeForces();
 };
 
@@ -277,17 +284,28 @@ class controller{
         Servo brake;
     public:
         void deployBrake(float percent);
-        void initBrake();
+        bool initBrake();
 
 };
 
 class brakeState{
     private:
         float percentDeployed;
-        float dragForceCoefCoefficients[DRAG_FORCE_COEF_COEFS_SIZE] = {0};
+        float targetPercent; // target brake deployment percentage
+        float dragForceCoefCoefficients[DRAG_FORCE_COEF_COEFS_SIZE] = {0}; // polynomial coefficient to calculate drag coefficient
+        float deploymentCoefficients[DEPLOYMENT_COEFS_SIZE] = {0};
+        float deployTime;
+        float delta_t; 
+        float Now;
+        float lastTime;
     public:
         void setPercentDeployed(float percent);
+        void setTargetPercent(float percent);
         float getDragForce();
+        float getDeployTime(); // get amount of time that airbrake has been deploying
+        void updateDeltaT();
+        void updateDeployTime();
+        void updateState();
 };
 struct stateHistory{
 
@@ -341,7 +359,6 @@ struct stateHistory{
 struct status{
     float apogee;
 };
-
 
 extern stateHistory* rocketStateHistory;
 extern stateHistory* simStateHistory;

@@ -1,7 +1,8 @@
 #include "main.h"
 
 void state::updateState () { // Really only for rocketState, not for runge-kutta
-
+  updateDeltaT();
+  
   globalizeAcceleration();
 
 
@@ -19,6 +20,13 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
   x += vx * delta_t;
   y += vy * delta_t;
   z += vz * delta_t;
+
+  /* not super sure about these*/
+
+  localizeAcceleration();
+  localizeVelocity();
+
+  //
 
   // Very simple complimentary filter
 

@@ -31,6 +31,7 @@ void config::loadConfig(){
     for (int i = 0; i < 3; i++){
         dragForceCoefCoefs[i] = configJSON['drag_force_coef_coefs'][i];
     }
+    Serial.println("config loaded");
 }
 
 float config::getRefArea(){
