@@ -1,5 +1,6 @@
 #include "main.h"
 #include "telemetry.h"
+#include "coms.h"
 #include <wiring_private.h>
 #include <RTClib.h>
 
@@ -767,7 +768,7 @@ void writeSimStateLog()
 }
 
 void sendRocketTelemetry(){
-    Serial.write(TELEMETRY_START_BYTE);
+    Serial.write(MSG_TYPE_TELEMETRY);
 
     if (rocketStateHistoryTemp_index>0){
         Serial.write((uint8_t*)&rocketStateHistoryTemp[rocketStateHistoryTemp_index], sizeof(rocketStateHistory));

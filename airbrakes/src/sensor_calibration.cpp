@@ -61,7 +61,7 @@ bool sensorCalibration::saveCalibration(){
     return true;
 }
 
-bool sensorCalibration::loadCalibration(){
+bool sensorCalibration::loadCalibrationFromFile(){
     if (!calfile.open(calfilename, O_READ)){
         sd.errorHalt("unable to open calibration file");
         return false;
@@ -70,6 +70,36 @@ bool sensorCalibration::loadCalibration(){
     DeserializationError error = deserializeJson(calibJSON, calfile);
     if (error) {
         Serial.println(F("Failed to read file"));
+        return false;
+    }
+
+    calfile.close();
+
+    for (int i = 0; i < 3; i++) {
+        mag_hardiron[i] = calibJSON["mag_hardiron"][i] | 0.0;
+    }
+    for (int i = 0; i < 9; i++) {
+        float def = 0;
+        if (i == 0 || i == 4 || i == 8) {
+        def = 1;
+        }
+        mag_softiron[i] = calibJSON["mag_softiron"][i] | def;
+    }
+    mag_field = calibJSON["mag_field"] | 0.0;
+    for (int i = 0; i < 3; i++) {
+        gyro_zerorate[i] = calibJSON["gyro_zerorate"][i] | 0.0;
+    }
+    for (int i = 0; i < 3; i++) {
+        accel_zerog[i] = calibJSON["accel_zerog"][i] | 0.0;
+    }
+
+    return true;
+}
+
+bool sensorCalibration::loadCalibrationFromPacket(char *caldata){
+    DeserializationError error = deserializeJson(calibJSON, caldata);
+    if (error) {
+        Serial.println(F("Failed to read cal buffer"));
         return false;
     }
 

@@ -31,5 +31,6 @@ class sensorCalibration{
 
   bool begin(const char* filename);
   bool saveCalibration();
-  bool loadCalibration();
+  bool loadCalibrationFromFile();
+  bool loadCalibrationFromPacket(char *caldata);
 };

@@ -40,6 +40,7 @@
 #include "main.h"
 #include "sim.h"
 #include "config.h"
+#include "coms.h"
 
 #define TEST_TIME 20.0f
 #define START_TIME 20.0f
@@ -186,6 +187,7 @@ void loop()
   t = (float)micros() / 1000000.0f;
 
   readSensors();
+  readSerial();
   // Serial.print(rocketState.getAZ());
 
   // Serial.println("readSensors complete");
@@ -282,7 +284,7 @@ void loop()
    Serial.println(rocketState.getAZ());
    */
   // loopBT();
-
+/*
   Serial.print("Quaternion: ");
   Serial.print(rocketState.getQuatW(), 4);
   Serial.print(", ");
@@ -299,7 +301,7 @@ void loop()
   Serial.print(rocketState.getAY());
   Serial.print(", ");
   Serial.println(rocketState.getAZ());
-
+*/
   /* Serial.print(rocketState.getAX());
     Serial.print(", ");
     Serial.print(rocketState.getAY());

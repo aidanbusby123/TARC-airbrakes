@@ -13,7 +13,8 @@ class config {
         SdFile configFile;
         
         int begin(const char* filename);
-        void loadConfig();
+        void loadConfigFromFile();
+        void loadConfigFromPacket(char* configdata);
 
         float *getDragForceCoefCoefs(){
             return dragForceCoefCoefs;

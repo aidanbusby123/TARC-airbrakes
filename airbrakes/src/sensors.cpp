@@ -80,7 +80,7 @@ void initCalibration(void){
   if (!cal.begin("calibrat.dat")){
     Serial.println("Failed to initialize calibration helper");
     
-  }else if (!cal.loadCalibration()){
+  }else if (!cal.loadCalibrationFromFile()){
     Serial.println("No calibration loaded/found");
   }
  /*
@@ -95,7 +95,6 @@ void initCalibration(void){
 }
 
 void calibrateSensors(void){
-
   cal.calibrate(accel);
   cal.calibrate(gyro);
   cal.calibrate(mag);
