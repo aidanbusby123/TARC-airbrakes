@@ -402,3 +402,5 @@ void logSimState();
 void closeLogs();
 void writeRocketStateLog();
 void writeSimStateLog();
+
+void sendRocketTelemetry();

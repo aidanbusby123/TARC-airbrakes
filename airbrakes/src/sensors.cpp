@@ -77,31 +77,26 @@ SdFile calfile;
 void initCalibration(void){
   //if (!sd.begin(4, SPI_HALF_SPEED)) sd.initErrorHalt();
 
-  if (!calfile.open("calibration.dat", O_RDWR | O_CREAT)){
-    sd.errorHalt("opening sensor calibration failed");
-  }
-
   if (!cal.begin("calibrat.dat")){
     Serial.println("Failed to initialize calibration helper");
-    while (1) { yield(); }
+    
+  }else if (!cal.loadCalibration()){
+    Serial.println("No calibration loaded/found");
   }
  /*
   if (!cal.begin(0)){
     Serial.println("Failed to initialize calibration helper");
     while (1) { yield(); }
   }*/
-  if (!cal.loadCalibration()){
-    Serial.println("No calibration loaded/found");
-  }
+  
  // cal.printSavedCalibration();
   calfile.close();
 
 }
 
 void calibrateSensors(void){
-  /*
+
   cal.calibrate(accel);
   cal.calibrate(gyro);
   cal.calibrate(mag);
-*/
 }

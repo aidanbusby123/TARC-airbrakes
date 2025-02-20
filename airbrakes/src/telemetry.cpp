@@ -1,6 +1,5 @@
-/* TO-DO: CREATE rocketStateHistory[][], that way can alleviate having to copy data from current to temp, keep track of the array we are working with.*/
-
 #include "main.h"
+#include "telemetry.h"
 #include <wiring_private.h>
 #include <RTClib.h>
 
@@ -765,6 +764,19 @@ void writeSimStateLog()
     }
     // rocketStateLog.close();
     */
+}
+
+void sendRocketTelemetry(){
+    Serial.write(TELEMETRY_START_BYTE);
+
+    if (rocketStateHistoryTemp_index>0){
+        Serial.write((uint8_t*)&rocketStateHistoryTemp[rocketStateHistoryTemp_index], sizeof(rocketStateHistory));
+    }
+    if (rocketStateHistoryTemp_index == 0){
+        if ((rocketStateHistory_size) > 0){
+            Serial.write((uint8_t*)&rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory));
+        }
+    }
 }
 
 void closeLogs()

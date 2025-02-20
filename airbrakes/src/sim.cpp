@@ -56,23 +56,12 @@ void stepSim(){ // do i need to update position for intermediaries?
     copyState(k3, k1);
     copyState(k4, k1);
 
-    
-    //k1.setAX_Local(0);
-    //k1.setAY_Local(0);
-
     // Runge Kutta 4th Order approximation
-
-
-    /* Muy, muy importante, pendojo! arregla la pendejado codigo tu estupido maricon*/
-    // You need to use the fucking derivative of the acceleration, retard!!!!!
 
     
     k2.setVZ_Local(k1.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
-    //k2.setVX_Local(0);
-    //k2.setVY_Local(0);
     k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass()));
-    //k2.setAX_Local(0);
-    //k2.setAY_Local(0);
+
 
     k2.globalizeVelocity();
     k2.globalizeAcceleration();
@@ -83,36 +72,11 @@ void stepSim(){ // do i need to update position for intermediaries?
     
     k2.localizeVelocity();
     k2.localizeAcceleration();
-/*
-    Serial.print(" k2 accel ");
-    Serial.print(k2.getAZ());
-    Serial.print(", ");
-    Serial.print(k2.getAX());
-    Serial.print(", ");
-    Serial.println(k2.getAY());
-
-    Serial.print(" k2 accel local ");
-    Serial.print(k2.getAZ_Local());
-    Serial.print(", ");
-    Serial.print(k2.getAX_Local());
-    Serial.print(", ");
-    Serial.println(k2.getAY_Local());
-
-    Serial.print(" k2 vel: ");
-    Serial.println(k2.getVZ());
-
-    Serial.print(" k2 vel local: ");
-    Serial.println(k2.getVZ_Local());
-*/
-    //k2.updatePos();
 
 
     k3.setVZ_Local(k1.getVZ_Local() + k2.getAZ_Local() * k1.delta_t * 0.5f);
-    //k3.setVX_Local(0);
-    //k3.setVY_Local(0);
     k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass()));
-    //k3.setAX_Local(0);
-    //k3.setAY_Local(0);
+
 
     k3.globalizeVelocity();
     k3.globalizeAcceleration();
@@ -121,57 +85,15 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     k3.localizeVelocity();
     k3.localizeAcceleration();
-    /*
-    Serial.print(" k3 accel: ");
-    Serial.print(k3.getAZ());
-    Serial.print(", ");
-    Serial.print(k3.getAX());
-    Serial.print(", ");
-    Serial.println(k3.getAY());
-
-    Serial.print( " k3 accel local ");
-    Serial.println(k3.getAZ_Local());
-    
-    Serial.print(" k3 vel: ");
-    Serial.println(k3.getVZ());
-
-    Serial.print(" k3 vel local: ");
-    Serial.println(k3.getVZ_Local());
-    */
-    //k3.updatePos();
 
     k4.setVZ_Local(k1.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
-    //k4.setVX_Local(0);
-    //k4.setVY_Local(0);
     k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * dragCoefficient * crossSection /k1.getMass()));
-    //k4.setAX_Local(0);
-    //k4.setAY_Local(0);
 
     k4.globalizeVelocity();
     k4.globalizeAcceleration();
     
     k4.setAZ(k4.getAZ()-(float)GRAVITY);
 
-   /* Serial.print(" k4 accel: ");
-    Serial.print(k4.getAZ());
-    Serial.print(", ");
-    Serial.print(k4.getAX());
-    Serial.print(", ");
-    Serial.println(k4.getAY());
-
-    Serial.print(" k4 accel local: ");
-    Serial.print(k4.getAZ_Local());
-    Serial.print(", ");
-    Serial.print(k4.getAX());
-    Serial.print(", ");
-    Serial.println(k4.getAY());
-
-    Serial.print(" k4 vel: ");
-    Serial.println(k4.getVZ());
-
-    Serial.print(" k4 vel local: ");
-    Serial.println(k4.getVZ_Local());
-*/
     k4.localizeVelocity();
     k4.localizeAcceleration();
 
@@ -242,10 +164,6 @@ void stepSim(){ // do i need to update position for intermediaries?
     simStepNum++;
 }
 
-/*void calcForces(){
-    simState.setFZ_Local(-0.5 * getAirDensity()); // Calculate Fz (local inertial frame)
-    
-}*/
 
 // !!!!!
 float getAirDensity(){ // IMPORTANT!!! fix this, should not be defined here, should have option to get sim air density

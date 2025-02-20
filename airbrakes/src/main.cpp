@@ -159,7 +159,7 @@ void setup()
 
   // initFlash(); // Initialize system flash
 
-  // initCalibration();
+  initCalibration();
 
   setupSensors(); // setup sensors
   // delay(10000);
@@ -212,6 +212,7 @@ void loop()
         t_last = rocketState.time;
         // Serial.println("logging");
         logRocketState();
+        sendRocketTelemetry();
         // logSimState();
       }
 
@@ -228,7 +229,6 @@ void loop()
         Serial.println("flighphase launch");
         rocketState.flightPhase = IGNITION;
         t_launch = rocketState.time;
-        // brake.write(60);
       }
       rocketState.stepTime();
     }
@@ -256,14 +256,14 @@ void loop()
       t_last = t;
       // Serial.println("logging");
       logRocketState();
-      // logSimState();
+      sendRocketTelemetry();
     }
     if (simState.time > TEST_TIME)
     {
       rocketState.flightPhase = LAND;
       writeRocketStateLog();
       closeLogs();
-      Serial.println("closed logs");
+     // Serial.println("closed logs");
       exit(0);
     }
   }
