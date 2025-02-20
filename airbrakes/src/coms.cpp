@@ -8,6 +8,8 @@ void initSerial(){
 }
 
 void readSerial(){
+    serialPacket.start_byte = MSG_START_BYTE;
+    serialPacket.end_byte = MSG_END_BYTE;
     uint8_t byte = 0;
     uint8_t count = 0;
     bool isMessage = false;
@@ -30,29 +32,46 @@ void readSerial(){
                 serialPacket.data[count-2] = byte;
             }
             if (byte == MSG_END_BYTE){
-                break;
+                handleSerial();
+                continue;
             }
             count++;
         }
     }
 }
 
-void writeSerial(){
+void writeSerial(uint8_t type, uint8_t data_size, uint8_t *data){
+    uint8_t *buffer;
+    serialPacket.start_byte = MSG_START_BYTE;
+    serialPacket.end_byte = MSG_END_BYTE;
+    serialPacket.type = type;
+    serialPacket.data_size = data_size;
+    serialPacket.data = (uint8_t*)malloc(data_size);
 
+    buffer = (uint8_t*)malloc(sizeof(serialPacket.start_byte) + sizeof(serialPacket.type) + sizeof(serialPacket.data_size) + serialPacket.data_size + sizeof(serialPacket.end_byte));
+
+    memcpy(serialPacket.data, data, data_size);
+
+    
 }
 
 void handleSerial(){
     if (serialPacket.type == MSG_TYPE_CALIBRATION){
-        char *caldata = (char*)malloc(serialPacket.data_size + 1);
+        char *caldata = (char*)malloc(serialPacket.data_size);
         memcpy(caldata, serialPacket.data, serialPacket.data_size);
-        caldata[serialPacket.data_size] = 0;
+        if (caldata[serialPacket.data_size-1] != 0){
+            Serial.println(F("Incorrectly formatted calibration data packet"));
+        }
 
         cal.loadCalibrationFromPacket(caldata);
     }
+
     if (serialPacket.type == MSG_TYPE_CONFIG){
-        char *configdata = (char*)malloc(serialPacket.data_size + 1);
+        char *configdata = (char*)malloc(serialPacket.data_size);
         memcpy(configdata, serialPacket.data, serialPacket.data_size);
-        configdata[serialPacket.data_size] = 0;
+        if (configdata[serialPacket.data_size-1] != 0){
+            Serial.println(F("Incorrectly formatted config data packet"));
+        }
 
         rocketConfig.loadConfigFromPacket(configdata);
     }
