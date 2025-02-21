@@ -60,7 +60,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     
     k2.setVZ_Local(k1.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
-    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass()));
+    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass()) + getThrust()/k1.getMass());
 
 
     k2.globalizeVelocity();
@@ -171,6 +171,10 @@ float getAirDensity(){ // IMPORTANT!!! fix this, should not be defined here, sho
    // Serial.println(simState.getBaroTemperature());
     //return ((28.97 * rocketState.getBaroPressure()) / (pow(8.31432, -3) * rocketState.getBaroTemperature())); // rho = MP/RT, gas density equation
     return(1.20f);
+}
+
+float getThrust(){ // get thrust from thrust curve, need to implement this, too tired
+
 }
 
 void copyState(state& newState, state& curState){

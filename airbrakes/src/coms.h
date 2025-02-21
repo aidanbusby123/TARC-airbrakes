@@ -16,3 +16,4 @@ struct packet {
 };
 
 void readSerial();
+void writeSerial(uint8_t type, uint8_t data_size, uint8_t *data);

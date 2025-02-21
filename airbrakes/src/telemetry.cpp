@@ -768,16 +768,7 @@ void writeSimStateLog()
 }
 
 void sendRocketTelemetry(){
-    Serial.write(MSG_TYPE_TELEMETRY);
-
-    if (rocketStateHistoryTemp_index>0){
-        Serial.write((uint8_t*)&rocketStateHistoryTemp[rocketStateHistoryTemp_index], sizeof(rocketStateHistory));
-    }
-    if (rocketStateHistoryTemp_index == 0){
-        if ((rocketStateHistory_size) > 0){
-            Serial.write((uint8_t*)&rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory));
-        }
-    }
+    writeSerial(MSG_TYPE_TELEMETRY, sizeof(simStateHistory), (uint8_t*)(&simStateHistory[simStateHistory_index]));
 }
 
 void closeLogs()

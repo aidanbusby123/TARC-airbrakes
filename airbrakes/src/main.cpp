@@ -235,9 +235,12 @@ void loop()
       rocketState.stepTime();
     }
   }
-  if (rocketState.flightPhase == IGNITION || rocketState.flightPhase == COAST)
+  if (rocketState.flightPhase == IGNITION)
   {
-
+    if (rocketState.time > BURN_TIME)
+      rocketState.flightPhase = COAST;
+  }
+  if (rocketState.flightPhase == COAST){
     updateSim();
 
     // Needless to say, this bit could use some work.
@@ -250,8 +253,7 @@ void loop()
      // rocketControl.deployBrake(0);
     }
     // Serial.println("logging");
-    if (rocketState.time > BURN_TIME)
-      rocketState.flightPhase = COAST;
+    
 
     if (((rocketState.time * 1000000) / (LOG_TIME_STEP * 1000000) - ((t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
     {
