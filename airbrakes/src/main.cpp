@@ -74,14 +74,7 @@ status simStatus;
 
 config rocketConfig;
 
-stateHistory *rocketStateHistory; // Rocket State history
-stateHistory *simStateHistory;    // Simulation state history
 
-uint rocketStateHistory_index = 0;
-uint rocketStateHistory_size = 0;
-
-uint simStateHistory_index = 0;
-uint simStateHistory_size = 0;
 // GLOBAL SENSOR VALUES
 
 float MPL_PRESSURE;
@@ -139,28 +132,32 @@ void setup()
   }
   else
   {
-    Serial.println("Worked!");
+ //   Serial.println("Worked!");
   }
 
   rocketState.stateType = ROCKET;
-  Serial.println("State type established");
+//  Serial.println("State type established");
   // Initialize rocket state history
 
-  Serial.println("rocketStateHistory created");
+//  Serial.println("rocketStateHistory created");
   initSD();
-  Serial.println("SD initialized");
+ // Serial.println("SD initialized");
 
   initLogs(); // Initialize state history logs
 
-  Serial.println("Logs initialized");
+ // Serial.println("Logs initialized");
   // initBT();
 
    rocketControl.initBrake();
   rocketControl.deployBrake(55);
 
   // initFlash(); // Initialize system flash
+  initConfig();
 
+ // Serial.println("Config loaded");
   initCalibration();
+
+  //Serial.println("Cal loaded");
 
   setupSensors(); // setup sensors
   // delay(10000);
@@ -188,6 +185,7 @@ void loop()
 
   readSensors();
   readSerial();
+
   // Serial.print(rocketState.getAZ());
 
   // Serial.println("readSensors complete");
@@ -214,7 +212,7 @@ void loop()
         t_last = rocketState.time;
         // Serial.println("logging");
         logRocketState();
-        sendRocketTelemetry();
+        //sendRocketTelemetry();
         // logSimState();
       }
 
@@ -228,7 +226,7 @@ void loop()
       // Serial.println("flightphase pad");
       if (rocketState.getAZ() > TRIGGER_ACCEL)
       { // If launch is detected
-        Serial.println("flighphase launch");
+       // Serial.println("flighphase launch");
         rocketState.flightPhase = IGNITION;
         t_launch = rocketState.time;
       }
@@ -237,6 +235,7 @@ void loop()
   }
   if (rocketState.flightPhase == IGNITION)
   {
+    //Serial.println(rocketState.time);
     if (rocketState.time > BURN_TIME)
       rocketState.flightPhase = COAST;
   }
@@ -258,7 +257,8 @@ void loop()
     if (((rocketState.time * 1000000) / (LOG_TIME_STEP * 1000000) - ((t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
     {
       t_last = t;
-      // Serial.println("logging");
+       //Serial.println("logging");
+      //Serial.println(rocketState.time);
       logRocketState();
       sendRocketTelemetry();
     }

@@ -1,5 +1,6 @@
 #include "main.h"
 #include <ArduinoJson.h>
+#include <SdFat.h>
 #pragma once
 
 class config {
@@ -10,7 +11,6 @@ class config {
         float targetApogee;
     public:
         StaticJsonDocument<512> configJSON;
-        SdFile configFile;
         
         int begin(const char* filename);
         void loadConfigFromFile();
@@ -23,3 +23,6 @@ class config {
         float getRefArea();
         float getTargetApogee();
 };
+
+//SdFile configFile;
+void initConfig();

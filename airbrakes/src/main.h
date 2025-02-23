@@ -301,7 +301,7 @@ class brakeState{
     public:
         void setPercentDeployed(float percent);
         void setTargetPercent(float percent);
-        float getDragForce();
+        float getDragForceCoef();
         float getDeployTime(); // get amount of time that airbrake has been deploying
         void updateDeltaT();
         void updateDeployTime();

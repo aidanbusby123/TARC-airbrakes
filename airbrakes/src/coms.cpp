@@ -1,15 +1,15 @@
 #include "main.h"
 #include "coms.h"
+#include "telemetry.h"
 
 packet serialPacket = {0};
 
 void initSerial(){
-
+    
 }
 
 void readSerial(){
     serialPacket.start_byte = MSG_START_BYTE;
-    serialPacket.end_byte = MSG_END_BYTE;
     uint8_t byte = 0;
     uint8_t count = 0;
     bool isMessage = false;
@@ -42,15 +42,38 @@ void readSerial(){
 
 void writeSerial(uint8_t type, uint8_t data_size, uint8_t *data){
     uint8_t *buffer;
+    uint8_t *buffer_start;
     serialPacket.start_byte = MSG_START_BYTE;
-    serialPacket.end_byte = MSG_END_BYTE;
     serialPacket.type = type;
     serialPacket.data_size = data_size;
     serialPacket.data = (uint8_t*)malloc(data_size);
+    memcpy(serialPacket.data, data, data_size);
 
-    buffer = (uint8_t*)malloc(sizeof(serialPacket.start_byte) + sizeof(serialPacket.type) + sizeof(serialPacket.data_size) + serialPacket.data_size + sizeof(serialPacket.end_byte));
+    int buffer_size = sizeof(serialPacket.start_byte) + sizeof(serialPacket.type) + sizeof(serialPacket.data_size) + serialPacket.data_size;
+
+    buffer = (uint8_t*)malloc(sizeof(serialPacket.start_byte) + sizeof(serialPacket.type) + sizeof(serialPacket.data_size) + serialPacket.data_size);
+    buffer_start = buffer;
 
     memcpy(serialPacket.data, data, data_size);
+
+    memcpy(buffer, &serialPacket.start_byte, sizeof(serialPacket.start_byte));
+    buffer += sizeof(uint8_t);
+    memcpy(buffer, &serialPacket.type, sizeof(uint8_t));
+    buffer += sizeof(uint8_t);
+    memcpy(buffer, &serialPacket.data_size, sizeof(uint8_t));
+    buffer += sizeof(uint8_t);
+    memcpy(buffer, serialPacket.data, serialPacket.data_size);
+    //Serial.println(serialPacket.data_size);
+    buffer += serialPacket.data_size;
+
+    buffer = buffer_start;
+
+    Serial.write(buffer, buffer_size);
+    
+    free(buffer);
+
+
+
 
     
 }

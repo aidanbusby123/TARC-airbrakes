@@ -17,7 +17,9 @@ uint16_t sensorCalibration::crc16_update(uint16_t crc, uint8_t a) {
 
 bool sensorCalibration::begin(const char* filename){
     strcpy(calfilename, filename);
+    calfile.open("/");
     if (!calfile.exists(calfilename)){
+        Serial.println(calfilename);
         sd.errorHalt("calfile does not exist");
         return false;
     }

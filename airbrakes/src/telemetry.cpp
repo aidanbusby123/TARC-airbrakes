@@ -12,10 +12,22 @@ SdFile simStateLog;
 stateHistory *rocketStateHistoryTemp;
 stateHistory *simStateHistoryTemp;
 
+
+stateHistory *rocketStateHistory; // Rocket State history
+stateHistory *simStateHistory;    // Simulation state history
+
+stateHistory rocketStateStruct;
+
 uint rocketStateHistoryTemp_index = 0;
 uint simStateHistoryTemp_index = 0;
 uint rocketStateHistoryTemp_size = 0;
 uint simStateHistoryTemp_size = 0;
+
+uint rocketStateHistory_index = 0;
+uint rocketStateHistory_size = 0;
+
+uint simStateHistory_index = 0;
+uint simStateHistory_size = 0;
 
 /*void SERCOM1_Handler()
 {
@@ -47,7 +59,7 @@ void logRocketState()
 
         if (rocketStateHistory_index <= rocketStateHistory_size - 1)
         {
-            rocketStateHistory[rocketStateHistory_index].time = micros()/1000000.0f;
+            rocketStateHistory[rocketStateHistory_index].time = rocketState.time;
 
             rocketStateHistory[rocketStateHistory_index].ax = rocketState.getAX();
             rocketStateHistory[rocketStateHistory_index].ay = rocketState.getAY();
@@ -94,7 +106,7 @@ void logRocketState()
                     
             if (rocketStateHistory_index == rocketStateHistory_size)
             {
-                for (int i = 0; i < simStateHistory_size; i++)
+                for (int i = 0; i < rocketStateHistory_size; i++)
                 { // copy current simStateHistory to temp
                     rocketStateHistoryTemp[i].time = rocketStateHistory[i].time;
                     rocketStateHistoryTemp[i].ax = rocketStateHistory[i].ax;
@@ -197,8 +209,8 @@ void logRocketState()
             rocketStateHistory_index = 0;
         }
     } else { // rocket not on pad
-        if (rocketStateHistory_index <= rocketStateHistory_size){
-            rocketStateHistory[rocketStateHistory_index].time = micros()/1000000.0f;
+        if (rocketStateHistory_index < rocketStateHistory_size){
+            rocketStateHistory[rocketStateHistory_index].time = rocketState.time;
 
             rocketStateHistory[rocketStateHistory_index].ax = rocketState.getAX();
             rocketStateHistory[rocketStateHistory_index].ay = rocketState.getAY();
@@ -264,7 +276,7 @@ void logSimState()
 
         if (simStateHistory_index <= simStateHistory_size - 1)
         {
-            simStateHistory[simStateHistory_index].time = micros()/1000000.0f;
+            simStateHistory[simStateHistory_index].time = simState.time;
     
             simStateHistory[simStateHistory_index].ax = simState.getAX();
             simStateHistory[simStateHistory_index].ay = simState.getAY();
@@ -410,7 +422,7 @@ void logSimState()
     {
         if (simStateHistory_index <= simStateHistory_size - 1)
         {
-            simStateHistory[simStateHistory_index].time = micros()/1000000.0f;
+            simStateHistory[simStateHistory_index].time = simState.time;
 
             simStateHistory[simStateHistory_index].ax = simState.getAX();
             simStateHistory[simStateHistory_index].ay = simState.getAY();
@@ -476,12 +488,17 @@ void initLogs()
     int filecount = 1;
     char rocketStateLogName[64] = "rocket_state_log.dat";
     char simStateLogName[64] = "sim_state_log.dat";
+    rocketStateLog.open("/");
     if (rocketStateLog.exists(rocketStateLogName)){
+        //Serial.println("already exists");
         for (filecount = 1; filecount < 999; filecount++){
             snprintf(rocketStateLogName, 64, "rocket_state_log%d.dat", filecount);
             if (!rocketStateLog.exists(rocketStateLogName)){
+                //Serial.println(rocketStateLogName);
                 if (!rocketStateLog.open(rocketStateLogName, O_RDWR | O_CREAT)){
                     sd.errorHalt("unable to open rocket state log, not enough space");
+                } else {
+                    break;
                 }
             }
         }
@@ -495,11 +512,15 @@ void initLogs()
     }
 
     if (simStateLog.exists(simStateLogName)){
+       // Serial.println("sim already exists");
         for (filecount = 1; filecount < 999; filecount++){
             snprintf(simStateLogName, 64, "sim_state_log%d.dat", filecount);
             if (!simStateLog.exists(simStateLogName)){
+               // Serial.println(simStateLogName);
                 if (!simStateLog.open(simStateLogName, O_RDWR | O_CREAT)){
                     sd.errorHalt("unable to open sim state log, not enough space");
+                } else {
+                    break;
                 }
             }
         }
@@ -514,11 +535,11 @@ void initLogs()
 
     rocketStateHistory = new stateHistory[STATEHISTORY_SIZE];
     rocketStateHistory_size = STATEHISTORY_SIZE;
-    Serial.println("log one initialized");
+    //Serial.println("log one initialized");
 
     rocketStateHistoryTemp = new stateHistory[STATEHISTORY_SIZE];
     rocketStateHistoryTemp_size = STATEHISTORY_SIZE;
-    Serial.println("log two initialized");
+    //Serial.println("log two initialized");
 /*
     simStateHistory = new stateHistory[STATEHISTORY_SIZE];
     simStateHistory_size = STATEHISTORY_SIZE;
@@ -533,19 +554,23 @@ void writeRocketStateLog()
 {
     if (rocketStateHistoryTemp_index>0){
         for (int i = 0; i < rocketStateHistory_size; i++){
-            rocketStateLog.write((uint8_t*)&rocketStateHistoryTemp[i], sizeof(rocketStateHistory));
+            //Serial.write((uint8_t*)&rocketStateHistoryTemp[i], sizeof(rocketStateHistory));
+            rocketStateLog.write((uint8_t*)&rocketStateHistoryTemp[i], sizeof(*rocketStateHistory));
         }
         rocketStateHistoryTemp_index = 0;
         delete rocketStateHistoryTemp;
     }
     if (rocketStateHistoryTemp_index == 0){
-        if ((rocketStateHistory_size) > 0){
-            for (int i = 0; i < rocketStateHistory_size; i++){
-                rocketStateLog.write((uint8_t*)&rocketStateHistory[i], sizeof(rocketStateHistory));
+        if ((rocketStateHistory_index) > 0){
+            for (int i = 0; i < rocketStateHistory_index; i++){
+                //Serial.write((uint8_t*)&rocketStateHistory[i], sizeof(rocketStateHistory));
+                rocketStateLog.write((uint8_t*)&rocketStateHistory[i], sizeof(*rocketStateHistory));
             }
             rocketStateHistory_index = 0;
         }
     }
+    closeLogs();
+    initLogs();
 /*V1
         if (rocketStateHistoryTemp_index > 0){
             for (uint i = 0; i < rocketStateHistory_size; i++) {
@@ -768,7 +793,8 @@ void writeSimStateLog()
 }
 
 void sendRocketTelemetry(){
-    writeSerial(MSG_TYPE_TELEMETRY, sizeof(simStateHistory), (uint8_t*)(&simStateHistory[simStateHistory_index]));
+
+    writeSerial(MSG_TYPE_TELEMETRY, sizeof(*rocketStateHistory), (uint8_t*)(&rocketStateHistory[rocketStateHistory_index-1]));
 }
 
 void closeLogs()

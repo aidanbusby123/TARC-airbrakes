@@ -11,4 +11,5 @@ void stepSim();
 void runTestSim();
 void calcForces();
 float getAirDensity();
+float getThrust();
 void copyState(state& newState, state& curState);

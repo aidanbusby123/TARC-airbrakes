@@ -8,5 +8,22 @@
 			"path": ".."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"*.tcc": "cpp",
+			"fstream": "cpp",
+			"hash_map": "cpp",
+			"deque": "cpp",
+			"list": "cpp",
+			"string": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"vector": "cpp",
+			"string_view": "cpp",
+			"random": "cpp",
+			"mutex": "cpp",
+			"ranges": "cpp",
+			"valarray": "cpp"
+		}
+	}
 }

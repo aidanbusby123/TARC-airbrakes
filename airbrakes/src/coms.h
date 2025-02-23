@@ -12,8 +12,8 @@ struct packet {
     uint8_t type;
     uint8_t data_size;
     uint8_t* data;
-    uint8_t end_byte = MSG_END_BYTE;
 };
 
 void readSerial();
+void handleSerial();
 void writeSerial(uint8_t type, uint8_t data_size, uint8_t *data);

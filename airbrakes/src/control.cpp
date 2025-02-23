@@ -9,8 +9,8 @@ void controller::deployBrake(float percent){
         
 bool controller::initBrake(){
     if (brake.attach(23) == 0){
-        Serial.println("unable to initialize brake");
-        return false;
+        //Serial.println("unable to initialize brake");
+       // return false;
     }
     return true;
 }
@@ -23,7 +23,7 @@ void brakeState::setTargetPercent(float percent){ // set the percent deployed ta
     targetPercent = percent;
 }
 
-float brakeState::getDragForce(){
+float brakeState::getDragForceCoef(){
     float dragForceCoef = 0.0f;
     for (int i = 0; i < DRAG_FORCE_COEF_COEFS_SIZE; i++){
         dragForceCoef += dragForceCoefCoefficients[i] * pow(percentDeployed, i);

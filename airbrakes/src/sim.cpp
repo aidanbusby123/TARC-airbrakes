@@ -27,7 +27,7 @@ double simStartTime = 0.0f;
 }*/
 
 void initSim(){
-    simState.dragCoefficient = airBrakeState.getDragForce();
+    simState.dragCoefficient = airBrakeState.getDragForceCoef();
     simState.crossSection = rocketConfig.getRefArea();
 }
 
@@ -60,12 +60,12 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     
     k2.setVZ_Local(k1.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
-    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass()) + getThrust()/k1.getMass());
+    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * simState.dragCoefficient * simState.crossSection/ k1.getMass()) + getThrust()/k1.getMass());
 
 
     k2.globalizeVelocity();
     k2.globalizeAcceleration();
-    Serial.println(k2.getAZ());
+
 
     k2.setAZ(k2.getAZ()-(float)GRAVITY);
 
@@ -75,7 +75,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
 
     k3.setVZ_Local(k1.getVZ_Local() + k2.getAZ_Local() * k1.delta_t * 0.5f);
-    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * dragCoefficient * crossSection/ k1.getMass()));
+    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * simState.dragCoefficient * simState.crossSection/ k1.getMass()) + getThrust()/k2.getMass());
 
 
     k3.globalizeVelocity();
@@ -87,7 +87,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     k3.localizeAcceleration();
 
     k4.setVZ_Local(k1.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
-    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * dragCoefficient * crossSection /k1.getMass()));
+    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * simState.dragCoefficient * simState.crossSection /k1.getMass()) + getThrust()/k2.getMass());
 
     k4.globalizeVelocity();
     k4.globalizeAcceleration();
@@ -108,7 +108,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     simState.globalizeVelocity();
 
-    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * dragCoefficient * crossSection /simState.getMass()));
+    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * simState.dragCoefficient * simState.crossSection /simState.getMass()));
    
     // gotta set these to zero to avoid fucking up next round of simulation.
     simState.setAX_Local(0);
@@ -174,7 +174,7 @@ float getAirDensity(){ // IMPORTANT!!! fix this, should not be defined here, sho
 }
 
 float getThrust(){ // get thrust from thrust curve, need to implement this, too tired
-
+    return 0.0f;
 }
 
 void copyState(state& newState, state& curState){
