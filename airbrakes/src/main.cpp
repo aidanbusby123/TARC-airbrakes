@@ -42,7 +42,7 @@
 #include "config.h"
 #include "coms.h"
 
-#define TEST_TIME 20.0f
+#define TEST_TIME 2000.0f
 #define START_TIME 20.0f
 
 SdFile Config;
@@ -169,6 +169,8 @@ void setup()
   readSensors(); // Read sensors
   rocketState.setAltitude(baro.getAltitude());
   //delay(0000);
+
+  //initSim();
   /*while (1){
 
     //runTestSim();
@@ -184,7 +186,7 @@ void loop()
   t = (float)micros() / 1000000.0f;
 
   readSensors();
-  readSerial();
+ // readSerial();
 
   // Serial.print(rocketState.getAZ());
 
@@ -206,12 +208,15 @@ void loop()
     while (rocketState.flightPhase == LAUNCH)
     {                // While rocket flight phase is LAUNCH, continue to read sensors until moving.
       readSensors(); // get sensor input
+    //  updateSim();
+
+   // Serial.println("stuck in launch fuck me");
 
       if ((((rocketState.time * 1000000) / (LOG_TIME_STEP * 1000000)) - ((t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
       {
         t_last = rocketState.time;
         // Serial.println("logging");
-        logRocketState();
+       // logRocketState();
         //sendRocketTelemetry();
         // logSimState();
       }
@@ -221,7 +226,7 @@ void loop()
      // rocketState.updateDeltaT();
       rocketState.updateState();
 
-      simState.time = (float)micros() / 1000000.0f;
+      //simState.time = (float)micros() / 1000000.0f;
 
       // Serial.println("flightphase pad");
       if (rocketState.getAZ() > TRIGGER_ACCEL)
@@ -229,6 +234,8 @@ void loop()
        // Serial.println("flighphase launch");
         rocketState.flightPhase = IGNITION;
         t_launch = rocketState.time;
+        rocketControl.deployBrake(0);
+        
       }
       rocketState.stepTime();
     }
@@ -236,11 +243,12 @@ void loop()
   if (rocketState.flightPhase == IGNITION)
   {
     //Serial.println(rocketState.time);
+   // updateSim();
     if (rocketState.time > BURN_TIME)
       rocketState.flightPhase = COAST;
   }
   if (rocketState.flightPhase == COAST){
-    updateSim();
+   // updateSim();
 
     // Needless to say, this bit could use some work.
     if (simStatus.apogee >= TARGET_APOGEE)
@@ -262,11 +270,13 @@ void loop()
       logRocketState();
       sendRocketTelemetry();
     }
-    if (simState.time > TEST_TIME)
+    if (rocketState.time-t_launch > TEST_TIME)
     {
       rocketState.flightPhase = LAND;
+      rocketControl.deployBrake(1);
       writeRocketStateLog();
       closeLogs();
+      
      // Serial.println("closed logs");
       exit(0);
     }

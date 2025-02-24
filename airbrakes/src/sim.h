@@ -6,6 +6,7 @@
 
 extern state simState;
 
+void initSim();
 void updateSim();
 void stepSim();
 void runTestSim();

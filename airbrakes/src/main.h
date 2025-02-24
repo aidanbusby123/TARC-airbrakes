@@ -54,7 +54,7 @@
 #define GRAVITY 9.79
 #define SEAPRESSURE 1013.25
 
-#define STATEHISTORY_SIZE 64// size of state history buffers
+#define STATEHISTORY_SIZE 128// size of state history buffers
 
 #define TRIGGER_ACCEL 1.0
 
@@ -358,6 +358,7 @@ struct stateHistory{
 
 struct status{
     float apogee;
+    float tPlus;
 };
 
 extern stateHistory* rocketStateHistory;

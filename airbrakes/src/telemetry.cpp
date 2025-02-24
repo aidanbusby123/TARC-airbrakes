@@ -102,6 +102,8 @@ void logRocketState()
 
             rocketStateHistory[rocketStateHistory_index].baroTemperature = rocketState.getBaroTemperature();
 
+            memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
+
             rocketStateHistory_index++;
                     
             if (rocketStateHistory_index == rocketStateHistory_size)
@@ -252,6 +254,8 @@ void logRocketState()
             rocketStateHistory[rocketStateHistory_index].baroPressure = rocketState.getBaroPressure();
 
             rocketStateHistory[rocketStateHistory_index].baroTemperature = rocketState.getBaroTemperature();
+            
+            memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
 
             rocketStateHistory_index++;
             if (rocketStateHistory_index == rocketStateHistory_size){
@@ -569,8 +573,8 @@ void writeRocketStateLog()
             rocketStateHistory_index = 0;
         }
     }
-    closeLogs();
-    initLogs();
+    //closeLogs();
+   // initLogs();
 /*V1
         if (rocketStateHistoryTemp_index > 0){
             for (uint i = 0; i < rocketStateHistory_size; i++) {
@@ -794,7 +798,7 @@ void writeSimStateLog()
 
 void sendRocketTelemetry(){
 
-    writeSerial(MSG_TYPE_TELEMETRY, sizeof(*rocketStateHistory), (uint8_t*)(&rocketStateHistory[rocketStateHistory_index-1]));
+    writeSerial(MSG_TYPE_TELEMETRY, sizeof(rocketStateStruct), (uint8_t*)(&rocketStateStruct));
 }
 
 void closeLogs()

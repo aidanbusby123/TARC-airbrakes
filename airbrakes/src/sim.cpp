@@ -33,7 +33,7 @@ void initSim(){
 
 void updateSim(){
     float lastVel = 0.0f;
-    if (simState.time - simStartTime < SIM_TIME_S){
+    if (simState.time < SIM_TIME_S){
         stepSim();
         lastVel = simState.getVZ();
         if (simState.getVZ() < 0 && lastVel >= 0){
