@@ -90,10 +90,6 @@ void logRocketState()
             rocketStateHistory[rocketStateHistory_index].qy = rocketState.getQuatY();
             rocketStateHistory[rocketStateHistory_index].qz = rocketState.getQuatZ();
 
-            rocketStateHistory[rocketStateHistory_index].fx_local = rocketState.getFX_Local();
-            rocketStateHistory[rocketStateHistory_index].fy_local = rocketState.getFY_Local();
-            rocketStateHistory[rocketStateHistory_index].fz_local = rocketState.getFZ_Local();
-
             rocketStateHistory[rocketStateHistory_index].baroAltitude = rocketState.getBaroAltitude();
 
             rocketStateHistory[rocketStateHistory_index].altitude = rocketState.getAltitude();
@@ -103,6 +99,7 @@ void logRocketState()
             rocketStateHistory[rocketStateHistory_index].baroTemperature = rocketState.getBaroTemperature();
 
             memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
+            rocketStateStruct.predictedAltitude = globalStatus.apogee;
 
             rocketStateHistory_index++;
                     
@@ -139,10 +136,6 @@ void logRocketState()
                     rocketStateHistoryTemp[i].qx = rocketStateHistory[i].qx;
                     rocketStateHistoryTemp[i].qy = rocketStateHistory[i].qy;
                     rocketStateHistoryTemp[i].qz = rocketStateHistory[i].qz;
-
-                    rocketStateHistoryTemp[i].fx_local = rocketStateHistory[i].fx_local;
-                    rocketStateHistoryTemp[i].fy_local = rocketStateHistory[i].fy_local;
-                    rocketStateHistoryTemp[i].fz_local = rocketStateHistory[i].fz_local;
 
                     rocketStateHistoryTemp[i].baroAltitude = rocketStateHistory[i].baroAltitude;
 
@@ -192,10 +185,6 @@ void logRocketState()
                 rocketStateHistoryTemp[i].qy = rocketStateHistory[i].qy;
                 rocketStateHistoryTemp[i].qz = rocketStateHistory[i].qz;
 
-                rocketStateHistoryTemp[i].fx_local = rocketStateHistory[i].fx_local;
-                rocketStateHistoryTemp[i].fy_local = rocketStateHistory[i].fy_local;
-                rocketStateHistoryTemp[i].fz_local = rocketStateHistory[i].fz_local;
-
                 rocketStateHistoryTemp[i].baroAltitude = rocketStateHistory[i].baroAltitude;
 
                 rocketStateHistoryTemp[i].altitude = rocketStateHistory[i].altitude;
@@ -243,10 +232,6 @@ void logRocketState()
             rocketStateHistory[rocketStateHistory_index].qy = rocketState.getQuatY();
             rocketStateHistory[rocketStateHistory_index].qz = rocketState.getQuatZ();
 
-            rocketStateHistory[rocketStateHistory_index].fx_local = rocketState.getFX_Local();
-            rocketStateHistory[rocketStateHistory_index].fy_local = rocketState.getFY_Local();
-            rocketStateHistory[rocketStateHistory_index].fz_local = rocketState.getFZ_Local();
-
             rocketStateHistory[rocketStateHistory_index].baroAltitude = rocketState.getBaroAltitude();
 
             rocketStateHistory[rocketStateHistory_index].altitude = rocketState.getAltitude();
@@ -256,6 +241,7 @@ void logRocketState()
             rocketStateHistory[rocketStateHistory_index].baroTemperature = rocketState.getBaroTemperature();
             
             memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
+            rocketStateStruct.predictedAltitude = globalStatus.apogee;
 
             rocketStateHistory_index++;
             if (rocketStateHistory_index == rocketStateHistory_size){
@@ -311,10 +297,6 @@ void logSimState()
             simStateHistory[simStateHistory_index].qy = simState.getQuatY();
             simStateHistory[simStateHistory_index].qz = simState.getQuatZ();
 
-            simStateHistory[simStateHistory_index].fx_local = simState.getFX_Local();
-            simStateHistory[simStateHistory_index].fy_local = simState.getFY_Local();
-            simStateHistory[simStateHistory_index].fz_local = simState.getFZ_Local();
-
             simStateHistory[simStateHistory_index].baroAltitude = simState.getBaroAltitude();
 
             simStateHistory[simStateHistory_index].altitude = simState.getAltitude();
@@ -359,10 +341,6 @@ void logSimState()
                     simStateHistoryTemp[i].qy = simStateHistory[i].qy;
                     simStateHistoryTemp[i].qz = simStateHistory[i].qz;
 
-                    simStateHistoryTemp[i].fx_local = simStateHistory[i].fx_local;
-                    simStateHistoryTemp[i].fy_local = simStateHistory[i].fy_local;
-                    simStateHistoryTemp[i].fz_local = simStateHistory[i].fz_local;
-
                     simStateHistoryTemp[i].baroAltitude = simStateHistory[i].baroAltitude;
 
                     simStateHistoryTemp[i].altitude = simStateHistory[i].altitude;
@@ -406,10 +384,6 @@ void logSimState()
                 simStateHistoryTemp[i].qx = simStateHistory[i].qx;
                 simStateHistoryTemp[i].qy = simStateHistory[i].qy;
                 simStateHistoryTemp[i].qz = simStateHistory[i].qz;
-
-                simStateHistoryTemp[i].fx_local = simStateHistory[i].fx_local;
-                simStateHistoryTemp[i].fy_local = simStateHistory[i].fy_local;
-                simStateHistoryTemp[i].fz_local = simStateHistory[i].fz_local;
 
                 simStateHistoryTemp[i].baroAltitude = simStateHistory[i].baroAltitude;
 
@@ -456,10 +430,6 @@ void logSimState()
             simStateHistory[simStateHistory_index].qx = simState.getQuatX();
             simStateHistory[simStateHistory_index].qy = simState.getQuatY();
             simStateHistory[simStateHistory_index].qz = simState.getQuatZ();
-
-            simStateHistory[simStateHistory_index].fx_local = simState.getFX_Local();
-            simStateHistory[simStateHistory_index].fy_local = simState.getFY_Local();
-            simStateHistory[simStateHistory_index].fz_local = simState.getFZ_Local();
 
             simStateHistory[simStateHistory_index].baroAltitude = simState.getBaroAltitude();
 

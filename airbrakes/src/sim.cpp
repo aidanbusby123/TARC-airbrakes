@@ -5,6 +5,8 @@
 /*TO-DO: TRANSITION TO USING THE ACTUAL SENSOR DATA, LOOP THROUGH stepSim IN updateSim, PREPARE FOR ACTUAL DATA.
 Also, figure out how to convert euler angles to quaternions, will help with simulation testing*/
 
+/*TO-DO Figure out how to fix timing, have both time since mcu bootup and simulation time*/
+
 state simState;
 //float dragCoefficient = 0.0f;
 float dragCoefficient = 0.52f;
@@ -14,7 +16,7 @@ state k1, k2, k3, k4;
 
 
 uint simStepNum;
-double simStartTime = 0.0f;
+float simStartTime = 0.0f;
 
 
 /*void simLoop(){
@@ -27,23 +29,37 @@ double simStartTime = 0.0f;
 }*/
 
 void initSim(){
+    Serial.println("init sim");
     simState.dragCoefficient = airBrakeState.getDragForceCoef();
+    Serial.println("got drag force coef");
     simState.crossSection = rocketConfig.getRefArea();
+    Serial.println("got reference area");
+    simState.time = (float)(micros())/1000000.0f;
+    simStartTime = simState.time;
+    simState.delta_t = 0.10f;
+    Serial.println("sim initialized");
 }
 
 void updateSim(){
     float lastVel = 0.0f;
-    if (simState.time < SIM_TIME_S){
-        stepSim();
+    copyState(simState, rocketState);
+    while ((simState.time-simStartTime) < SIM_TIME_S){
         lastVel = simState.getVZ();
-        if (simState.getVZ() < 0 && lastVel >= 0){
-          simStatus.apogee = simState.getAltitude();
+        stepSim();
+       // Serial.println("stepping sim");
+        
+        if (simState.getVZ() < 0){
+          globalStatus.apogee = simState.getAltitude();
+          Serial.println("Apogee reached");
+          break;
         }
-    } else {
+        
+    } 
         //logSimState();
-        simState.reset();
-        simStepNum = 0;
-    }
+    simState.reset();
+    simStepNum = 0;
+    Serial.println("sim updated");
+
 }
 
 void stepSim(){ // do i need to update position for intermediaries?
@@ -298,8 +314,8 @@ void state::reset(){
     baroAltitude = 0.0f;
     altitude = 0.0f;
     baroPressure = 0.0f;
-    baroTemperature = 0.0f;
-    dragCoefficient = 0.0f;
+   // baroTemperature = 0.0f;
+   // dragCoefficient = 0.0f;
     time = 0;
-    delta_t = 0;
+    //delta_t = 0;
 }

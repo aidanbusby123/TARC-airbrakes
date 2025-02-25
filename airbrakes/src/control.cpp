@@ -3,7 +3,7 @@
 
 
 void controller::deployBrake(float percent){
-    brake.write(BRAKE_RETRACTED * (1-percent/100.0f) + BRAKE_DEPLOYED*percent/100.0f);
+    brake.write(BRAKE_RETRACTED * (1-(percent/100.0f)) + BRAKE_DEPLOYED*percent/100.0f);
     airBrakeState.setTargetPercent(percent);
 }
         
@@ -13,6 +13,17 @@ bool controller::initBrake(){
        // return false;
     }
     return true;
+}
+
+void brakeState::loadConfig(config Config){
+    float *ptr;
+    ptr = Config.getDragForceCoefCoefs();
+    dragForceCoefCoefficients[0] = ptr[0];
+    dragForceCoefCoefficients[1] = ptr[1];
+    dragForceCoefCoefficients[2] = ptr[2];
+    Serial.println(ptr[0]);
+    Serial.println(ptr[1]);
+    Serial.println(ptr[2]);
 }
 
 void brakeState::setPercentDeployed(float percent){ // set the current percent deployed
@@ -28,6 +39,7 @@ float brakeState::getDragForceCoef(){
     for (int i = 0; i < DRAG_FORCE_COEF_COEFS_SIZE; i++){
         dragForceCoef += dragForceCoefCoefficients[i] * pow(percentDeployed, i);
     }
+    return dragForceCoef;
 }
 
 void brakeState::updateDeltaT(){

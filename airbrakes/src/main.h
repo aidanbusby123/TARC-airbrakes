@@ -49,19 +49,19 @@
 #define INIT_MASS 0.417
 #define BURN_TIME 1.1
 
-#define TARGET_APOGEE 240
+#define TARGET_APOGEE 87
 
 #define GRAVITY 9.79
 #define SEAPRESSURE 1013.25
 
-#define STATEHISTORY_SIZE 128// size of state history buffers
+#define STATEHISTORY_SIZE 64// size of state history buffers
 
 #define TRIGGER_ACCEL 1.0
 
 #define LOG_TIME_STEP 0.1
 
-#define BRAKE_RETRACTED 65
-#define BRAKE_DEPLOYED 0
+#define BRAKE_RETRACTED 5
+#define BRAKE_DEPLOYED 65
 #define DEPLOYMENT_COEFS_SIZE 3
 #define DRAG_FORCE_COEF_COEFS_SIZE 3
 #define BRAKE_DEPLOY_TIME 200
@@ -164,6 +164,7 @@ class state{
         // change in time, used to calculate velocity and position
         float delta_t = 0.0f;
         float time = 0;
+        float t_launch = 0;
 
         float dragCoefficient = 0.0f;
         float crossSection = 0.0f;
@@ -299,6 +300,7 @@ class brakeState{
         float Now;
         float lastTime;
     public:
+        void loadConfig(config Config);
         void setPercentDeployed(float percent);
         void setTargetPercent(float percent);
         float getDragForceCoef();
@@ -342,9 +344,7 @@ struct stateHistory{
         float qy = 0.0f;
         float qz = 0.0f;
 
-        float fx_local = 0.0f;
-        float fy_local = 0.0f;
-        float fz_local = 0.0f;
+        float predictedAltitude = 0.0f;
 
         float baroAltitude = 0.0f; // Barometric altitude
         float altitude = 0.0f; // Real altitude
@@ -356,9 +356,13 @@ struct stateHistory{
         float dragCoefficient = 0.0f; // Fix this
 };
 
-struct status{
+class status{
+    public:
     float apogee;
-    float tPlus;
+    float time; // system time;
+    float t_last;
+    
+    void updateTime();
 };
 
 extern stateHistory* rocketStateHistory;
@@ -375,7 +379,7 @@ extern state simState; // Simulation state
 
 extern brakeState airBrakeState; // airbrake state
 
-extern status simStatus;
+extern status globalStatus;
 
 extern config rocketConfig;
 

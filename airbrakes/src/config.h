@@ -26,3 +26,4 @@ class config {
 
 //SdFile configFile;
 void initConfig();
+void loadConfigFromFile();

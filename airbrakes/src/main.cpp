@@ -70,7 +70,7 @@ brakeState airBrakeState;
 
 controller rocketControl;
 
-status simStatus;
+status globalStatus;
 
 config rocketConfig;
 
@@ -107,6 +107,9 @@ float t_launch = 0.0f;
 float t_last = 0.0f;
 float dt = 0;
 
+float start_altitude;
+float target_apogee = 0.0f;
+
 float test_dt = 0.0f;
 float test_dt_now = 0.0f;
 float test_dt_last = 0.0f;
@@ -118,7 +121,7 @@ void setup()
   digitalWrite(LED_BUILTIN, HIGH);
   Wire.begin();
   Wire.setClock(400000UL);
-
+  
   t_start = (float)micros() / 1000000.0f;
 
   Serial.begin(115200);
@@ -148,16 +151,20 @@ void setup()
  // Serial.println("Logs initialized");
   // initBT();
 
-   rocketControl.initBrake();
-  rocketControl.deployBrake(55);
-
+  rocketControl.initBrake();
+  rocketControl.deployBrake(0);
+  Serial.println("brake deployed");
   // initFlash(); // Initialize system flash
   initConfig();
+  rocketConfig.loadConfigFromFile();
 
+  airBrakeState.loadConfig(rocketConfig);
+
+  Serial.println("config finished");
  // Serial.println("Config loaded");
   initCalibration();
 
-  //Serial.println("Cal loaded");
+  Serial.println("Cal loaded");
 
   setupSensors(); // setup sensors
   // delay(10000);
@@ -168,9 +175,13 @@ void setup()
 
   readSensors(); // Read sensors
   rocketState.setAltitude(baro.getAltitude());
+  Serial.println("set altitude");
+  //delay(1000);
   //delay(0000);
 
-  //initSim();
+  initSim();
+
+
   /*while (1){
 
     //runTestSim();
@@ -183,9 +194,11 @@ void setup()
 
 void loop()
 {
-  t = (float)micros() / 1000000.0f;
-
+  Serial.println("beginning loop");
+  globalStatus.time = (float)micros() / 1000000.0f;
+  Serial.print("time loop");
   readSensors();
+  Serial.println("readSensors");
  // readSerial();
 
   // Serial.print(rocketState.getAZ());
@@ -198,43 +211,44 @@ void loop()
   //rocketState.updateDeltaT();
   rocketState.updateState();
 
+
   // If time is past start time (time for the rocket to get set up)
 
   if (rocketState.flightPhase == PAD)
   {
-    // Serial.println("here we go!");
+     Serial.println("here we go!");
     rocketState.flightPhase = LAUNCH;
 
     while (rocketState.flightPhase == LAUNCH)
     {                // While rocket flight phase is LAUNCH, continue to read sensors until moving.
       readSensors(); // get sensor input
-    //  updateSim();
+      updateSim();
+      rocketState.setAltitude(baro.getAltitude());
+      target_apogee = rocketState.getAltitude() + 1.0f;
 
-   // Serial.println("stuck in launch fuck me");
 
-      if ((((rocketState.time * 1000000) / (LOG_TIME_STEP * 1000000)) - ((t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
+      if ((((globalStatus.time * 1000000) / (LOG_TIME_STEP * 1000000)) - ((globalStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
       {
-        t_last = rocketState.time;
-        // Serial.println("logging");
-       // logRocketState();
-        //sendRocketTelemetry();
+        globalStatus.t_last = globalStatus.time;
+
+        logRocketState();
+        sendRocketTelemetry();
         // logSimState();
       }
 
-      // Serial.println("readSensors complete");
-
      // rocketState.updateDeltaT();
       rocketState.updateState();
+      globalStatus.updateTime();
 
-      //simState.time = (float)micros() / 1000000.0f;
+     // simState.time = (float)micros() / 1000000.0f;
 
       // Serial.println("flightphase pad");
       if (rocketState.getAZ() > TRIGGER_ACCEL)
       { // If launch is detected
        // Serial.println("flighphase launch");
         rocketState.flightPhase = IGNITION;
-        t_launch = rocketState.time;
-        rocketControl.deployBrake(0);
+        rocketState.t_launch = globalStatus.time;
+        //rocketControl.deployBrake(0);
         
       }
       rocketState.stepTime();
@@ -242,16 +256,16 @@ void loop()
   }
   if (rocketState.flightPhase == IGNITION)
   {
+    Serial.println("ignition");
     //Serial.println(rocketState.time);
-   // updateSim();
+    
     if (rocketState.time > BURN_TIME)
       rocketState.flightPhase = COAST;
   }
   if (rocketState.flightPhase == COAST){
-   // updateSim();
 
     // Needless to say, this bit could use some work.
-    if (simStatus.apogee >= TARGET_APOGEE)
+    if (globalStatus.apogee >= target_apogee)
     {
       rocketControl.deployBrake(100);
     }
@@ -262,15 +276,15 @@ void loop()
     // Serial.println("logging");
     
 
-    if (((rocketState.time * 1000000) / (LOG_TIME_STEP * 1000000) - ((t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
+    if (((globalStatus.time * 1000000) / (LOG_TIME_STEP * 1000000) - ((globalStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
     {
-      t_last = t;
+      globalStatus.t_last = globalStatus.time;
        //Serial.println("logging");
       //Serial.println(rocketState.time);
       logRocketState();
       sendRocketTelemetry();
     }
-    if (rocketState.time-t_launch > TEST_TIME)
+    if (rocketState.time > TEST_TIME)
     {
       rocketState.flightPhase = LAND;
       rocketControl.deployBrake(1);
@@ -285,59 +299,12 @@ void loop()
   {
     return;
   }
-  /*Serial.print(rocketState.getBaroAltitude());
-  Serial.print(", ");
-  Serial.println(rocketState.getAltitude());*/
-  /*
-   Serial.print(rocketState.getAX());
-   Serial.print(", ");
-   Serial.print(rocketState.getAY());
-   Serial.print(", ");
-   Serial.println(rocketState.getAZ());
-   */
-  // loopBT();
-/*
-  Serial.print("Quaternion: ");
-  Serial.print(rocketState.getQuatW(), 4);
-  Serial.print(", ");
-  Serial.print(rocketState.getQuatX(), 4);
-  Serial.print(", ");
-  Serial.print(rocketState.getQuatY(), 4);
-  Serial.print(", ");
-  Serial.println(rocketState.getQuatZ(), 4);
-  // Serial.println(" ");
 
-  Serial.print("Acceleration: ");
-  Serial.print(rocketState.getAX());
-  Serial.print(", ");
-  Serial.print(rocketState.getAY());
-  Serial.print(", ");
-  Serial.println(rocketState.getAZ());
-*/
-  /* Serial.print(rocketState.getAX());
-    Serial.print(", ");
-    Serial.print(rocketState.getAY());
-    Serial.print(", ");
-    Serial.println(rocketState.getAZ());
-  */
-  /*if (t <= 5000000.0f){
-    rocketState.flightPhase = PAD;
-   // Serial.println("Flighphase: PAD");
-  }
-    else rocketState.flightPhase = LAUNCH;
-    */
-  /*
-    if (rocketState.flightPhase == PAD){
-      cal.gyro_zerorate[0] = GYRO_X;
-      cal.gyro_zerorate[1] = GYRO_Y;
-      cal.gyro_zerorate[2] = GYRO_Z;
-    }
-    */
-  // Serial.println(rocketState.getAltitude()-80.00);
+  updateSim();
 
-  // Serial.println(dt, 6);
 
   rocketState.stepTime();
+  globalStatus.updateTime();
 }
 
 // READ SENSORS
@@ -350,24 +317,7 @@ void readSensors()
   if (!baro.conversionComplete())
   {
 
-    /*V1 Code
 
-    sensors_event_t temp;
-    sensors_event_t pressure;
-    //lps.getEvent(&pressure, &temp);// get pressure
-
-    lsm6ds.getEvent(&accel, &gyro, &tempp);
-
-    lis3mdl.getEvent(&mag);
-  */
-
-    // updated every 40ms (25 hz)
-    // fast-updating pressure and temp data
-    // LPS_PRESSURE = pressure.pressure; // float, hPa
-    // LPS_TEMP = temp.temperature;      // float, C
-
-    // updated ~1KHz
-    // acceleration and gyro data
 
     bno055.getEvent(&accel, Adafruit_BNO055::VECTOR_ACCELEROMETER);
     bno055.getEvent(&gyro, Adafruit_BNO055::VECTOR_GYROSCOPE);
@@ -400,18 +350,9 @@ void readSensors()
     rocketState.setBaroAltitude(MPL_ALTI);
     rocketState.setBaroPressure(MPL_PRESSURE);
     rocketState.setBaroTemperature(MPL_TEMP);
-    // Serial.println(MPL_ALTI);
 
-    // Serial.println(micros() - dT_baro);
     calibrateSensors();
-    /* Serial.print(copyQuat[0]);
-     Serial.print(", ");
-     Serial.print(copyQuat[1]);
-     Serial.print(", ");
-     Serial.print(copyQuat[2]);
-     Serial.print(", ");
-     Serial.println(copyQuat[3]);
-       */
+
   }
 
   rocketState.setAX_Local(ACC_X);
@@ -455,4 +396,8 @@ void state::updateDeltaT()
 void state::stepTime()
 {
   delay(STEP_TIME);
+}
+
+void status::updateTime(){
+  time = (float)(micros())/1000000.0f;
 }
