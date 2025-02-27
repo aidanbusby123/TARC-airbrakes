@@ -32,7 +32,7 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
   // Very simple complimentary filter
 
   if (stateType == ROCKET){
-    altitude = 0.99 * (altitude + vz * delta_t) + 0.01 * baroAltitude; 
+    altitude = 0.99 * (altitude + vz * delta_t) + 0.01 * baro_altitude; 
   } else {
     altitude = altitude + vz * delta_t;
   }
@@ -112,7 +112,7 @@ void state::updatePos(){
   y += vy * delta_t;
   z += vz * delta_t;
   if (stateType == ROCKET){
-    altitude = 0.99 * (altitude + vz * delta_t) + 0.01 * baroAltitude; 
+    altitude = 0.99 * (altitude + vz * delta_t) + 0.01 * baro_altitude; 
   } else {
     altitude = altitude + vz * delta_t;
   }

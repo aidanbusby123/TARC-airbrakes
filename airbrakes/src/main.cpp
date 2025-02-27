@@ -70,7 +70,7 @@ brakeState airBrakeState;
 
 controller rocketControl;
 
-status globalStatus;
+status rocketStatus;
 
 config rocketConfig;
 
@@ -118,14 +118,14 @@ float *copyQuat; // float array to copy quaternion to RocketState
 
 void setup()
 {
-  digitalWrite(LED_BUILTIN, HIGH);
+  initPins();
   Wire.begin();
   Wire.setClock(400000UL);
   
   t_start = (float)micros() / 1000000.0f;
 
   Serial.begin(115200);
-  while (!Serial);
+  //while (!Serial);
   // Serial.println("Airbrakes!");
   delay(100);
 
@@ -174,7 +174,8 @@ void setup()
   }*/
 
   readSensors(); // Read sensors
-  rocketState.setAltitude(baro.getAltitude());
+  for (int i = 0; i < 10; i++) // try to get barometer to converge
+    rocketState.setAltitude(baro.getAltitude());
   Serial.println("set altitude");
   //delay(1000);
   //delay(0000);
@@ -195,7 +196,7 @@ void setup()
 void loop()
 {
   Serial.println("beginning loop");
-  globalStatus.time = (float)micros() / 1000000.0f;
+  rocketStatus.updateTime();
   Serial.print("time loop");
   readSensors();
   Serial.println("readSensors");
@@ -216,6 +217,10 @@ void loop()
 
   if (rocketState.flightPhase == PAD)
   {
+   // readSerial();
+
+    if (digitalRead(USE_LORA_PIN) == HIGH) // LoRa telemetry turned on
+      rocketStatus.use_lora = true;
      Serial.println("here we go!");
     rocketState.flightPhase = LAUNCH;
 
@@ -227,9 +232,9 @@ void loop()
       target_apogee = rocketState.getAltitude() + 1.0f;
 
 
-      if ((((globalStatus.time * 1000000) / (LOG_TIME_STEP * 1000000)) - ((globalStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
+      if ((((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000)) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
       {
-        globalStatus.t_last = globalStatus.time;
+        rocketStatus.t_last = rocketStatus.t;
 
         logRocketState();
         sendRocketTelemetry();
@@ -238,16 +243,16 @@ void loop()
 
      // rocketState.updateDeltaT();
       rocketState.updateState();
-      globalStatus.updateTime();
+      rocketStatus.updateTime();
 
      // simState.time = (float)micros() / 1000000.0f;
 
-      // Serial.println("flightphase pad");
+       Serial.println("flightphase pad");
       if (rocketState.getAZ() > TRIGGER_ACCEL)
       { // If launch is detected
        // Serial.println("flighphase launch");
         rocketState.flightPhase = IGNITION;
-        rocketState.t_launch = globalStatus.time;
+        rocketState.t_launch = rocketStatus.t;
         //rocketControl.deployBrake(0);
         
       }
@@ -265,7 +270,7 @@ void loop()
   if (rocketState.flightPhase == COAST){
 
     // Needless to say, this bit could use some work.
-    if (globalStatus.apogee >= target_apogee)
+    if (rocketStatus.apogee >= target_apogee)
     {
       rocketControl.deployBrake(100);
     }
@@ -276,9 +281,9 @@ void loop()
     // Serial.println("logging");
     
 
-    if (((globalStatus.time * 1000000) / (LOG_TIME_STEP * 1000000) - ((globalStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
+    if (((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
     {
-      globalStatus.t_last = globalStatus.time;
+      rocketStatus.t_last = rocketStatus.t;
        //Serial.println("logging");
       //Serial.println(rocketState.time);
       logRocketState();
@@ -304,7 +309,7 @@ void loop()
 
 
   rocketState.stepTime();
-  globalStatus.updateTime();
+  rocketStatus.updateTime();
 }
 
 // READ SENSORS
@@ -388,9 +393,9 @@ void brakeTest()
 
 void state::updateDeltaT()
 {
-  Now = micros();
-  delta_t = (float)((Now - lastTime) / 1000000.0f);
-  lastTime = Now;
+  now = micros();
+  delta_t = (float)((now - last_time) / 1000000.0f);
+  last_time = now;
 }
 
 void state::stepTime()
@@ -399,5 +404,10 @@ void state::stepTime()
 }
 
 void status::updateTime(){
-  time = (float)(micros())/1000000.0f;
+  t = (float)(micros())/1000000.0f;
+}
+
+void initPins(){
+  digitalWrite(LED_BUILTIN, HIGH);
+  pinMode(USE_LORA_PIN, INPUT);
 }

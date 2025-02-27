@@ -30,9 +30,12 @@ float simStartTime = 0.0f;
 
 void initSim(){
     Serial.println("init sim");
-    simState.dragCoefficient = airBrakeState.getDragForceCoef();
-    Serial.println("got drag force coef");
-    simState.crossSection = rocketConfig.getRefArea();
+    simState.ref_area = airBrakeState.getDragForceCoef();
+    Serial.println("drag force coefficient: ");
+    Serial.println(simState.ref_area);
+    simState.ref_area = rocketConfig.getRefArea();
+    Serial.println("reference area");
+    Serial.println();
     Serial.println("got reference area");
     simState.time = (float)(micros())/1000000.0f;
     simStartTime = simState.time;
@@ -41,18 +44,29 @@ void initSim(){
 }
 
 void updateSim(){
-    float lastVel = 0.0f;
+    float last_vel = 0.0f;
+    float last_altitude = 0.0f;
+    uint count = 0;
     copyState(simState, rocketState);
+    last_altitude = simState.getAltitude();
     while ((simState.time-simStartTime) < SIM_TIME_S){
-        lastVel = simState.getVZ();
+        last_vel = simState.getVZ();
         stepSim();
        // Serial.println("stepping sim");
         
-        if (simState.getVZ() < 0){
-          globalStatus.apogee = simState.getAltitude();
-          Serial.println("Apogee reached");
-          break;
+        if (simState.getAltitude() < last_altitude || simState.getVZ() < 0){
+            if (count >= 4){
+                rocketStatus.apogee = simState.getAltitude();
+                Serial.println("Apogee reached");
+                break;
+            }
+            count++;
+          
+        } else {
+            count = 0;
+            last_altitude = simState.getAltitude();
         }
+        
         
     } 
         //logSimState();
@@ -76,7 +90,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     
     k2.setVZ_Local(k1.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
-    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * simState.dragCoefficient * simState.crossSection/ k1.getMass()) + getThrust()/k1.getMass());
+    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * simState.drag_coefficient * simState.ref_area/ k1.getMass()) + getThrust()/k1.getMass());
 
 
     k2.globalizeVelocity();
@@ -91,7 +105,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
 
     k3.setVZ_Local(k1.getVZ_Local() + k2.getAZ_Local() * k1.delta_t * 0.5f);
-    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * simState.dragCoefficient * simState.crossSection/ k1.getMass()) + getThrust()/k2.getMass());
+    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * simState.drag_coefficient * simState.ref_area / k1.getMass()) + getThrust()/k2.getMass());
 
 
     k3.globalizeVelocity();
@@ -103,7 +117,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     k3.localizeAcceleration();
 
     k4.setVZ_Local(k1.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
-    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * simState.dragCoefficient * simState.crossSection /k1.getMass()) + getThrust()/k2.getMass());
+    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * simState.drag_coefficient * simState.ref_area /k1.getMass()) + getThrust()/k2.getMass());
 
     k4.globalizeVelocity();
     k4.globalizeAcceleration();
@@ -124,7 +138,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     simState.globalizeVelocity();
 
-    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * simState.dragCoefficient * simState.crossSection /simState.getMass()));
+    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * simState.drag_coefficient * simState.ref_area /simState.getMass()));
    
     // gotta set these to zero to avoid fucking up next round of simulation.
     simState.setAX_Local(0);
@@ -311,9 +325,9 @@ void state::reset(){
     fx_local = 0.0f;
     fy_local = 0.0f;
     fz_local = 0.0f;
-    baroAltitude = 0.0f;
+    baro_altitude = 0.0f;
     altitude = 0.0f;
-    baroPressure = 0.0f;
+    baro_pressure = 0.0f;
    // baroTemperature = 0.0f;
    // dragCoefficient = 0.0f;
     time = 0;

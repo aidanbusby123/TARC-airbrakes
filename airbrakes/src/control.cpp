@@ -8,7 +8,7 @@ void controller::deployBrake(float percent){
 }
         
 bool controller::initBrake(){
-    if (brake.attach(23) == 0){
+    if (brake.attach(SERVO_PIN) == 0){
         //Serial.println("unable to initialize brake");
        // return false;
     }

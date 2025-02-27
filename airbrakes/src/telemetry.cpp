@@ -90,16 +90,16 @@ void logRocketState()
             rocketStateHistory[rocketStateHistory_index].qy = rocketState.getQuatY();
             rocketStateHistory[rocketStateHistory_index].qz = rocketState.getQuatZ();
 
-            rocketStateHistory[rocketStateHistory_index].baroAltitude = rocketState.getBaroAltitude();
+            rocketStateHistory[rocketStateHistory_index].baro_altitude = rocketState.getBaroAltitude();
 
             rocketStateHistory[rocketStateHistory_index].altitude = rocketState.getAltitude();
 
-            rocketStateHistory[rocketStateHistory_index].baroPressure = rocketState.getBaroPressure();
+            rocketStateHistory[rocketStateHistory_index].baro_pressure = rocketState.getBaroPressure();
 
-            rocketStateHistory[rocketStateHistory_index].baroTemperature = rocketState.getBaroTemperature();
+            rocketStateHistory[rocketStateHistory_index].baro_temperature = rocketState.getBaroTemperature();
 
             memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
-            rocketStateStruct.predictedAltitude = globalStatus.apogee;
+            rocketStateStruct.apogee = rocketStatus.apogee;
 
             rocketStateHistory_index++;
                     
@@ -137,13 +137,13 @@ void logRocketState()
                     rocketStateHistoryTemp[i].qy = rocketStateHistory[i].qy;
                     rocketStateHistoryTemp[i].qz = rocketStateHistory[i].qz;
 
-                    rocketStateHistoryTemp[i].baroAltitude = rocketStateHistory[i].baroAltitude;
+                    rocketStateHistoryTemp[i].baro_altitude = rocketStateHistory[i].baro_altitude;
 
                     rocketStateHistoryTemp[i].altitude = rocketStateHistory[i].altitude;
 
-                    rocketStateHistoryTemp[i].baroPressure = rocketStateHistory[i].baroPressure;
+                    rocketStateHistoryTemp[i].baro_pressure = rocketStateHistory[i].baro_pressure;
 
-                    rocketStateHistoryTemp[i].baroTemperature = rocketStateHistory[i].baroTemperature;
+                    rocketStateHistoryTemp[i].baro_temperature = rocketStateHistory[i].baro_temperature;
                 }
             
             delete rocketStateHistory;
@@ -185,13 +185,13 @@ void logRocketState()
                 rocketStateHistoryTemp[i].qy = rocketStateHistory[i].qy;
                 rocketStateHistoryTemp[i].qz = rocketStateHistory[i].qz;
 
-                rocketStateHistoryTemp[i].baroAltitude = rocketStateHistory[i].baroAltitude;
+                rocketStateHistoryTemp[i].baro_altitude = rocketStateHistory[i].baro_altitude;
 
                 rocketStateHistoryTemp[i].altitude = rocketStateHistory[i].altitude;
 
-                rocketStateHistoryTemp[i].baroPressure = rocketStateHistory[i].baroPressure;
+                rocketStateHistoryTemp[i].baro_pressure = rocketStateHistory[i].baro_pressure;
 
-                rocketStateHistoryTemp[i].baroTemperature = rocketStateHistory[i].baroTemperature;
+                rocketStateHistoryTemp[i].baro_temperature = rocketStateHistory[i].baro_temperature;
             }
             
             delete rocketStateHistory;
@@ -232,16 +232,16 @@ void logRocketState()
             rocketStateHistory[rocketStateHistory_index].qy = rocketState.getQuatY();
             rocketStateHistory[rocketStateHistory_index].qz = rocketState.getQuatZ();
 
-            rocketStateHistory[rocketStateHistory_index].baroAltitude = rocketState.getBaroAltitude();
+            rocketStateHistory[rocketStateHistory_index].baro_altitude = rocketState.getBaroAltitude();
 
             rocketStateHistory[rocketStateHistory_index].altitude = rocketState.getAltitude();
 
-            rocketStateHistory[rocketStateHistory_index].baroPressure = rocketState.getBaroPressure();
+            rocketStateHistory[rocketStateHistory_index].baro_pressure = rocketState.getBaroPressure();
 
-            rocketStateHistory[rocketStateHistory_index].baroTemperature = rocketState.getBaroTemperature();
+            rocketStateHistory[rocketStateHistory_index].baro_temperature = rocketState.getBaroTemperature();
             
             memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
-            rocketStateStruct.predictedAltitude = globalStatus.apogee;
+            rocketStateStruct.apogee = rocketStatus.apogee;
 
             rocketStateHistory_index++;
             if (rocketStateHistory_index == rocketStateHistory_size){
@@ -297,13 +297,13 @@ void logSimState()
             simStateHistory[simStateHistory_index].qy = simState.getQuatY();
             simStateHistory[simStateHistory_index].qz = simState.getQuatZ();
 
-            simStateHistory[simStateHistory_index].baroAltitude = simState.getBaroAltitude();
+            simStateHistory[simStateHistory_index].baro_altitude = simState.getBaroAltitude();
 
             simStateHistory[simStateHistory_index].altitude = simState.getAltitude();
 
-            simStateHistory[simStateHistory_index].baroPressure = simState.getBaroPressure();
+            simStateHistory[simStateHistory_index].baro_pressure = simState.getBaroPressure();
 
-            simStateHistory[simStateHistory_index].baroTemperature = simState.getBaroTemperature();
+            simStateHistory[simStateHistory_index].baro_temperature = simState.getBaroTemperature();
 
             simStateHistory_index++;
 
@@ -341,13 +341,13 @@ void logSimState()
                     simStateHistoryTemp[i].qy = simStateHistory[i].qy;
                     simStateHistoryTemp[i].qz = simStateHistory[i].qz;
 
-                    simStateHistoryTemp[i].baroAltitude = simStateHistory[i].baroAltitude;
+                    simStateHistoryTemp[i].baro_altitude = simStateHistory[i].baro_altitude;
 
                     simStateHistoryTemp[i].altitude = simStateHistory[i].altitude;
 
-                    simStateHistoryTemp[i].baroPressure = simStateHistory[i].baroPressure;
+                    simStateHistoryTemp[i].baro_pressure = simStateHistory[i].baro_pressure;
 
-                    simStateHistoryTemp[i].baroTemperature = simStateHistory[i].baroTemperature;
+                    simStateHistoryTemp[i].baro_temperature = simStateHistory[i].baro_temperature;
                 }
                 simStateHistoryTemp_index = simStateHistory_size;
             }
@@ -385,13 +385,13 @@ void logSimState()
                 simStateHistoryTemp[i].qy = simStateHistory[i].qy;
                 simStateHistoryTemp[i].qz = simStateHistory[i].qz;
 
-                simStateHistoryTemp[i].baroAltitude = simStateHistory[i].baroAltitude;
+                simStateHistoryTemp[i].baro_altitude = simStateHistory[i].baro_altitude;
 
                 simStateHistoryTemp[i].altitude = simStateHistory[i].altitude;
 
-                simStateHistoryTemp[i].baroPressure = simStateHistory[i].baroPressure;
+                simStateHistoryTemp[i].baro_pressure = simStateHistory[i].baro_pressure;
 
-                simStateHistoryTemp[i].baroTemperature = simStateHistory[i].baroTemperature;
+                simStateHistoryTemp[i].baro_temperature = simStateHistory[i].baro_temperature;
             }
             simStateHistoryTemp_index = simStateHistoryTemp_size;
         }
@@ -431,13 +431,13 @@ void logSimState()
             simStateHistory[simStateHistory_index].qy = simState.getQuatY();
             simStateHistory[simStateHistory_index].qz = simState.getQuatZ();
 
-            simStateHistory[simStateHistory_index].baroAltitude = simState.getBaroAltitude();
+            simStateHistory[simStateHistory_index].baro_altitude = simState.getBaroAltitude();
 
             simStateHistory[simStateHistory_index].altitude = simState.getAltitude();
 
-            simStateHistory[simStateHistory_index].baroPressure = simState.getBaroPressure();
+            simStateHistory[simStateHistory_index].baro_pressure = simState.getBaroPressure();
 
-            simStateHistory[simStateHistory_index].baroTemperature = simState.getBaroTemperature();
+            simStateHistory[simStateHistory_index].baro_temperature = simState.getBaroTemperature();
 
             simStateHistory_index++;
             if (simStateHistory_index == simStateHistory_size){

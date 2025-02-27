@@ -54,9 +54,9 @@
 #define GRAVITY 9.79
 #define SEAPRESSURE 1013.25
 
-#define STATEHISTORY_SIZE 64// size of state history buffers
+#define STATEHISTORY_SIZE 16// size of state history buffers
 
-#define TRIGGER_ACCEL 1.0
+#define TRIGGER_ACCEL 5.0
 
 #define LOG_TIME_STEP 0.1
 
@@ -65,6 +65,10 @@
 #define DEPLOYMENT_COEFS_SIZE 3
 #define DRAG_FORCE_COEF_COEFS_SIZE 3
 #define BRAKE_DEPLOY_TIME 200
+
+#define SERVO_PIN 23
+
+#define USE_LORA_PIN 5
 
 
 
@@ -149,14 +153,19 @@ class state{
 
 
 
-        float baroAltitude = 0.0f; // Barometric altitude
+        float baro_altitude = 0.0f; // Barometric altitude
         float altitude = 0.0f; // Real altitude
 
-        float baroPressure = 0.0f; // Barometric pressure
+        float baro_pressure = 0.0f; // Barometric pressure
 
-        float baroTemperature = 0.0f; // temperature
-        float lastTime;
-        float Now;
+        float baro_temperature = 0.0f; // temperature
+
+        float air_pressure;
+        float air_density;
+        float air_temperature;
+
+        float last_time;
+        float now;
 
 
     public:
@@ -166,8 +175,8 @@ class state{
         float time = 0;
         float t_launch = 0;
 
-        float dragCoefficient = 0.0f;
-        float crossSection = 0.0f;
+        float drag_coefficient = 0.0f;
+        float ref_area = 0.0f;
 
         // Rocket flight phase
 
@@ -217,11 +226,14 @@ class state{
         float getFZ_Local() { return fz_local; }
 
         float getAltitude() { return altitude; }
-        float getBaroAltitude() { return baroAltitude; }
+        float getBaroAltitude() { return baro_altitude; }
 
-        float getBaroPressure() { return baroPressure; } 
+        float getBaroPressure() { return baro_pressure; } 
 
-        float getBaroTemperature() { return baroTemperature; }
+        float getBaroTemperature() { return baro_temperature; }
+
+        float getAirPressure;
+        float getAirDensity;
 
         // Set state values
 
@@ -256,12 +268,12 @@ class state{
         void setFY_Local(float fy_local) { this->fy_local = fy_local; }
         void setFZ_Local(float fz_local) { this->fz_local = fz_local; }
 
-        void setBaroAltitude(float baroAltitude) { this->baroAltitude = baroAltitude; }
+        void setBaroAltitude(float baro_altitude) { this->baro_altitude = baro_altitude; }
         void setAltitude(float altitude) { this->altitude = altitude; }
 
-        void setBaroPressure(float baroPressure) { this->baroPressure = baroPressure; }
+        void setBaroPressure(float baro_pressure) { this->baro_pressure = baro_pressure; }
 
-        void setBaroTemperature(float baroTemperature) { this->baroTemperature = baroTemperature; }
+        void setBaroTemperature(float baroTemperature) { this->baro_temperature = baroTemperature; }
 
 
         void updateState();
@@ -344,23 +356,30 @@ struct stateHistory{
         float qy = 0.0f;
         float qz = 0.0f;
 
-        float predictedAltitude = 0.0f;
+        float apogee = 0.0f;
 
-        float baroAltitude = 0.0f; // Barometric altitude
+        float baro_altitude = 0.0f; // Barometric altitude
         float altitude = 0.0f; // Real altitude
 
-        float baroPressure = 0.0f; // Barometric pressure
 
-        float baroTemperature = 0.0f; // temperature
+        float baro_pressure = 0.0f; // Barometric pressure
 
-        float dragCoefficient = 0.0f; // Fix this
+        float baro_temperature = 0.0f; // temperature
+
+         float air_pressure;
+        float air_density;
+        float air_temperature;
+
+        float drag_coefficient = 0.0f; // Fix this
 };
 
 class status{
     public:
     float apogee;
-    float time; // system time;
+    float t; // system time;
     float t_last;
+
+    bool use_lora;
     
     void updateTime();
 };
@@ -379,7 +398,7 @@ extern state simState; // Simulation state
 
 extern brakeState airBrakeState; // airbrake state
 
-extern status globalStatus;
+extern status rocketStatus;
 
 extern config rocketConfig;
 

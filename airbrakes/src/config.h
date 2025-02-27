@@ -7,9 +7,12 @@ class config {
     private:
         float dragForceCoefCoefs[3];
         float deploymentTimeCoefs[3];    
-        float refArea;
-        float targetApogee;
+        float ref_area;
+        float target_apogee;
+        float temperature;
+        float pressure;
     public:
+        float ground_lora_address;
         StaticJsonDocument<512> configJSON;
         
         int begin(const char* filename);

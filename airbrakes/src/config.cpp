@@ -33,13 +33,16 @@ void config::loadConfigFromFile(){
         Serial.println(F("Failed to read config file"));
     }
 
-    targetApogee = configJSON["target_apogee"];
+    target_apogee = configJSON["target_apogee"];
 
-    refArea = configJSON["reference_area"];
+    ref_area = configJSON["reference_area"];
 
     for (int i = 0; i < 3; i++){
         dragForceCoefCoefs[i] = configJSON["drag_force_coef_coefs"][i];
     }
+
+    pressure = configJSON["pressure"];
+    temperature = configJSON["temperature"];
    // Serial.println("config loaded");
 }
 
@@ -50,9 +53,9 @@ void config::loadConfigFromPacket(char *configdata){
         Serial.println(F("Failed to read config data"));
     }
 
-    targetApogee = configJSON["target_apogee"];
+    target_apogee = configJSON["target_apogee"];
 
-    refArea = configJSON["reference_area"];
+    ref_area = configJSON["reference_area"];
 
     for (int i = 0; i < 3; i++){
         dragForceCoefCoefs[i] = configJSON["drag_force_coef_coefs"][i];
@@ -61,9 +64,9 @@ void config::loadConfigFromPacket(char *configdata){
 }
 
 float config::getRefArea(){
-    return refArea;
+    return ref_area;
 }
 
 float config::getTargetApogee(){
-    return targetApogee;
+    return target_apogee;
 }
