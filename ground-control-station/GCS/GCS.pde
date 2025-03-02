@@ -14,6 +14,7 @@ float pitch = 0.0F;
 float yaw   = 0.0F;
 float temp  = 0.0F;
 float alt   = 0.0F;
+float apogee = 0.0F;
 float time = 0.0F;
 
 float qw = 0.0F;
@@ -46,7 +47,9 @@ int msg_type = 0x8a;
 
 OBJModel model;
 
-int accelScale = 100;
+Table logfile;
+
+int accelScale = 10;
 
 // Serial port state.
 Serial       port;
@@ -54,7 +57,7 @@ String       buffer = "";
 final String serialConfigFile = "serialconfig.txt";
 boolean      printSerial = false;
 
-
+ArrayList<Float> accel_history = new ArrayList<Float>();
 
 
 // UI controls.
@@ -69,6 +72,7 @@ GLabel accel_x_Label, accel_y_Label, accel_z_Label, gyro_x_Label, gyro_y_Label, 
 GLabel accel_x_local_Label, accel_y_local_Label, accel_z_local_Label;
 GLabel vel_x_Label, vel_y_Label, vel_z_Label, vel_x_local_Label, vel_y_local_Label, vel_z_local_Label;
 GLabel alt_Label;
+GLabel apogee_Label;
 
 void setup()
 {
@@ -79,6 +83,19 @@ void setup()
   model.load("rocket.obj");
   model.scale(0.5);
   
+  logfile = new Table();
+  
+  logfile.addColumn("time");
+  logfile.addColumn("alt");
+  logfile.addColumn("apogee");
+  logfile.addColumn("ax");
+  logfile.addColumn("ay");
+  logfile.addColumn("az");
+  logfile.addColumn("vx");
+  logfile.addColumn("vy");
+  logfile.addColumn("vz");
+  
+
       // do something with each field
 
   
@@ -101,6 +118,7 @@ void setup()
   
   time_Label = new GLabel(this, 10, 20, 200, 20, "Time: 0.0");
   alt_Label = new GLabel(this, 10, 50, 200, 20, "Altitude: 0.0");
+  apogee_Label = new GLabel(this, 10, 65, 200, 20, "Predicted Apogee: 0.0");
   
   accel_x_Label = new GLabel(this, 10, 80, 200, 20, "AX: 0.0");
   accel_y_Label = new GLabel(this, 10, 110, 200, 20, "AY: 0.0");
@@ -113,7 +131,12 @@ void setup()
   dataPanel.addControl(accel_x_Label);
   dataPanel.addControl(accel_y_Label);
   dataPanel.addControl(accel_z_Label);
+  dataPanel.addControl(vel_x_Label);
+  dataPanel.addControl(vel_y_Label);
+  dataPanel.addControl(vel_z_Label);
   dataPanel.addControl(time_Label);
+  dataPanel.addControl(alt_Label);
+  dataPanel.addControl(apogee_Label);
   
     int selectedPort = 0;
   String[] availablePorts = Serial.list();
@@ -147,10 +170,25 @@ void draw()
  }*/
   
   time_Label.setText("time: " + nf(time, 1, 2));
+  alt_Label.setText("altitude: " + nf(alt, 1, 2));
+  apogee_Label.setText("apogee" + nf(apogee, 1, 2));
   accel_x_Label.setText("AX: " + nf(ax, 1, 2));
   accel_y_Label.setText("AY: " + nf(ay, 1, 2));
   accel_z_Label.setText("AZ: " + nf(az, 1, 2));
   background(0,0, 0);
+  
+  TableRow newRow = logfile.addRow();
+  newRow.setFloat("time", time);
+  newRow.setFloat("alt", alt);
+  newRow.setFloat("apogee", apogee);
+  newRow.setFloat("ax", ax);
+  newRow.setFloat("ay", ay);
+  newRow.setFloat("az", az);
+  newRow.setFloat("vx", vx);
+  newRow.setFloat("vy", vy);
+  newRow.setFloat("vz", vz);
+  
+  saveTable(logfile, "logfile.csv");
 
   // Set a new co-ordinate space
   pushMatrix();
@@ -168,15 +206,15 @@ void draw()
   
    stroke(255, 0, 0);
    strokeWeight(5);
-   line(0, 0, 0, ax*accelScale, 0, 0);
+   line(0, 0, 0, -ax*accelScale, 0, 0);
    
    stroke(0, 255, 0);
    strokeWeight(5);
-   line(0, 0, 0, 0, az*accelScale, 0);
+   line(0, 0, 0, 0, -az*accelScale, 0);
    
    stroke(0, 0, 255);
    strokeWeight(5);
-   line(0, 0, 0, 0, 0, ay*accelScale);
+   line(0, 0, 0, 0, 0, -ay*accelScale);
 
   //println(qx);
   // Rotate shapes around the X/Y/Z axis (values in radians, 0..Pi*2)
@@ -258,13 +296,15 @@ void processMessage(int type, byte[] data) {
     if (data.length % 4 == 0) {
         float[] floatData = new float[data.length / 4];
         for (int i = 0; i < floatData.length; i++) {
-            int intBits = ((data[i * 4] & 0xFF) << 24) | 
-                          ((data[i * 4 + 1] & 0xFF) << 16) |
-                          ((data[i * 4 + 2] & 0xFF) << 8) |
-                          ((data[i * 4 + 3] & 0xFF));
+            int intBits = ((data[i * 4] & 0xFF)) | 
+                          ((data[i * 4 + 1] & 0xFF) << 8) |
+                          ((data[i * 4 + 2] & 0xFF) << 16) |
+                          ((data[i * 4 + 3] & 0xFF) << 24);
             floatData[i] = Float.intBitsToFloat(intBits);
-            println(Float.toHexString(floatData[i]));
+            println(floatData[i]);
         }
+        time = floatData[1];
+        
         ax = floatData[2];
         ay = floatData[3];
         az = floatData[4];
@@ -272,7 +312,10 @@ void processMessage(int type, byte[] data) {
         qw = floatData[20];
         qx = floatData[21];
         qy = floatData[22];
-        qz = floatData[23];
+        qz = floatData[23]; 
+        
+        apogee = floatData[24];
+        alt = floatData[26];
       //  println("Float Data: " + join(str(floatToHexString\\\(floatData)), ", "));
     } else {
         println("Raw Data: " + new String(data));  // Print as string if not float
