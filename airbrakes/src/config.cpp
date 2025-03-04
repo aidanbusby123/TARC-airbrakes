@@ -15,6 +15,8 @@ void initConfig(){
         sd.errorHalt("unable to open config file (num 1)");
     }
 
+    rocketConfig.loadConfigDefaults();
+
    // rocketConfig.begin("config.dat");
 }
 
@@ -31,19 +33,40 @@ void config::loadConfigFromFile(){
 
     if (error){
         Serial.println(F("Failed to read config file"));
+    } else {
+
+        target_apogee = configJSON["target_apogee"];
+        if (target_apogee <= 0){
+            Serial.println("Error: incorrect apogee");
+            target_apogee = DEFAULT_TARGET_APOGEE;
+        }
+
+        ref_area = configJSON["reference_area"];
+
+        if (ref_area < 0){
+            ref_area = DEFAULT_REF_AREA;
+        }
+
+        for (int i = 0; i < 3; i++){
+            dragForceCoefCoefs[i] = configJSON["drag_force_coef_coefs"][i];
+            if (dragForceCoefCoefs[i] < 0)
+                dragForceCoefCoefs[i] = 0;
+        }
+
+        for (int i = 0; i < 3; i++){
+            deploymentTimeCoefs[i] = configJSON["deployment_time_coefs"][i];
+            if (deploymentTimeCoefs[i] < 0)
+                deploymentTimeCoefs[i] = 0;
+        }
+
+        pressure = configJSON["pressure"];
+        temperature = configJSON["temperature"];
+        ground_lora_address = configJSON["ground_lora_address"];
+        if (ground_lora_address < 0){
+            ground_lora_address = 0;
+        }
+        Serial.println("config loaded");
     }
-
-    target_apogee = configJSON["target_apogee"];
-
-    ref_area = configJSON["reference_area"];
-
-    for (int i = 0; i < 3; i++){
-        dragForceCoefCoefs[i] = configJSON["drag_force_coef_coefs"][i];
-    }
-
-    pressure = configJSON["pressure"];
-    temperature = configJSON["temperature"];
-   // Serial.println("config loaded");
 }
 
 void config::loadConfigFromPacket(char *configdata){
@@ -60,7 +83,20 @@ void config::loadConfigFromPacket(char *configdata){
     for (int i = 0; i < 3; i++){
         dragForceCoefCoefs[i] = configJSON["drag_force_coef_coefs"][i];
     }
+    ground_lora_address = configJSON["ground_lora_address"];
     Serial.println("config loaded");
+}
+
+void config::loadConfigDefaults(){
+    target_apogee = DEFAULT_TARGET_APOGEE;
+    ref_area = DEFAULT_REF_AREA;
+    for (int i = 0; i < 3; i++){
+        dragForceCoefCoefs[i] = DEFAULT_DRAG_FORCE_COEF_COEFS[i];
+    }
+    pressure = 1013.25;
+    temperature = 20.0;
+    ground_lora_address = 0;
+
 }
 
 float config::getRefArea(){

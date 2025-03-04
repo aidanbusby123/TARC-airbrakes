@@ -69,6 +69,7 @@ void writeSerial(uint8_t type, uint8_t data_size, uint8_t *data, bool use_lora){
         buffer = buffer_start;
 
         if (use_lora == true){
+            Serial.write(buffer, buffer_size);
             sendSerial(buffer_size, buffer);
         } else {
             Serial.write(buffer, buffer_size);
@@ -88,8 +89,9 @@ void sendSerial(uint8_t data_size, uint8_t *data){
     if (data_size > 0){
         itoa(rocketConfig.ground_lora_address, (char*)address, 10);
         itoa(data_size, data_size_string, 10);
-        buffer_size = strlen(address) + strlen("AT+SEND=,,") + strlen(data_size_string) + data_size;
+        buffer_size = strlen(address) + strlen("AT+SEND=,,\r\n") + strlen(data_size_string) + data_size;
         buffer = (uint8_t*)malloc(buffer_size);
+        buffer_start = buffer;
     } else 
         return;
 
@@ -97,9 +99,12 @@ void sendSerial(uint8_t data_size, uint8_t *data){
     memcpy(buffer, address, strlen(address));
     memcpy(buffer, ",", strlen(","));
     memcpy(buffer, data_size_string, strlen(data_size_string));
+    memcpy(buffer, ",", strlen(","));
     memcpy(buffer, data, data_size);
-
-    Serial.write(buffer, buffer_size);
+    memcpy(buffer, "/r/n", 2);
+    buffer = buffer_start;
+    Serial1.write(buffer, buffer_size);
+    free(buffer);
     
 }
 

@@ -46,18 +46,20 @@ void initSim(){
 void updateSim(){
     float last_vel = 0.0f;
     float last_altitude = 0.0f;
+    float apogee = 0.0f;
     uint count = 0;
     copyState(simState, rocketState);
     last_altitude = simState.getAltitude();
     while ((simState.time-simStartTime) < SIM_TIME_S){
         last_vel = simState.getVZ();
         stepSim();
-       // Serial.println("stepping sim");
+       //Serial.println("stepping sim");
         
         if (simState.getAltitude() < last_altitude || simState.getVZ() < 0){
+            apogee = simState.getAltitude();
             if (count >= 4){
-                rocketStatus.apogee = simState.getAltitude();
-                Serial.println("Apogee reached");
+                rocketStatus.apogee = apogee;
+                //Serial.println("Apogee reached");
                 break;
             }
             count++;

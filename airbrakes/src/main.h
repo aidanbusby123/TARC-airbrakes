@@ -33,6 +33,7 @@
 #include <Adafruit_LPS2X.h>
 #include <Adafruit_LIS3MDL.h>
 #include <Adafruit_BNO055.h>
+#include <Adafruit_BMP3XX.h>
 //#include <Adafruit_Sensor_Calibration.h>
 //#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <SdFat.h>
@@ -43,20 +44,22 @@
 #include"maths.h"
 #include "config.h"
 #include "sensor_calibration.h"
+#include "coms.h"
 
 #define STEP_TIME 10
 
 #define INIT_MASS 0.417
 #define BURN_TIME 1.1
 
-#define TARGET_APOGEE 87
+#define LAUNCH_DELAY 420
 
 #define GRAVITY 9.79
 #define SEAPRESSURE 1013.25
 
-#define STATEHISTORY_SIZE 16// size of state history buffers
+#define STATEHISTORY_SIZE 64// size of state history buffers
 
-#define TRIGGER_ACCEL 5.0
+#define TRIGGER_ACCEL 7.0
+#define TRIGGER_VEL 5.0
 
 #define LOG_TIME_STEP 0.1
 
@@ -69,11 +72,13 @@
 #define SERVO_PIN 23
 
 #define USE_LORA_PIN 5
+#define BUZZER_PIN 2
 
 
 
 
-extern Adafruit_MPL3115A2 baro;
+//extern Adafruit_MPL3115A2 baro;
+extern Adafruit_BMP3XX bmp_baro;
 
 //V1
 extern Adafruit_LSM6DS33 lsm6ds;
@@ -154,11 +159,13 @@ class state{
 
 
         float baro_altitude = 0.0f; // Barometric altitude
-        float altitude = 0.0f; // Real altitude
+        float ground_altitude = 0.0f; // altitude measurement for ground
+        float altitude = 0.0f; // Real altitude, AGL
 
         float baro_pressure = 0.0f; // Barometric pressure
 
         float baro_temperature = 0.0f; // temperature
+
 
         float air_pressure;
         float air_density;
@@ -227,13 +234,13 @@ class state{
 
         float getAltitude() { return altitude; }
         float getBaroAltitude() { return baro_altitude; }
-
+        float getGroundAltitude() { return ground_altitude; }
         float getBaroPressure() { return baro_pressure; } 
 
         float getBaroTemperature() { return baro_temperature; }
 
-        float getAirPressure;
-        float getAirDensity;
+        float getAirPressure();
+        float getAirDensity();
 
         // Set state values
 
@@ -270,7 +277,7 @@ class state{
 
         void setBaroAltitude(float baro_altitude) { this->baro_altitude = baro_altitude; }
         void setAltitude(float altitude) { this->altitude = altitude; }
-
+        void setGroundAltitude(float ground_altitude) { this->ground_altitude = ground_altitude; }
         void setBaroPressure(float baro_pressure) { this->baro_pressure = baro_pressure; }
 
         void setBaroTemperature(float baroTemperature) { this->baro_temperature = baroTemperature; }
@@ -371,6 +378,8 @@ struct stateHistory{
         float air_temperature;
 
         float drag_coefficient = 0.0f; // Fix this
+
+        phase flightPhase = PAD;
 };
 
 class status{
@@ -428,3 +437,8 @@ void writeRocketStateLog();
 void writeSimStateLog();
 
 void sendRocketTelemetry();
+
+void readSerial();
+void handleSerial();
+void writeSerial(uint8_t type, uint8_t data_size, uint8_t *data, bool use_lora);
+void sendSerial(uint8_t data_size, uint8_t *data);

@@ -59,44 +59,7 @@ void logRocketState()
 
         if (rocketStateHistory_index <= rocketStateHistory_size - 1)
         {
-            rocketStateHistory[rocketStateHistory_index].time = rocketState.time;
-
-            rocketStateHistory[rocketStateHistory_index].ax = rocketState.getAX();
-            rocketStateHistory[rocketStateHistory_index].ay = rocketState.getAY();
-            rocketStateHistory[rocketStateHistory_index].az = rocketState.getAZ();
-
-            rocketStateHistory[rocketStateHistory_index].ax_local = rocketState.getAX_Local();
-            rocketStateHistory[rocketStateHistory_index].ay_local = rocketState.getAY_Local();
-            rocketStateHistory[rocketStateHistory_index].az_local = rocketState.getAZ_Local();
-
-            rocketStateHistory[rocketStateHistory_index].pitch = rocketState.getPitch();
-            rocketStateHistory[rocketStateHistory_index].roll = rocketState.getRoll();
-            rocketStateHistory[rocketStateHistory_index].yaw = rocketState.getYaw();
-
-            rocketStateHistory[rocketStateHistory_index].vx = rocketState.getVX();
-            rocketStateHistory[rocketStateHistory_index].vy = rocketState.getVY();
-            rocketStateHistory[rocketStateHistory_index].vz = rocketState.getVZ();
-
-            rocketStateHistory[rocketStateHistory_index].vx_local = rocketState.getVX_Local();
-            rocketStateHistory[rocketStateHistory_index].vy_local = rocketState.getVY_Local();
-            rocketStateHistory[rocketStateHistory_index].vz_local = rocketState.getVZ_Local();
-
-            rocketStateHistory[rocketStateHistory_index].x = rocketState.getX();
-            rocketStateHistory[rocketStateHistory_index].y = rocketState.getY();
-            rocketStateHistory[rocketStateHistory_index].z = rocketState.getZ();
-
-            rocketStateHistory[rocketStateHistory_index].qw = rocketState.getQuatW();
-            rocketStateHistory[rocketStateHistory_index].qx = rocketState.getQuatX();
-            rocketStateHistory[rocketStateHistory_index].qy = rocketState.getQuatY();
-            rocketStateHistory[rocketStateHistory_index].qz = rocketState.getQuatZ();
-
-            rocketStateHistory[rocketStateHistory_index].baro_altitude = rocketState.getBaroAltitude();
-
-            rocketStateHistory[rocketStateHistory_index].altitude = rocketState.getAltitude();
-
-            rocketStateHistory[rocketStateHistory_index].baro_pressure = rocketState.getBaroPressure();
-
-            rocketStateHistory[rocketStateHistory_index].baro_temperature = rocketState.getBaroTemperature();
+            logState(rocketStateHistory, rocketStateHistory_index, rocketState);
 
             memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
             rocketStateStruct.apogee = rocketStatus.apogee;
@@ -105,46 +68,7 @@ void logRocketState()
                     
             if (rocketStateHistory_index == rocketStateHistory_size)
             {
-                for (int i = 0; i < rocketStateHistory_size; i++)
-                { // copy current simStateHistory to temp
-                    rocketStateHistoryTemp[i].time = rocketStateHistory[i].time;
-                    rocketStateHistoryTemp[i].ax = rocketStateHistory[i].ax;
-                    rocketStateHistoryTemp[i].ay = rocketStateHistory[i].ay;
-                    rocketStateHistoryTemp[i].az = rocketStateHistory[i].az;
-
-                    rocketStateHistoryTemp[i].ax_local = rocketStateHistory[i].ax_local;
-                    rocketStateHistoryTemp[i].ay_local = rocketStateHistory[i].ay_local;
-                    rocketStateHistoryTemp[i].az_local = rocketStateHistory[i].az_local;
-
-                    rocketStateHistoryTemp[i].pitch = rocketStateHistory[i].pitch;
-                    rocketStateHistoryTemp[i].roll = rocketStateHistory[i].roll;
-                    rocketStateHistoryTemp[i].yaw = rocketStateHistory[i].yaw;
-
-                    rocketStateHistoryTemp[i].vx = rocketStateHistory[i].vx;
-                    rocketStateHistoryTemp[i].vy = rocketStateHistory[i].vy;
-                    rocketStateHistoryTemp[i].vz = rocketStateHistory[i].vz;
-
-                    rocketStateHistoryTemp[i].vx_local = rocketStateHistory[i].vx_local;
-                    rocketStateHistoryTemp[i].vy_local = rocketStateHistory[i].vy_local;
-                    rocketStateHistoryTemp[i].vz_local = rocketStateHistory[i].vz_local;
-
-                    rocketStateHistoryTemp[i].x = rocketStateHistory[i].x;
-                    rocketStateHistoryTemp[i].y = rocketStateHistory[i].y;
-                    rocketStateHistoryTemp[i].z = rocketStateHistory[i].z;
-
-                    rocketStateHistoryTemp[i].qw = rocketStateHistory[i].qw;
-                    rocketStateHistoryTemp[i].qx = rocketStateHistory[i].qx;
-                    rocketStateHistoryTemp[i].qy = rocketStateHistory[i].qy;
-                    rocketStateHistoryTemp[i].qz = rocketStateHistory[i].qz;
-
-                    rocketStateHistoryTemp[i].baro_altitude = rocketStateHistory[i].baro_altitude;
-
-                    rocketStateHistoryTemp[i].altitude = rocketStateHistory[i].altitude;
-
-                    rocketStateHistoryTemp[i].baro_pressure = rocketStateHistory[i].baro_pressure;
-
-                    rocketStateHistoryTemp[i].baro_temperature = rocketStateHistory[i].baro_temperature;
-                }
+            logTempState(rocketStateHistoryTemp, rocketStateHistory, rocketStateHistory_size);
             
             delete rocketStateHistory;
             rocketStateHistory = nullptr;
@@ -153,46 +77,8 @@ void logRocketState()
             }
     } else if (rocketStateHistory_index == rocketStateHistory_size)
         {
-            for (int i = 0; i < simStateHistory_size; i++)
-            { // copy current simStateHistory to temp
-                rocketStateHistoryTemp[i].time = rocketStateHistory[i].time;
-                rocketStateHistoryTemp[i].ax = rocketStateHistory[i].ax;
-                rocketStateHistoryTemp[i].ay = rocketStateHistory[i].ay;
-                rocketStateHistoryTemp[i].az = rocketStateHistory[i].az;
 
-                rocketStateHistoryTemp[i].ax_local = rocketStateHistory[i].ax_local;
-                rocketStateHistoryTemp[i].ay_local = rocketStateHistory[i].ay_local;
-                rocketStateHistoryTemp[i].az_local = rocketStateHistory[i].az_local;
-
-                rocketStateHistoryTemp[i].pitch = rocketStateHistory[i].pitch;
-                rocketStateHistoryTemp[i].roll = rocketStateHistory[i].roll;
-                rocketStateHistoryTemp[i].yaw = rocketStateHistory[i].yaw;
-
-                rocketStateHistoryTemp[i].vx = rocketStateHistory[i].vx;
-                rocketStateHistoryTemp[i].vy = rocketStateHistory[i].vy;
-                rocketStateHistoryTemp[i].vz = rocketStateHistory[i].vz;
-
-                rocketStateHistoryTemp[i].vx_local = rocketStateHistory[i].vx_local;
-                rocketStateHistoryTemp[i].vy_local = rocketStateHistory[i].vy_local;
-                rocketStateHistoryTemp[i].vz_local = rocketStateHistory[i].vz_local;
-
-                rocketStateHistoryTemp[i].x = rocketStateHistory[i].x;
-                rocketStateHistoryTemp[i].y = rocketStateHistory[i].y;
-                rocketStateHistoryTemp[i].z = rocketStateHistory[i].z;
-
-                rocketStateHistoryTemp[i].qw = rocketStateHistory[i].qw;
-                rocketStateHistoryTemp[i].qx = rocketStateHistory[i].qx;
-                rocketStateHistoryTemp[i].qy = rocketStateHistory[i].qy;
-                rocketStateHistoryTemp[i].qz = rocketStateHistory[i].qz;
-
-                rocketStateHistoryTemp[i].baro_altitude = rocketStateHistory[i].baro_altitude;
-
-                rocketStateHistoryTemp[i].altitude = rocketStateHistory[i].altitude;
-
-                rocketStateHistoryTemp[i].baro_pressure = rocketStateHistory[i].baro_pressure;
-
-                rocketStateHistoryTemp[i].baro_temperature = rocketStateHistory[i].baro_temperature;
-            }
+            logTempState(rocketStateHistoryTemp, rocketStateHistory, rocketStateHistory_size);
             
             delete rocketStateHistory;
             rocketStateHistory = nullptr;
@@ -201,44 +87,7 @@ void logRocketState()
         }
     } else { // rocket not on pad
         if (rocketStateHistory_index < rocketStateHistory_size){
-            rocketStateHistory[rocketStateHistory_index].time = rocketState.time;
-
-            rocketStateHistory[rocketStateHistory_index].ax = rocketState.getAX();
-            rocketStateHistory[rocketStateHistory_index].ay = rocketState.getAY();
-            rocketStateHistory[rocketStateHistory_index].az = rocketState.getAZ();
-
-            rocketStateHistory[rocketStateHistory_index].ax_local = rocketState.getAX_Local();
-            rocketStateHistory[rocketStateHistory_index].ay_local = rocketState.getAY_Local();
-            rocketStateHistory[rocketStateHistory_index].az_local = rocketState.getAZ_Local();
-
-            rocketStateHistory[rocketStateHistory_index].pitch = rocketState.getPitch();
-            rocketStateHistory[rocketStateHistory_index].roll = rocketState.getRoll();
-            rocketStateHistory[rocketStateHistory_index].yaw = rocketState.getYaw();
-
-            rocketStateHistory[rocketStateHistory_index].vx = rocketState.getVX();
-            rocketStateHistory[rocketStateHistory_index].vy = rocketState.getVY();
-            rocketStateHistory[rocketStateHistory_index].vz = rocketState.getVZ();
-
-            rocketStateHistory[rocketStateHistory_index].vx_local = rocketState.getVX_Local();
-            rocketStateHistory[rocketStateHistory_index].vy_local = rocketState.getVY_Local();
-            rocketStateHistory[rocketStateHistory_index].vz_local = rocketState.getVZ_Local();
-
-            rocketStateHistory[rocketStateHistory_index].x = rocketState.getX();
-            rocketStateHistory[rocketStateHistory_index].y = rocketState.getY();
-            rocketStateHistory[rocketStateHistory_index].z = rocketState.getZ();
-
-            rocketStateHistory[rocketStateHistory_index].qw = rocketState.getQuatW();
-            rocketStateHistory[rocketStateHistory_index].qx = rocketState.getQuatX();
-            rocketStateHistory[rocketStateHistory_index].qy = rocketState.getQuatY();
-            rocketStateHistory[rocketStateHistory_index].qz = rocketState.getQuatZ();
-
-            rocketStateHistory[rocketStateHistory_index].baro_altitude = rocketState.getBaroAltitude();
-
-            rocketStateHistory[rocketStateHistory_index].altitude = rocketState.getAltitude();
-
-            rocketStateHistory[rocketStateHistory_index].baro_pressure = rocketState.getBaroPressure();
-
-            rocketStateHistory[rocketStateHistory_index].baro_temperature = rocketState.getBaroTemperature();
+            logState(rocketStateHistory, rocketStateHistory_index, rocketState);
             
             memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
             rocketStateStruct.apogee = rocketStatus.apogee;
@@ -266,133 +115,16 @@ void logSimState()
 
         if (simStateHistory_index <= simStateHistory_size - 1)
         {
-            simStateHistory[simStateHistory_index].time = simState.time;
-    
-            simStateHistory[simStateHistory_index].ax = simState.getAX();
-            simStateHistory[simStateHistory_index].ay = simState.getAY();
-            simStateHistory[simStateHistory_index].az = simState.getAZ();
-
-            simStateHistory[simStateHistory_index].ax_local = simState.getAX_Local();
-            simStateHistory[simStateHistory_index].ay_local = simState.getAY_Local();
-            simStateHistory[simStateHistory_index].az_local = simState.getAZ_Local();
-
-            simStateHistory[simStateHistory_index].pitch = simState.getPitch();
-            simStateHistory[simStateHistory_index].roll = simState.getRoll();
-            simStateHistory[simStateHistory_index].yaw = simState.getYaw();
-
-            simStateHistory[simStateHistory_index].vx = simState.getVX();
-            simStateHistory[simStateHistory_index].vy = simState.getVY();
-            simStateHistory[simStateHistory_index].vz = simState.getVZ();
-
-            simStateHistory[simStateHistory_index].vx_local = simState.getVX_Local();
-            simStateHistory[simStateHistory_index].vy_local = simState.getVY_Local();
-            simStateHistory[simStateHistory_index].vz_local = simState.getVZ_Local();
-
-            simStateHistory[simStateHistory_index].x = simState.getX();
-            simStateHistory[simStateHistory_index].y = simState.getY();
-            simStateHistory[simStateHistory_index].z = simState.getZ();
-
-            simStateHistory[simStateHistory_index].qw = simState.getQuatW();
-            simStateHistory[simStateHistory_index].qx = simState.getQuatX();
-            simStateHistory[simStateHistory_index].qy = simState.getQuatY();
-            simStateHistory[simStateHistory_index].qz = simState.getQuatZ();
-
-            simStateHistory[simStateHistory_index].baro_altitude = simState.getBaroAltitude();
-
-            simStateHistory[simStateHistory_index].altitude = simState.getAltitude();
-
-            simStateHistory[simStateHistory_index].baro_pressure = simState.getBaroPressure();
-
-            simStateHistory[simStateHistory_index].baro_temperature = simState.getBaroTemperature();
-
-            simStateHistory_index++;
+            logState(simStateHistory, simStateHistory_index, simState);
 
             if (simStateHistory_index == simStateHistory_size)
             {
-                for (int i = 0; i < simStateHistory_size; i++)
-                { // copy current simStateHistory to temp
-                    simStateHistoryTemp[i].time = simStateHistory[i].time;
-                    simStateHistoryTemp[i].ax = simStateHistory[i].ax;
-                    simStateHistoryTemp[i].ay = simStateHistory[i].ay;
-                    simStateHistoryTemp[i].az = simStateHistory[i].az;
-
-                    simStateHistoryTemp[i].ax_local = simStateHistory[i].ax_local;
-                    simStateHistoryTemp[i].ay_local = simStateHistory[i].ay_local;
-                    simStateHistoryTemp[i].az_local = simStateHistory[i].az_local;
-
-                    simStateHistoryTemp[i].pitch = simStateHistory[i].pitch;
-                    simStateHistoryTemp[i].roll = simStateHistory[i].roll;
-                    simStateHistoryTemp[i].yaw = simStateHistory[i].yaw;
-
-                    simStateHistoryTemp[i].vx = simStateHistory[i].vx;
-                    simStateHistoryTemp[i].vy = simStateHistory[i].vy;
-                    simStateHistoryTemp[i].vz = simStateHistory[i].vz;
-
-                    simStateHistoryTemp[i].vx_local = simStateHistory[i].vx_local;
-                    simStateHistoryTemp[i].vy_local = simStateHistory[i].vy_local;
-                    simStateHistoryTemp[i].vz_local = simStateHistory[i].vz_local;
-
-                    simStateHistoryTemp[i].x = simStateHistory[i].x;
-                    simStateHistoryTemp[i].y = simStateHistory[i].y;
-                    simStateHistoryTemp[i].z = simStateHistory[i].z;
-
-                    simStateHistoryTemp[i].qw = simStateHistory[i].qw;
-                    simStateHistoryTemp[i].qx = simStateHistory[i].qx;
-                    simStateHistoryTemp[i].qy = simStateHistory[i].qy;
-                    simStateHistoryTemp[i].qz = simStateHistory[i].qz;
-
-                    simStateHistoryTemp[i].baro_altitude = simStateHistory[i].baro_altitude;
-
-                    simStateHistoryTemp[i].altitude = simStateHistory[i].altitude;
-
-                    simStateHistoryTemp[i].baro_pressure = simStateHistory[i].baro_pressure;
-
-                    simStateHistoryTemp[i].baro_temperature = simStateHistory[i].baro_temperature;
-                }
+                logTempState(simStateHistoryTemp, simStateHistory, simStateHistory_size);
                 simStateHistoryTemp_index = simStateHistory_size;
             }
         } else if (simStateHistory_index == simStateHistory_size)
         {
-            for (int i = 0; i < simStateHistory_size; i++)
-            { // copy current simStateHistory to temp
-                simStateHistoryTemp[i].time = simStateHistory[i].time;
-                simStateHistoryTemp[i].ax = simStateHistory[i].ax;
-                simStateHistoryTemp[i].ay = simStateHistory[i].ay;
-                simStateHistoryTemp[i].az = simStateHistory[i].az;
-
-                simStateHistoryTemp[i].ax_local = simStateHistory[i].ax_local;
-                simStateHistoryTemp[i].ay_local = simStateHistory[i].ay_local;
-                simStateHistoryTemp[i].az_local = simStateHistory[i].az_local;
-
-                simStateHistoryTemp[i].pitch = simStateHistory[i].pitch;
-                simStateHistoryTemp[i].roll = simStateHistory[i].roll;
-                simStateHistoryTemp[i].yaw = simStateHistory[i].yaw;
-
-                simStateHistoryTemp[i].vx = simStateHistory[i].vx;
-                simStateHistoryTemp[i].vy = simStateHistory[i].vy;
-                simStateHistoryTemp[i].vz = simStateHistory[i].vz;
-
-                simStateHistoryTemp[i].vx_local = simStateHistory[i].vx_local;
-                simStateHistoryTemp[i].vy_local = simStateHistory[i].vy_local;
-                simStateHistoryTemp[i].vz_local = simStateHistory[i].vz_local;
-
-                simStateHistoryTemp[i].x = simStateHistory[i].x;
-                simStateHistoryTemp[i].y = simStateHistory[i].y;
-                simStateHistoryTemp[i].z = simStateHistory[i].z;
-
-                simStateHistoryTemp[i].qw = simStateHistory[i].qw;
-                simStateHistoryTemp[i].qx = simStateHistory[i].qx;
-                simStateHistoryTemp[i].qy = simStateHistory[i].qy;
-                simStateHistoryTemp[i].qz = simStateHistory[i].qz;
-
-                simStateHistoryTemp[i].baro_altitude = simStateHistory[i].baro_altitude;
-
-                simStateHistoryTemp[i].altitude = simStateHistory[i].altitude;
-
-                simStateHistoryTemp[i].baro_pressure = simStateHistory[i].baro_pressure;
-
-                simStateHistoryTemp[i].baro_temperature = simStateHistory[i].baro_temperature;
-            }
+            logTempState(simStateHistoryTemp, simStateHistory, simStateHistory_size);
             simStateHistoryTemp_index = simStateHistoryTemp_size;
         }
     }
@@ -400,44 +132,7 @@ void logSimState()
     {
         if (simStateHistory_index <= simStateHistory_size - 1)
         {
-            simStateHistory[simStateHistory_index].time = simState.time;
-
-            simStateHistory[simStateHistory_index].ax = simState.getAX();
-            simStateHistory[simStateHistory_index].ay = simState.getAY();
-            simStateHistory[simStateHistory_index].az = simState.getAZ();
-
-            simStateHistory[simStateHistory_index].ax_local = simState.getAX_Local();
-            simStateHistory[simStateHistory_index].ay_local = simState.getAY_Local();
-            simStateHistory[simStateHistory_index].az_local = simState.getAZ_Local();
-
-            simStateHistory[simStateHistory_index].pitch = simState.getPitch();
-            simStateHistory[simStateHistory_index].roll = simState.getRoll();
-            simStateHistory[simStateHistory_index].yaw = simState.getYaw();
-
-            simStateHistory[simStateHistory_index].vx = simState.getVX();
-            simStateHistory[simStateHistory_index].vy = simState.getVY();
-            simStateHistory[simStateHistory_index].vz = simState.getVZ();
-
-            simStateHistory[simStateHistory_index].vx_local = simState.getVX_Local();
-            simStateHistory[simStateHistory_index].vy_local = simState.getVY_Local();
-            simStateHistory[simStateHistory_index].vz_local = simState.getVZ_Local();
-
-            simStateHistory[simStateHistory_index].x = simState.getX();
-            simStateHistory[simStateHistory_index].y = simState.getY();
-            simStateHistory[simStateHistory_index].z = simState.getZ();
-
-            simStateHistory[simStateHistory_index].qw = simState.getQuatW();
-            simStateHistory[simStateHistory_index].qx = simState.getQuatX();
-            simStateHistory[simStateHistory_index].qy = simState.getQuatY();
-            simStateHistory[simStateHistory_index].qz = simState.getQuatZ();
-
-            simStateHistory[simStateHistory_index].baro_altitude = simState.getBaroAltitude();
-
-            simStateHistory[simStateHistory_index].altitude = simState.getAltitude();
-
-            simStateHistory[simStateHistory_index].baro_pressure = simState.getBaroPressure();
-
-            simStateHistory[simStateHistory_index].baro_temperature = simState.getBaroTemperature();
+            logState(simStateHistory, simStateHistory_index, simState);
 
             simStateHistory_index++;
             if (simStateHistory_index == simStateHistory_size){
@@ -545,234 +240,109 @@ void writeRocketStateLog()
     }
     //closeLogs();
    // initLogs();
-/*V1
-        if (rocketStateHistoryTemp_index > 0){
-            for (uint i = 0; i < rocketStateHistory_size; i++) {
-                rocketStateLog.print(rocketStateHistoryTemp[i].ax, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].ay, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].az, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].ax_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].ay_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].az_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].vx, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].vy, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].vz, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].vx_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].vy_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].vz_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].x, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].y, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].z, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].qw, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].qx, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].qy, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].qz, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].fx_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].fy_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].fz_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistoryTemp[i].baroAltitude, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.println(rocketStateHistoryTemp[i].altitude, 4);
-                
-            }
-            delete rocketStateHistoryTemp;
-            rocketStateHistoryTemp_index = 0;
-        } if (rocketStateHistory_size > 0) {
-            for (uint i = 0; i < rocketStateHistory_size; i++){
-                rocketStateLog.print(rocketStateHistory[i].ax, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].ay, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].az, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].ax_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].ay_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].az_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].vx, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].vy, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].vz, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].vx_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].vy_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].vz_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].x, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].y, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].z, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].qw, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].qx, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].qy, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].qz, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].fx_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].fy_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].fz_local, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.print(rocketStateHistory[i].baroAltitude, 4);
-                rocketStateLog.print(", ");
-                rocketStateLog.println(rocketStateHistory[i].altitude, 4);
-        }
-    }
-    */
+
 }
 
 void writeSimStateLog()
 {
-    /* V1
-    if (simStateHistoryTemp_index > 0){
-        for (uint i = 0; i < simStateHistoryTemp_size; i++){
-            simStateLog.print(simStateHistoryTemp[i].ax);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].ay);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].az);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].ax_local);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].ay_local);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].az_local);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].vx);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].vy);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].vz);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].vx_local);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].vy_local);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].vz_local);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].x);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].y);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].z);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].qw);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].qx);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].qy);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].qz);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].fx_local);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].fy_local);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].fz_local);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].baroAltitude);
-            simStateLog.print(", ");
-            simStateLog.print(simStateHistoryTemp[i].altitude);
-            delete simStateHistoryTemp;
-            simStateHistoryTemp_index = 0;
-        }
-    }
 
-    if (simStateHistory_index > 0){
-        for (uint i = 0; i < simStateHistory_size; i++)
-        {
-        simStateLog.print(simStateHistory[i].ax);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].ay);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].az);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].ax_local);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].ay_local);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].az_local);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].vx);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].vy);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].vz);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].vx_local);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].vy_local);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].vz_local);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].x);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].y);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].z);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].qw);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].qx);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].qy);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].qz);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].fx_local);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].fy_local);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].fz_local);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].baroAltitude);
-        simStateLog.print(", ");
-        simStateLog.print(simStateHistory[i].altitude);
-    }
-    }
-    // rocketStateLog.close();
-    */
 }
 
 void sendRocketTelemetry(){
 
-    writeSerial(MSG_TYPE_TELEMETRY, sizeof(rocketStateStruct), (uint8_t*)(&rocketStateStruct));
+    writeSerial((uint8_t)MSG_TYPE_TELEMETRY, (uint8_t)sizeof(rocketStateStruct), (uint8_t*)(&rocketStateStruct), rocketStatus.use_lora);
 }
 
 void closeLogs()
 {
     rocketStateLog.close();
     simStateLog.close();
+}
+
+void logState(stateHistory* destHistory, uint destHistory_index, state sourceState){
+    destHistory[destHistory_index].time = sourceState.time;
+
+    destHistory[destHistory_index].ax = sourceState.getAX();
+    destHistory[destHistory_index].ay = sourceState.getAY();
+    destHistory[destHistory_index].az = sourceState.getAZ();
+
+    destHistory[destHistory_index].ax_local = sourceState.getAX_Local();
+    destHistory[destHistory_index].ay_local = sourceState.getAY_Local();
+    destHistory[destHistory_index].az_local = sourceState.getAZ_Local();
+
+    destHistory[destHistory_index].pitch = sourceState.getPitch();
+    destHistory[destHistory_index].roll = sourceState.getRoll();
+    destHistory[destHistory_index].yaw = sourceState.getYaw();
+
+    destHistory[destHistory_index].vx = sourceState.getVX();
+    destHistory[destHistory_index].vy = sourceState.getVY();
+    destHistory[destHistory_index].vz = sourceState.getVZ();
+
+    destHistory[destHistory_index].vx_local = sourceState.getVX_Local();
+    destHistory[destHistory_index].vy_local = sourceState.getVY_Local();
+    destHistory[destHistory_index].vz_local = sourceState.getVZ_Local();
+
+    destHistory[destHistory_index].x = sourceState.getX();
+    destHistory[destHistory_index].y = sourceState.getY();
+    destHistory[destHistory_index].z = sourceState.getZ();
+
+    destHistory[destHistory_index].qw = sourceState.getQuatW();
+    destHistory[destHistory_index].qx = sourceState.getQuatX();
+    destHistory[destHistory_index].qy = sourceState.getQuatY();
+    destHistory[destHistory_index].qz = sourceState.getQuatZ();
+
+    destHistory[destHistory_index].baro_altitude = sourceState.getBaroAltitude();
+
+    destHistory[destHistory_index].altitude = sourceState.getAltitude();
+
+    destHistory[destHistory_index].baro_pressure = sourceState.getBaroPressure();
+
+    destHistory[destHistory_index].baro_temperature = sourceState.getBaroTemperature();
+
+    destHistory[destHistory_index].flightPhase = sourceState.flightPhase;
+
+}
+
+void logTempState(stateHistory* destHistoryTemp, stateHistory* destHistory, uint destHistory_size){
+    for (int i = 0; i < destHistory_size; i++){
+        destHistoryTemp[i].time = destHistory[i].time;
+    destHistoryTemp[i].ax = destHistory[i].ax;
+    destHistoryTemp[i].ay = destHistory[i].ay;
+    destHistoryTemp[i].az = destHistory[i].az;
+
+    destHistoryTemp[i].ax_local = destHistory[i].ax_local;
+    destHistoryTemp[i].ay_local = destHistory[i].ay_local;
+    destHistoryTemp[i].az_local = destHistory[i].az_local;
+
+    destHistoryTemp[i].pitch = destHistory[i].pitch;
+    destHistoryTemp[i].roll = destHistory[i].roll;
+    destHistoryTemp[i].yaw = destHistory[i].yaw;
+
+    destHistoryTemp[i].vx = destHistory[i].vx;
+    destHistoryTemp[i].vy = destHistory[i].vy;
+    destHistoryTemp[i].vz = destHistory[i].vz;
+
+    destHistoryTemp[i].vx_local = destHistory[i].vx_local;
+    destHistoryTemp[i].vy_local = destHistory[i].vy_local;
+    destHistoryTemp[i].vz_local = destHistory[i].vz_local;
+
+    destHistoryTemp[i].x = destHistory[i].x;
+    destHistoryTemp[i].y = destHistory[i].y;
+    destHistoryTemp[i].z = destHistory[i].z;
+
+    destHistoryTemp[i].qw = destHistory[i].qw;
+    destHistoryTemp[i].qx = destHistory[i].qx;
+    destHistoryTemp[i].qy = destHistory[i].qy;
+    destHistoryTemp[i].qz = destHistory[i].qz;
+
+    destHistoryTemp[i].baro_altitude = destHistory[i].baro_altitude;
+
+    destHistoryTemp[i].altitude = destHistory[i].altitude;
+
+    destHistoryTemp[i].baro_pressure = destHistory[i].baro_pressure;
+
+    destHistoryTemp[i].baro_temperature = destHistory[i].baro_temperature;
+
+    destHistoryTemp[i].flightPhase = destHistory[i].flightPhase;
+}
 }

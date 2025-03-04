@@ -26,12 +26,13 @@ bool initSensors(void) {
 //V3
 
 bool initSensors(void) {
-  bno055 = Adafruit_BNO055(19, 0x28);
-  if (!bno055.begin() || !baro.begin()) {
+  bno055 = Adafruit_BNO055(19, 0x29);
+  /*if (!bno055.begin() || !baro.begin()) {
     Serial.println(baro.begin());
     Serial.println(bno055.begin());
     return false;
-  } 
+  } */
+ if (!bno055.begin() || !bmp_baro.begin_I2C(0x77))
   return true;
 }
 
@@ -59,11 +60,14 @@ void setupSensors(void) {
   */
 
  // Serial.println("setup_sensors check 2");
-
+/*
   baro.setSeaPressure(SEAPRESSURE);  
   baro.setMode(MPL3115A2_ALTIMETER);
   baro.startOneShot();
-  
+  */
+
+ bmp_baro.readAltitude(rocketConfig.getPressure());
+ bmp_baro.setOutputDataRate(BMP3_ODR_100_HZ);
 
   calibrateSensors();
 
