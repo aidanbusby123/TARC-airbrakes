@@ -94,6 +94,7 @@ bool sensorCalibration::loadCalibrationFromFile(){
     for (int i = 0; i < 3; i++) {
         accel_zerog[i] = calibJSON["accel_zerog"][i] | 0.0;
     }
+    
 
     return true;
 }

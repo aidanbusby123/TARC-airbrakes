@@ -1,7 +1,7 @@
 #include "main.h"
 
 #define SIM_REPS 100
-#define SIM_TIME_S 20
+#define SIM_TIME_S 8
 #define DRAG_COEFFICIENT 0.75
 
 extern state simState;

@@ -13,13 +13,14 @@ SdFat sd;
 
 void initSD(void){
     // Initialize the external flash
-    /*if (!sd.begin(SdioConfig(FIFO_SDIO))) //sd.initErrorHalt();
+    if (!sd.begin(SdioConfig(FIFO_SDIO))) //sd.initErrorHalt();
         Serial.println("unable to init sd");
 
-    (TEENSY 4.1)*/
-    // Open file system on flash (Fat16)
-    pinMode(10, OUTPUT);
+    
+    // Teensy 3.2
+     // Open file system on flash (Fat16)
+    /*pinMode(10, OUTPUT);
     digitalWrite(10, HIGH);
     if (!sd.begin(SdSpiConfig(10, 0,  SPI_HALF_SPEED)))
-        Serial.println("unable to init sd");
+        Serial.println("unable to init sd"); */
 }

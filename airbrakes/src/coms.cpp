@@ -21,21 +21,30 @@ void readSerial(){
                 count++;
             }
         } else {
+            if (byte == MSG_START_BYTE){
+                count = 0;
+                isMessage = true;
+            }
             if (count == 1){
                 serialPacket.type = byte;
             }
             if (count == 2){
                 serialPacket.data_size = byte;
+                if (byte > 0){
+                    serialPacket.data = (uint8_t*)malloc(serialPacket.data_size);
+                }
             }
-            serialPacket.data = (uint8_t*)malloc(serialPacket.data_size);
+            
             if ((count-2) < serialPacket.data_size){
                 serialPacket.data[count-2] = byte;
             }
-            if (byte == MSG_END_BYTE){
+            if ((count-2) == serialPacket.data_size-1){
                 handleSerial();
-                continue;
+                count = 0;
+                isMessage = false;
+            } else {
+                count++;
             }
-            count++;
         }
     }
 }
@@ -69,13 +78,15 @@ void writeSerial(uint8_t type, uint8_t data_size, uint8_t *data, bool use_lora){
         buffer = buffer_start;
 
         if (use_lora == true){
-            Serial.write(buffer, buffer_size);
+            Serial1.write(buffer, buffer_size);
             sendSerial(buffer_size, buffer);
         } else {
             Serial.write(buffer, buffer_size);
         }
         
         free(buffer);
+        free(serialPacket.data);
+        //free(buffer_start);
         
 
 }
@@ -101,9 +112,10 @@ void sendSerial(uint8_t data_size, uint8_t *data){
     memcpy(buffer, data_size_string, strlen(data_size_string));
     memcpy(buffer, ",", strlen(","));
     memcpy(buffer, data, data_size);
-    memcpy(buffer, "/r/n", 2);
+    memcpy(buffer, "/r/n", 3);
     buffer = buffer_start;
     Serial1.write(buffer, buffer_size);
+    //Serial.write(buffer, buffer_size);
     free(buffer);
     
 }

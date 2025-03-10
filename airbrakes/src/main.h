@@ -47,18 +47,20 @@
 #include "coms.h"
 
 #define STEP_TIME 10
+#define TEST_TIME 60.0f
+#define START_TIME 20.0f
 
 #define INIT_MASS 0.417
 #define BURN_TIME 1.1
 
-#define LAUNCH_DELAY 420
+#define LAUNCH_DELAY 4
 
 #define GRAVITY 9.79
 #define SEAPRESSURE 1013.25
 
-#define STATEHISTORY_SIZE 64// size of state history buffers
+#define STATEHISTORY_SIZE 1// size of state history buffers
 
-#define TRIGGER_ACCEL 7.0
+#define TRIGGER_ACCEL 30.0
 #define TRIGGER_VEL 5.0
 
 #define LOG_TIME_STEP 0.1
@@ -73,17 +75,18 @@
 
 #define USE_LORA_PIN 5
 #define BUZZER_PIN 2
+#define LED_PIN 3
 
 
 
-
-//extern Adafruit_MPL3115A2 baro;
-extern Adafruit_BMP3XX bmp_baro;
+extern Adafruit_MPL3115A2 baro;
+//extern Adafruit_BMP3XX bmp_baro;
 
 //V1
 extern Adafruit_LSM6DS33 lsm6ds;
 extern Adafruit_LPS25 lps;
 extern Adafruit_LIS3MDL lis3mdl;
+extern Adafruit_LSM9DS1 lsm;
  
 
 extern Adafruit_BNO055 bno055;
@@ -157,6 +160,7 @@ class state{
         float fz_local = 0.0f;
 
 
+        float apogee = 0.0f;
 
         float baro_altitude = 0.0f; // Barometric altitude
         float ground_altitude = 0.0f; // altitude measurement for ground
@@ -171,8 +175,8 @@ class state{
         float air_density;
         float air_temperature;
 
-        float last_time;
-        float now;
+        float last_time = 0;
+        float now = 0;
 
 
     public:
@@ -233,6 +237,9 @@ class state{
         float getFZ_Local() { return fz_local; }
 
         float getAltitude() { return altitude; }
+
+        float getApogee() { return apogee; }
+
         float getBaroAltitude() { return baro_altitude; }
         float getGroundAltitude() { return ground_altitude; }
         float getBaroPressure() { return baro_pressure; } 
@@ -275,6 +282,8 @@ class state{
         void setFY_Local(float fy_local) { this->fy_local = fy_local; }
         void setFZ_Local(float fz_local) { this->fz_local = fz_local; }
 
+        void setApogee(float apogee) { this->apogee = apogee; }
+
         void setBaroAltitude(float baro_altitude) { this->baro_altitude = baro_altitude; }
         void setAltitude(float altitude) { this->altitude = altitude; }
         void setGroundAltitude(float ground_altitude) { this->ground_altitude = ground_altitude; }
@@ -290,8 +299,11 @@ class state{
 
         void localizeVelocity();
         void localizeAcceleration();
+        void updateAcceleration();
 
         void updatePos();
+
+        void updateEulerAngles();
 
         void updateDeltaT();
 
@@ -384,7 +396,6 @@ struct stateHistory{
 
 class status{
     public:
-    float apogee;
     float t; // system time;
     float t_last;
 

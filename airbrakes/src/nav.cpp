@@ -4,11 +4,7 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
   updateDeltaT();
   time = (float)micros()/1000000.0f - t_launch;
 
-  globalizeAcceleration();
-
-
-  az -= GRAVITY;
-  
+  updateAcceleration();
 
   // Update velocity values
 
@@ -24,9 +20,10 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
 
   /* not super sure about these*/
 
-  localizeAcceleration();
+  //localizeAcceleration();
   localizeVelocity();
 
+  updateEulerAngles();
   //
 
   // Very simple complimentary filter
@@ -36,6 +33,12 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
   } else {
     altitude = altitude + vz * delta_t;
   }
+}
+
+void state::updateAcceleration(){
+  globalizeAcceleration();
+  az -= GRAVITY;
+  localizeAcceleration();
 }
 
 void state::globalizeAcceleration(){
@@ -116,6 +119,12 @@ void state::updatePos(){
   } else {
     altitude = altitude + vz * delta_t;
   }
+}
+
+void state::updateEulerAngles(){
+  roll = atan2(2*(qw*qx + qy*qz), qw*qw - qx*qx - qy*qy + qz*qz);
+  pitch = asin(2*(qw*qy - qx*qz));
+  yaw = atan2(2*(qw*qz + qx*qy), qw*qw + qx*qx - qy*qy - qz*qz);
 }
 
 /*void state::globalizeForces(){

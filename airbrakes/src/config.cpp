@@ -65,6 +65,9 @@ void config::loadConfigFromFile(){
         if (ground_lora_address < 0){
             ground_lora_address = 0;
         }
+
+        max_time = configJSON["max_time"];
+        max_time = 1000;
         Serial.println("config loaded");
     }
 }

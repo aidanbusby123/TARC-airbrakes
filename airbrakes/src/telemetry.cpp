@@ -62,7 +62,6 @@ void logRocketState()
             logState(rocketStateHistory, rocketStateHistory_index, rocketState);
 
             memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
-            rocketStateStruct.apogee = rocketStatus.apogee;
 
             rocketStateHistory_index++;
                     
@@ -75,7 +74,7 @@ void logRocketState()
             rocketStateHistory = new stateHistory[STATEHISTORY_SIZE];
             rocketStateHistory_index = 0;
             }
-    } else if (rocketStateHistory_index == rocketStateHistory_size)
+    } else if (rocketStateHistory_index == rocketStateHistory_size-1)
         {
 
             logTempState(rocketStateHistoryTemp, rocketStateHistory, rocketStateHistory_size);
@@ -89,8 +88,9 @@ void logRocketState()
         if (rocketStateHistory_index < rocketStateHistory_size){
             logState(rocketStateHistory, rocketStateHistory_index, rocketState);
             
+            
             memcpy(&rocketStateStruct, &rocketStateHistory[rocketStateHistory_index], sizeof(rocketStateHistory[rocketStateHistory_index]));
-            rocketStateStruct.apogee = rocketStatus.apogee;
+            
 
             rocketStateHistory_index++;
             if (rocketStateHistory_index == rocketStateHistory_size){
@@ -100,7 +100,7 @@ void logRocketState()
                 rocketStateHistory = new stateHistory[STATEHISTORY_SIZE];
                 rocketStateHistory_index = 0;
             }
-        } else if (rocketStateHistory_index == rocketStateHistory_size){
+        } else if (rocketStateHistory_index == rocketStateHistory_size-1){
             writeRocketStateLog();
             delete rocketStateHistory;
             rocketStateHistory = nullptr;
@@ -221,9 +221,13 @@ void initLogs()
 
 void writeRocketStateLog()
 {
-    if (rocketStateHistoryTemp_index>0){
+    
+    if (rocketStateHistoryTemp_index > 0){
         for (int i = 0; i < rocketStateHistory_size; i++){
             //Serial.write((uint8_t*)&rocketStateHistoryTemp[i], sizeof(rocketStateHistory));
+            rocketStateLog.write(MSG_START_BYTE);
+            rocketStateLog.write(MSG_TYPE_TELEMETRY);
+            rocketStateLog.write(sizeof(stateHistory));
             rocketStateLog.write((uint8_t*)&rocketStateHistoryTemp[i], sizeof(*rocketStateHistory));
         }
         rocketStateHistoryTemp_index = 0;
@@ -233,6 +237,9 @@ void writeRocketStateLog()
         if ((rocketStateHistory_index) > 0){
             for (int i = 0; i < rocketStateHistory_index; i++){
                 //Serial.write((uint8_t*)&rocketStateHistory[i], sizeof(rocketStateHistory));
+                rocketStateLog.write(MSG_START_BYTE);
+                rocketStateLog.write(MSG_TYPE_TELEMETRY);
+                rocketStateLog.write(sizeof(stateHistory));
                 rocketStateLog.write((uint8_t*)&rocketStateHistory[i], sizeof(*rocketStateHistory));
             }
             rocketStateHistory_index = 0;
@@ -250,7 +257,7 @@ void writeSimStateLog()
 
 void sendRocketTelemetry(){
 
-    writeSerial((uint8_t)MSG_TYPE_TELEMETRY, (uint8_t)sizeof(rocketStateStruct), (uint8_t*)(&rocketStateStruct), rocketStatus.use_lora);
+    writeSerial((uint8_t)MSG_TYPE_TELEMETRY, (uint8_t)sizeof(rocketStateStruct), (uint8_t*)(&rocketStateStruct), false);
 }
 
 void closeLogs()
@@ -292,6 +299,8 @@ void logState(stateHistory* destHistory, uint destHistory_index, state sourceSta
     destHistory[destHistory_index].qz = sourceState.getQuatZ();
 
     destHistory[destHistory_index].baro_altitude = sourceState.getBaroAltitude();
+
+    destHistory[destHistory_index].apogee = sourceState.getApogee();
 
     destHistory[destHistory_index].altitude = sourceState.getAltitude();
 
@@ -336,6 +345,8 @@ void logTempState(stateHistory* destHistoryTemp, stateHistory* destHistory, uint
     destHistoryTemp[i].qz = destHistory[i].qz;
 
     destHistoryTemp[i].baro_altitude = destHistory[i].baro_altitude;
+
+    destHistoryTemp[i].apogee = destHistory[i].apogee;
 
     destHistoryTemp[i].altitude = destHistory[i].altitude;
 

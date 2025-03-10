@@ -1,11 +1,17 @@
 #include "main.h"
 #include <Arduino.h>
+#include <Adafruit_LSM9DS1.h>
 //#include <Adafruit_Sensor_Calibration.h>
 //include <Adafruit_Sensor_Calibration_SDFat.h>
 //#include <BNO055.h>
+
+
+//to-do figure out how to use the new sensors
+
 #include <Adafruit_BNO055.h>
 
-#define BNO055_SAMPLERATE_DELAY_MS 10
+//#define BNO055_SAMPLERATE_DELAY_MS 10
+Adafruit_LSM9DS1 lsm;
 
 /*
 bool initSensors(void) {
@@ -26,14 +32,28 @@ bool initSensors(void) {
 //V3
 
 bool initSensors(void) {
-  bno055 = Adafruit_BNO055(19, 0x29);
+  //bno055 = Adafruit_BNO055(19, 0x29);
   /*if (!bno055.begin() || !baro.begin()) {
     Serial.println(baro.begin());
     Serial.println(bno055.begin());
     return false;
   } */
- if (!bno055.begin() || !bmp_baro.begin_I2C(0x77))
-  return true;
+ /*if (!bno055.begin(OPERATION_MODE_AMG) || !bmp_baro.begin_I2C(0x77)){
+  Serial.println(bno055.begin(OPERATION_MODE_AMG));
+  Serial.println(bmp_baro.begin_I2C(0x77));
+  return false;
+ }*/
+
+  lsm = Adafruit_LSM9DS1();
+
+  if (!baro.begin() || !lsm.begin()){
+    return false;
+  }
+
+
+
+ return true;
+  //bno055.write8(BNO055_ACCEL_DATA_X_LSB_ADDR, 0x0F); // change accel range to 16g
 }
 
 
@@ -60,14 +80,24 @@ void setupSensors(void) {
   */
 
  // Serial.println("setup_sensors check 2");
-/*
-  baro.setSeaPressure(SEAPRESSURE);  
+  
   baro.setMode(MPL3115A2_ALTIMETER);
   baro.startOneShot();
-  */
+  baro.setSeaPressure(baro.getPressure());
 
- bmp_baro.readAltitude(rocketConfig.getPressure());
- bmp_baro.setOutputDataRate(BMP3_ODR_100_HZ);
+  for (int i = 0; i < 10; i++){
+    baro.startOneShot();
+    baro.setSeaPressure(baro.getPressure());
+  }
+
+ //bmp_baro.readAltitude(rocketConfig.getPressure());
+ //bmp_baro.setOutputDataRate(BMP3_ODR_100_HZ);
+
+  lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_16G, lsm.LSM9DS1_ACCELDATARATE_50HZ);
+  lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS);
+  lsm.setupGyro(lsm.LSM9DS1_GYROSCALE_2000DPS);
+
+
 
   calibrateSensors();
 
