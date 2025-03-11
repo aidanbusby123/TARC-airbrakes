@@ -1,8 +1,7 @@
 #include "main.h"
 
 void state::updateState () { // Really only for rocketState, not for runge-kutta
-  updateDeltaT();
-  time = (float)micros()/1000000.0f - t_launch;
+  updateTime();
 
   updateAcceleration();
 

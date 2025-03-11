@@ -30,7 +30,7 @@ float simStartTime = 0.0f;
 
 void initSim(){
     Serial.println("init sim");
-    simState.drag_coefficient = 0.52;
+    simState.drag_coefficient = rocketConfig.getDragCoef();
     Serial.println("drag force coefficient: ");
     Serial.println(simState.ref_area);
     simState.ref_area = rocketConfig.getRefArea();
@@ -57,7 +57,7 @@ void updateSim(){
         stepSim();
        //Serial.println("stepping sim");
         
-        if (simState.getAltitude() < last_altitude || simState.getVZ() < 0){
+        if (simState.getAltitude() < last_altitude && simState.getVZ() < 0){
             apogee = simState.getAltitude();
             if (count >= 4){
                 simState.setApogee(apogee);

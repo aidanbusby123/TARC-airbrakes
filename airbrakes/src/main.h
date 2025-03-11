@@ -59,18 +59,20 @@
 #define GRAVITY 9.79
 #define SEAPRESSURE 1013.25
 
-#define STATEHISTORY_SIZE 1// size of state history buffers
+#define STATEHISTORY_SIZE 4// size of state history buffers
 
-#define TRIGGER_ACCEL 30.0
+#define TRIGGER_ACCEL 10.0
 #define TRIGGER_VEL 5.0
 
 #define LOG_TIME_STEP 0.1
 
 #define BRAKE_RETRACTED 5
-#define BRAKE_DEPLOYED 65
+#define BRAKE_DEPLOYED 80
 #define DEPLOYMENT_COEFS_SIZE 3
 #define DRAG_FORCE_COEF_COEFS_SIZE 3
 #define BRAKE_DEPLOY_TIME 200
+
+#define DEFAULT_DRAG_COEF 0.35
 
 #define SERVO_PIN 23
 
@@ -81,11 +83,11 @@
 
 extern Adafruit_NeoPixel statusLight;
 
-uint32_t RED;
-uint32_t GREEN;
-uint32_t BLUE;
-uint32_t YELLOW;
-uint32_t WHITE;
+extern uint32_t RED;
+extern uint32_t GREEN;
+extern uint32_t BLUE;
+extern uint32_t YELLOW;
+extern uint32_t WHITE;
 
 
 
@@ -316,6 +318,7 @@ class state{
         void updateEulerAngles();
 
         void updateDeltaT();
+        void updateTime();
 
         void stepTime(); // IMPORTANT, delay the main loop to ensure proper time stepping
         //void globalizeForces();
@@ -445,7 +448,7 @@ void setupSensors(void); // setup the sensors
 void initCalibration(void); // Initialize sensor calibration
 void calibrateSensors(void); // calibrate sensors
 
-void initSD(void); // initialize SD card
+bool initSD(void); // initialize SD card
 
 void initBT(); // Initialize Bluetooth
 void loopBT(); // Loop Bluetooth

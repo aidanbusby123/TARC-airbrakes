@@ -74,7 +74,7 @@ status rocketStatus;
 
 config rocketConfig;
 
-Adafruit_NeoPixel statusLight;
+Adafruit_NeoPixel statusLight(1, 20, NEO_GRB + NEO_KHZ800);
 
 // GLOBAL SENSOR VALUES
 
@@ -115,6 +115,12 @@ float test_dt = 0.0f;
 float test_dt_now = 0.0f;
 float test_dt_last = 0.0f;
 
+uint32_t RED;
+uint32_t GREEN;
+uint32_t BLUE;
+uint32_t YELLOW;
+uint32_t WHITE;
+
 float *copyQuat; // float array to copy quaternion to RocketState
 
 void initPins();
@@ -147,6 +153,10 @@ void setup()
   statusLight.show();
 
   statusLight.setPixelColor(0, WHITE);
+  statusLight.show();
+  delay(1000);
+  statusLight.clear();
+  statusLight.show();
 
   
 
@@ -154,14 +164,20 @@ void setup()
 
   rocketState.stateType = ROCKET;
 
-  initSD();
+  if (initSD() == false){
+    statusLight.setPixelColor(0, RED);
+    statusLight.show();
+    return;
+  }
 
   initLogs(); // Initialize state history logs
 
 
 
-  rocketControl.initBrake();
+  //rocketControl.initBrake();
   rocketControl.deployBrake(0);
+  delay(100);
+  rocketControl.deployBrake(50);
 
   initConfig();
   rocketConfig.loadConfigFromFile();
@@ -182,9 +198,14 @@ void setup()
 
 
 
-  for (int i = 0; i < 1; i++)
-    rocketState.setGroundAltitude(baro.getAltitude());
-  readSensors();
+  for (int i = 0; i < 10; i++){
+    readSensors();
+    rocketState.updateTime();
+    rocketStatus.updateTime();
+    rocketState.updateAcceleration();
+    rocketState.updateEulerAngles();
+    rocketState.setGroundAltitude(rocketState.getBaroAltitude());
+  }
 
   Serial.println("set altitude");
 
@@ -192,14 +213,16 @@ void setup()
 
   rocketStatus.use_lora = true;
 
-  statusLight.setPixelColor(0, GREEN);
+  statusLight.setPixelColor(0, WHITE);
+  statusLight.show();
+
 }
 
 void loop()
 {
  
   rocketStatus.updateTime();
-  rocketState.updateDeltaT();
+  rocketState.updateTime();
 
   readSensors();
 
@@ -207,6 +230,7 @@ void loop()
   {
     rocketState.updateState();
   } else {
+    // update state updates everything, only update accel and rotation while waiting for ignition
     rocketState.updateAcceleration();
     rocketState.updateEulerAngles();
   }
@@ -226,7 +250,8 @@ void loop()
     {
       if (rocketState.getPitch() > 0)
       {
-        statusLight.setPixelColor(0, RED);
+        statusLight.setPixelColor(0, GREEN);
+        statusLight.show();
         rocketState.flightPhase = LAUNCH;
         // digitalWrite()
       }
@@ -250,7 +275,8 @@ void loop()
     { // If launch is detected
       Serial.println("flighphase ignition");
       rocketState.flightPhase = IGNITION;
-      statusLight.setPixelColor(0, YELLOW);
+      statusLight.setPixelColor(0, BLUE);
+      statusLight.show();
       rocketState.t_launch = rocketStatus.t;
 
       // rocketControl.deployBrake(0);
@@ -278,9 +304,11 @@ void loop()
   case COAST:
 
     // Needless to say, this bit could use some work.
-    if (rocketState.getApogee() >= target_apogee)
+    if (rocketState.getApogee() >= rocketConfig.getTargetApogee())
     {
-      rocketControl.deployBrake(100);
+      rocketControl.deployBrake(75);
+      statusLight.setPixelColor(0, YELLOW);
+      statusLight.show();
     }
     else
     {
@@ -298,7 +326,8 @@ void loop()
     {
       Serial.println("flightphase land");
       rocketState.flightPhase = LAND;
-      statusLight.setPixelColor(0, BLUE);
+      statusLight.setPixelColor(0, WHITE);
+      statusLight.show();
       // rocketControl.deployBrake(0);
       writeRocketStateLog();
       closeLogs();
@@ -426,6 +455,11 @@ void state::updateDeltaT()
 void state::stepTime()
 {
   delay(STEP_TIME);
+}
+
+void state::updateTime(){
+  updateDeltaT();
+  time = (float)micros()/1000000.0f - t_launch;
 }
 
 void status::updateTime()

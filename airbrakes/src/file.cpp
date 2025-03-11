@@ -11,7 +11,7 @@ Adafruit_SPIFlash flash(&flashTransport);*/
 SdFat sd;
 
 
-void initSD(void){
+bool initSD(void){
     // Initialize the external flash
     if (!sd.begin(SdioConfig(FIFO_SDIO))) //sd.initErrorHalt();
         Serial.println("unable to init sd");

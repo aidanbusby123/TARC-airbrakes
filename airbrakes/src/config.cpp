@@ -66,8 +66,12 @@ void config::loadConfigFromFile(){
             ground_lora_address = 0;
         }
 
+        drag_coefficient = configJSON["drag_coefficient"];
+        if (drag_coefficient <= 0){
+            drag_coefficient = DEFAULT_DRAG_COEF;
+        }
+
         max_time = configJSON["max_time"];
-        max_time = 1000;
         Serial.println("config loaded");
     }
 }
@@ -99,6 +103,7 @@ void config::loadConfigDefaults(){
     pressure = 1013.25;
     temperature = 20.0;
     ground_lora_address = 0;
+    drag_coefficient = DEFAULT_DRAG_COEF;
 
 }
 

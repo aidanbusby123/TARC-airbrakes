@@ -17,6 +17,7 @@ class config {
         float temperature;
         float pressure;
         float max_time;
+        float drag_coefficient;
     public:
         float ground_lora_address;
         JsonDocument configJSON;
@@ -29,6 +30,8 @@ class config {
         float *getDragForceCoefCoefs(){
             return dragForceCoefCoefs;
         }
+
+        float getDragCoef() { return drag_coefficient; }
 
         float getRefArea();
         float getTargetApogee();
