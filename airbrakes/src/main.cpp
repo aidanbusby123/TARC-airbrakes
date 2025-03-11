@@ -167,6 +167,7 @@ void setup()
   if (initSD() == false){
     statusLight.setPixelColor(0, RED);
     statusLight.show();
+    delay (1000);
     return;
   }
 

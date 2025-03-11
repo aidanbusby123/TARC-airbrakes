@@ -13,8 +13,13 @@ SdFat sd;
 
 bool initSD(void){
     // Initialize the external flash
-    if (!sd.begin(SdioConfig(FIFO_SDIO))) //sd.initErrorHalt();
+    if (!sd.begin(SdioConfig(FIFO_SDIO))){ //sd.initErrorHalt();
         Serial.println("unable to init sd");
+        statusLight.setPixelColor(0, RED);
+        statusLight.show();
+        sd.initErrorHalt();
+        return false;
+    }
 
     
     // Teensy 3.2
