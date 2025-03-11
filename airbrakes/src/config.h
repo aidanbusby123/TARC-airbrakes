@@ -3,7 +3,7 @@
 #include <SdFat.h>
 #pragma once
 
-#define DEFAULT_TARGET_APOGEE 87
+#define DEFAULT_TARGET_APOGEE 185
 #define DEFAULT_REF_AREA 0.00343
 
 const float DEFAULT_DRAG_FORCE_COEF_COEFS[3] = {0, -0.00101833, 0.00051306};
@@ -23,7 +23,7 @@ class config {
         JsonDocument configJSON;
         
         int begin(const char* filename);
-        void loadConfigFromFile();
+        bool loadConfigFromFile();
         void loadConfigFromPacket(char* configdata);
         void loadConfigDefaults();
 
@@ -41,5 +41,5 @@ class config {
 };
 
 //SdFile configFile;
-void initConfig();
-void loadConfigFromFile();
+bool initConfig();
+bool loadConfigFromFile();

@@ -174,7 +174,7 @@ void setup()
 
 
 
-  //rocketControl.initBrake();
+  rocketControl.initBrake();
   rocketControl.deployBrake(0);
   delay(100);
   rocketControl.deployBrake(50);

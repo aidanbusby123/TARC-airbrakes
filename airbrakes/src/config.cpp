@@ -3,7 +3,7 @@
 #include <SdFat.h>
 #include <ArduinoJson.h>
 SdFile configFile;
-void initConfig(){
+bool initConfig(){
     /*if (!configFile.exists("config.dat")){
         sd.errorHalt("Config file does not exist!");
     }*/
@@ -28,11 +28,12 @@ int config::begin(const char *filename){
         sd.errorHalt("unable to open config file, dunno why");
     }
 }
-void config::loadConfigFromFile(){
+bool config::loadConfigFromFile(){
     DeserializationError error = deserializeJson(configJSON, configFile);
 
     if (error){
         Serial.println(F("Failed to read config file"));
+        statusLight.setPixelColor(0, RED);
     } else {
 
         target_apogee = configJSON["target_apogee"];
