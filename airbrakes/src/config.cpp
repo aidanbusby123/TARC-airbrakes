@@ -14,8 +14,11 @@ bool initConfig(){
     if (!configFile.open("config.dat", O_RDWR | O_CREAT)){
         sd.errorHalt("unable to open config file (num 1)");
     }
-
+    Serial.println( " all good config-wise");
     rocketConfig.loadConfigDefaults();
+    Serial.println("config defaults loaded");
+
+    return true;
 
    // rocketConfig.begin("config.dat");
 }
@@ -34,6 +37,7 @@ bool config::loadConfigFromFile(){
     if (error){
         Serial.println(F("Failed to read config file"));
         statusLight.setPixelColor(0, RED);
+        return false;
     } else {
 
         target_apogee = configJSON["target_apogee"];
@@ -72,9 +76,15 @@ bool config::loadConfigFromFile(){
             drag_coefficient = DEFAULT_DRAG_COEF;
         }
 
+        trigger_acceleration = configJSON["trigger_acceleration"];
+        if (trigger_acceleration <= 0)
+            trigger_acceleration = DEFAULT_TRIGGER_ACCEL;
+
         max_time = configJSON["max_time"];
         Serial.println("config loaded");
+
     }
+    return true;
 }
 
 void config::loadConfigFromPacket(char *configdata){

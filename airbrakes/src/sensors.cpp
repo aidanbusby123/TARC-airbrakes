@@ -93,7 +93,7 @@ void setupSensors(void) {
  //bmp_baro.readAltitude(rocketConfig.getPressure());
  //bmp_baro.setOutputDataRate(BMP3_ODR_100_HZ);
 
-  lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_16G, lsm.LSM9DS1_ACCELDATARATE_50HZ);
+  lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_16G, lsm.LSM9DS1_ACCELDATARATE_119HZ);
   lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS);
   lsm.setupGyro(lsm.LSM9DS1_GYROSCALE_2000DPS);
 

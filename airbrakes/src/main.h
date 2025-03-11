@@ -58,15 +58,17 @@
 
 #define GRAVITY 9.79
 #define SEAPRESSURE 1013.25
+#define AIR_MOLAR_MASS 0.029
+#define BOLTZMANN_COST 1.381
 
 #define STATEHISTORY_SIZE 4// size of state history buffers
 
-#define TRIGGER_ACCEL 10.0
+#define DEFAULT_TRIGGER_ACCEL 10.0
 #define TRIGGER_VEL 5.0
 
 #define LOG_TIME_STEP 0.1
 
-#define BRAKE_RETRACTED 55
+#define BRAKE_RETRACTED 60
 #define BRAKE_DEPLOYED 148
 
 

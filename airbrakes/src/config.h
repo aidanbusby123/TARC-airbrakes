@@ -10,7 +10,7 @@ const float DEFAULT_DRAG_FORCE_COEF_COEFS[3] = {0, -0.00101833, 0.00051306};
 
 class config {
     private:
-        float dragForceCoefCoefs[3];
+        float dragForceCoefCoefs[3] = {0, 0, 0};
         float deploymentTimeCoefs[3];    
         float ref_area;
         float target_apogee;
@@ -18,6 +18,7 @@ class config {
         float pressure;
         float max_time;
         float drag_coefficient;
+        float trigger_acceleration;
     public:
         float ground_lora_address;
         JsonDocument configJSON;
@@ -38,6 +39,7 @@ class config {
         float getTemperature() { return temperature; }
         float getPressure() { return pressure; }
         float getMaxTime() { return max_time; }
+        float getTriggerAcceleration() { return trigger_acceleration; }
 };
 
 //SdFile configFile;

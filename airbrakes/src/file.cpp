@@ -20,6 +20,7 @@ bool initSD(void){
         sd.initErrorHalt();
         return false;
     }
+    return true;
 
     
     // Teensy 3.2

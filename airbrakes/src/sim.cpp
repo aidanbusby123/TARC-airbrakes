@@ -204,8 +204,10 @@ void stepSim(){ // do i need to update position for intermediaries?
 float getAirDensity(){ // IMPORTANT!!! fix this, should not be defined here, should have option to get sim air density
    // Serial.println(simState.getBaroPressure());
    // Serial.println(simState.getBaroTemperature());
-    //return ((28.97 * rocketState.getBaroPressure()) / (pow(8.31432, -3) * rocketState.getBaroTemperature())); // rho = MP/RT, gas density equation
-    return(1.20f);
+   Serial.println((0.029 * rocketState.getBaroPressure() * 100.0f) / (8.31432 * (rocketState.getBaroTemperature()+273.15)), 4);
+    return ((0.029 * rocketState.getBaroPressure()* 100.0f) / (8.31432 * (rocketState.getBaroTemperature()+273.15))); // rho = MP/RT, gas density equation
+    
+    //return(1.20f);
 }
 
 float getThrust(){ // get thrust from thrust curve, need to implement this, too tired

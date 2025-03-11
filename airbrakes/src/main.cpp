@@ -173,19 +173,30 @@ void setup()
 
   initLogs(); // Initialize state history logs
 
+  Serial.println("logs initialized");
+
 
 
   rocketControl.initBrake();
+  Serial.println("brake intialized");
   rocketControl.deployBrake(0);
+  Serial.println("brake set to zero");
   delay(100);
   rocketControl.deployBrake(50);
+  Serial.println("brake set to 50");
+  delay(1000);
+  rocketControl.deployBrake(0);
 
   initConfig();
+  Serial.println("config init");
   rocketConfig.loadConfigFromFile();
+
+  Serial.println("config intitialized");
 
 
 
   airBrakeState.loadConfig(rocketConfig);
+
 
   Serial.println("config finished");
 
@@ -199,23 +210,25 @@ void setup()
 
 
 
-  for (int i = 0; i < 10; i++){
+  for (int i = 0; i < (int)(30.0f*((float)STEP_TIME/1000.0f)); i++){
     readSensors();
     rocketState.updateTime();
     rocketStatus.updateTime();
     rocketState.updateAcceleration();
     rocketState.updateEulerAngles();
     rocketState.setGroundAltitude(rocketState.getBaroAltitude());
+    rocketState.stepTime();
   }
 
   Serial.println("set altitude");
 
   initSim();
 
-  rocketStatus.use_lora = true;
+  rocketStatus.use_lora = false;
 
   statusLight.setPixelColor(0, WHITE);
   statusLight.show();
+  delay(1000);
 
 }
 
@@ -272,7 +285,7 @@ void loop()
 
 
     Serial.println("flightphase pad");
-    if (rocketState.getAZ() > TRIGGER_ACCEL)
+    if (rocketState.getAZ() > rocketConfig.getTriggerAcceleration())
     { // If launch is detected
       Serial.println("flighphase ignition");
       rocketState.flightPhase = IGNITION;
