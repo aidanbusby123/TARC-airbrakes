@@ -101,6 +101,12 @@ void setupSensors(void) {
 
   calibrateSensors();
 
+  for (int i = 0; i < 100; i++){
+    readSensors();
+    rocketState.stepTime();
+    rocketState.updateDeltaT();
+  }
+
  // Serial.println("setup_sensors check 3");
 }
 

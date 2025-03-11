@@ -32,6 +32,7 @@
 #include <Adafruit_Sensor.h>
 #include <SensorFusion.h>
 #include <Adafruit_BMP3XX.h>
+#include <Adafruit_NeoPixel.h>
 #include <SPI.h>
 #include <Servo.h>
 #include <Wire.h>
@@ -72,6 +73,8 @@ controller rocketControl;
 status rocketStatus;
 
 config rocketConfig;
+
+Adafruit_NeoPixel statusLight;
 
 // GLOBAL SENSOR VALUES
 
@@ -138,6 +141,15 @@ void setup()
 
   }
 
+  initColors();
+
+  statusLight.begin();
+  statusLight.show();
+
+  statusLight.setPixelColor(0, WHITE);
+
+  
+
   rocketState.reset();
 
   rocketState.stateType = ROCKET;
@@ -166,8 +178,6 @@ void setup()
 
   setupSensors(); // setup sensors
 
-
-
   readSensors(); // Read sensors
 
 
@@ -182,6 +192,7 @@ void setup()
 
   rocketStatus.use_lora = true;
 
+  statusLight.setPixelColor(0, GREEN);
 }
 
 void loop()
@@ -201,7 +212,6 @@ void loop()
   }
 
 
-
   switch (rocketState.flightPhase)
   {
 
@@ -209,12 +219,14 @@ void loop()
     // if (digitalRead(USE_LORA_PIN) == HIGH) // LoRa telemetry turned on
     // rocketStatus.use_lora = true;
     // Serial.println("here we go!");
+
     Serial.print("pitch: ");
     Serial.println(rocketState.getPitch());
     if (rocketStatus.t > LAUNCH_DELAY)
     {
       if (rocketState.getPitch() > 0)
       {
+        statusLight.setPixelColor(0, RED);
         rocketState.flightPhase = LAUNCH;
         // digitalWrite()
       }
@@ -238,6 +250,7 @@ void loop()
     { // If launch is detected
       Serial.println("flighphase ignition");
       rocketState.flightPhase = IGNITION;
+      statusLight.setPixelColor(0, YELLOW);
       rocketState.t_launch = rocketStatus.t;
 
       // rocketControl.deployBrake(0);
@@ -285,6 +298,7 @@ void loop()
     {
       Serial.println("flightphase land");
       rocketState.flightPhase = LAND;
+      statusLight.setPixelColor(0, BLUE);
       // rocketControl.deployBrake(0);
       writeRocketStateLog();
       closeLogs();
@@ -425,4 +439,12 @@ void initPins()
   pinMode(USE_LORA_PIN, INPUT);
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
+}
+
+void initColors(){
+  RED = statusLight.Color(255, 0, 0);
+  GREEN = statusLight.Color(0, 255, 0);
+  BLUE = statusLight.Color(0, 0, 255);
+  YELLOW = statusLight.Color(255, 255, 0);
+  WHITE = statusLight.Color(255, 255, 255);
 }

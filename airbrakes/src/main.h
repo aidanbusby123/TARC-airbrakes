@@ -34,6 +34,7 @@
 #include <Adafruit_LIS3MDL.h>
 #include <Adafruit_BNO055.h>
 #include <Adafruit_BMP3XX.h>
+#include <Adafruit_NeoPixel.h>
 //#include <Adafruit_Sensor_Calibration.h>
 //#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <SdFat.h>
@@ -76,6 +77,15 @@
 #define USE_LORA_PIN 5
 #define BUZZER_PIN 2
 #define LED_PIN 3
+
+
+extern Adafruit_NeoPixel statusLight;
+
+uint32_t RED;
+uint32_t GREEN;
+uint32_t BLUE;
+uint32_t YELLOW;
+uint32_t WHITE;
 
 
 
@@ -453,3 +463,5 @@ void readSerial();
 void handleSerial();
 void writeSerial(uint8_t type, uint8_t data_size, uint8_t *data, bool use_lora);
 void sendSerial(uint8_t data_size, uint8_t *data);
+
+void initColors();
