@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
+import java.awt.*;
+
 
 float roll  = 0.0F;
 float pitch = 0.0F;
@@ -45,6 +47,8 @@ int MSG_END = 0xFb;
 int msg_size = 0;
 int msg_type = 0x8a;
 
+int HISTORY_WIDTH = 400;
+
 OBJModel model;
 
 Table logfile;
@@ -57,7 +61,9 @@ String       buffer = "";
 final String serialConfigFile = "serialconfig.txt";
 boolean      printSerial = false;
 
-ArrayList<Float> accel_history = new ArrayList<Float>();
+ArrayList<float[]> dataHistory = new ArrayList<float[]>();
+
+float[] accelHistory= new float[HISTORY_WIDTH];
 
 
 // UI controls.
@@ -83,7 +89,7 @@ void setup()
   model.load("rocket.obj");
   model.scale(0.5);
   
-  logfile = new Table();
+ logfile = new Table();
   
   logfile.addColumn("time");
   logfile.addColumn("alt");
@@ -128,9 +134,15 @@ void setup()
   accel_y_local_Label = new GLabel(this, 10, 200, 200, 20, "AY_Local: 0.0");
   accel_z_local_Label = new GLabel(this, 10, 230, 200, 20, "AZ_Local: 0.0");
   
+  vel_x_Label = new GLabel(this, 10, 260, 200, 20, "VX: 0.0");
+  vel_y_Label = new GLabel(this, 10, 290, 200, 20, "VY: 0.0");
+  vel_z_Label = new GLabel(this, 10, 320, 200, 20, "VZ: 0.0");
+  
+  
   dataPanel.addControl(accel_x_Label);
   dataPanel.addControl(accel_y_Label);
   dataPanel.addControl(accel_z_Label);
+
   dataPanel.addControl(vel_x_Label);
   dataPanel.addControl(vel_y_Label);
   dataPanel.addControl(vel_z_Label);
@@ -138,8 +150,10 @@ void setup()
   dataPanel.addControl(alt_Label);
   dataPanel.addControl(apogee_Label);
   
+  textSize(30);
+  
     int selectedPort = 0;
-  String[] availablePorts = Serial.list();
+ String[] availablePorts = Serial.list();
   while (availablePorts == null) {
     println("ERROR: No serial ports available!");
     continue;
@@ -158,6 +172,7 @@ void setup()
   
   // Set serial port.
  setSerialPort(serialList.getSelectedText());
+ 
 }
  
 void draw()
@@ -175,7 +190,20 @@ void draw()
   accel_x_Label.setText("AX: " + nf(ax, 1, 2));
   accel_y_Label.setText("AY: " + nf(ay, 1, 2));
   accel_z_Label.setText("AZ: " + nf(az, 1, 2));
+  vel_x_Label.setText("VX: " + nf(vx, 1, 2));
+  vel_y_Label.setText("VY: " + nf(vy, 1, 2));
+  vel_z_Label.setText("VZ: " + nf(vz, 1, 2));
+  
+  Font font = new Font("Monospaced", Font.PLAIN, 20);
+  alt_Label.setFont(new Font("Monospaced", Font.PLAIN, 20));
+  apogee_Label.setFont(new Font("Monospaced", Font.PLAIN, 20));
+  accel_z_Label.setFont(new Font("Monospaced", Font.PLAIN, 20));
+  vel_z_Label.setFont(new Font("Monospaced", Font.PLAIN, 20));
+  
   background(0,0, 0);
+  
+  
+  
   
   TableRow newRow = logfile.addRow();
   newRow.setFloat("time", time);
@@ -202,6 +230,18 @@ void draw()
   
   // Displace objects from 0,0
   translate(width/2, height/2, 0);
+  
+  stroke(255, 255, 255);
+  
+  for (int i = 1; i < HISTORY_WIDTH-1; i++){
+    accelHistory[i] = accelHistory[i+1];
+  }
+  if (dataHistory.size() > 0){
+    accelHistory[HISTORY_WIDTH-1] = dataHistory.get((dataHistory.size()-1))[4];
+    for (int i = 1; i < HISTORY_WIDTH; i++){
+     line(i-1, -accelHistory[i-1]*5, i, -accelHistory[i]*5);
+  }
+  } else {}
   
   
    stroke(255, 0, 0);
@@ -309,6 +349,10 @@ void processMessage(int type, byte[] data) {
         ay = floatData[3];
         az = floatData[4];
         
+        vx = floatData[11];
+        vy = floatData[12];
+        vz = floatData[13];
+        
         qw = floatData[20];
         qx = floatData[21];
         qy = floatData[22];
@@ -316,6 +360,8 @@ void processMessage(int type, byte[] data) {
         
         apogee = floatData[24];
         alt = floatData[26];
+        
+        dataHistory.add(floatData);
       //  println("Float Data: " + join(str(floatToHexString\\\(floatData)), ", "));
     } else {
         println("Raw Data: " + new String(data));  // Print as string if not float
