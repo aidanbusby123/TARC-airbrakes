@@ -133,6 +133,8 @@ void setup()
 
   t_start = (float)micros() / 1000000.0f;
 
+  rocketStatus.updateTime();
+
   Serial.begin(115200);
   // while (!Serial);
   //  Serial.println("Airbrakes!");
@@ -168,7 +170,6 @@ void setup()
     statusLight.setPixelColor(0, RED);
     statusLight.show();
     delay (1000);
-    return;
   }
 
   initLogs(); // Initialize state history logs
@@ -210,9 +211,9 @@ void setup()
 
 
 
-  for (int i = 0; i < (int)(30.0f*((float)STEP_TIME/1000.0f)); i++){
+  for (int i = 0; i < (int)(30.0f/((float)STEP_TIME/1000.0f)); i++){
     readSensors();
-    rocketState.updateTime();
+    //rocketState.updateTime();
     rocketStatus.updateTime();
     rocketState.updateAcceleration();
     rocketState.updateEulerAngles();
@@ -234,21 +235,11 @@ void setup()
 
 void loop()
 {
- 
   rocketStatus.updateTime();
-  rocketState.updateTime();
 
   readSensors();
 
-  if (rocketState.flightPhase != PAD && rocketState.flightPhase != LAUNCH)
-  {
-    rocketState.updateState();
-  } else {
-    // update state updates everything, only update accel and rotation while waiting for ignition
-    rocketState.updateAcceleration();
-    rocketState.updateEulerAngles();
-  }
-
+  rocketState.updateState();
 
   switch (rocketState.flightPhase)
   {
@@ -296,7 +287,7 @@ void loop()
       // rocketControl.deployBrake(0);
     }
     rocketState.setGroundAltitude(rocketState.getBaroAltitude());
-    Serial.println(rocketState.getAZ());
+    //Serial.println(rocketState.getAZ());
 
     break;
 
@@ -472,8 +463,13 @@ void state::stepTime()
 }
 
 void state::updateTime(){
+  if (rocketState.flightPhase != PAD && rocketState.flightPhase != LAUNCH)
+    time = (float)micros()/1000000.0f - t_launch;
+  else
+    time = 0;
+
+    
   updateDeltaT();
-  time = (float)micros()/1000000.0f - t_launch;
 }
 
 void status::updateTime()

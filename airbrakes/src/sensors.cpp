@@ -82,11 +82,11 @@ void setupSensors(void) {
  // Serial.println("setup_sensors check 2");
   
   baro.setMode(MPL3115A2_ALTIMETER);
-  baro.startOneShot();
+  baro.getPressure();
   baro.setSeaPressure(baro.getPressure());
 
-  for (int i = 0; i < 10; i++){
-    baro.startOneShot();
+  for (int i = 0; i < 5; i++){
+    baro.getPressure();
     baro.setSeaPressure(baro.getPressure());
   }
 

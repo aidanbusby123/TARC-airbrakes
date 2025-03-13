@@ -1,21 +1,22 @@
 #include "main.h"
 
 void state::updateState () { // Really only for rocketState, not for runge-kutta
-  updateTime();
-
   updateAcceleration();
+
+  updateTime();
 
   // Update velocity values
 
-  vx += ax * delta_t;
-  vy += ay * delta_t;
-  vz += az * delta_t;
-
+  if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH){
+    vx += ax * delta_t;
+    vy += ay * delta_t;
+    vz += az * delta_t;
   // Update position values (need to implement Kalman filter, this uses simple complimentary filter)
 
-  x += vx * delta_t;
-  y += vy * delta_t;
-  z += vz * delta_t;
+    x += vx * delta_t;
+    y += vy * delta_t;
+    z += vz * delta_t;
+  }
 
   /* not super sure about these*/
 
@@ -27,9 +28,9 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
 
   // Very simple complimentary filter
 
-  if (stateType == ROCKET){
+  if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH){
     altitude = 0.99 * (altitude + vz * delta_t) + 0.01 * (baro_altitude - ground_altitude); 
-  } else {
+  } else if (stateType == SIM) {
     altitude = altitude + vz * delta_t;
   }
 }

@@ -51,7 +51,7 @@
 #define TEST_TIME 60.0f
 #define START_TIME 20.0f
 
-#define INIT_MASS 0.417
+#define INIT_MASS 0.478
 #define BURN_TIME 1.1
 
 #define LAUNCH_DELAY 4
