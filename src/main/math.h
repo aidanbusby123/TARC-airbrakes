@@ -11,15 +11,15 @@ class Vec3 {
 
     Vec3(float x = 0.0f, float y = 0.0f, float z = 0.0f) : x(x), y(y), z(z) {}
     //set vector components
-    void set_x(float x) { this->x = x;}
-    void set_y(float y) { this->y = y;}
-    void set_z(float z) { this->z = z;}
+    void setX(float x) { this->x = x;}
+    void setY(float y) { this->y = y;}
+    void setZ(float z) { this->z = z;}
 
     // get vector components
 
-    void get_x() const { return x; }
-    void get_y() const { return y; }
-    void get_z() const { return z; }
+    float getX() const { return x; }
+    float getY() const { return y; }
+    float getZ() const { return z; }
 
     // get magnitude of vector
 
@@ -35,7 +35,9 @@ class Vec3 {
       if (mag == 0){
         Serial.println("Error: cannot normalize a zero vector!");
       }
+      return Vec3(x/mag, y/mag, z/mag);
     }
+ 
 
     // get dot product
 
@@ -45,7 +47,7 @@ class Vec3 {
 
     // get cross product
   
-    Vec3 cross(const Vec3& b) const {
+    Vec3 operator*(const Vec3& b) const {
       return Vec3(
         this->y * b.z - this->z * b.y,
         this->z * b.x - this->x * b.z,
@@ -55,18 +57,18 @@ class Vec3 {
 
     // add vector
     
-    Vec3 add(const Vec3& b) const {
+    Vec3 operator+(const Vec3& b) const {
       return Vec3(this->x + b.x, this->y + b.y, this->z + b.z);
     }
 
     // subtract vector
     
-    Vec3 subtract(const Vec3& b) const {
+    Vec3 operator-(const Vec3& b) const {
       return Vec3(this->x - b.x, this->y - b.y, this->z - b.z);
     }
 
     // scale vector
-    Vec3 scale(const float k) const {
+    Vec3 operator*(const float k) const {
       return Vec3(this->x * k, this->y * k, this->z * k);
     }
   
@@ -80,6 +82,14 @@ public:
     // Constructors
     Quaternion() : w(1.0f), x(0.0f), y(0.0f), z(0.0f) {} // Default identity quaternion
     Quaternion(float w, float x, float y, float z) : w(w), x(x), y(y), z(z) {}
+
+
+    // Set values
+
+    void setW(float w) {this->w = w;}
+    void setX(float x) {this->x = x;}
+    void setY(float y) {this->y = y;}
+    void setZ(float z) {this->z = z;}
 
     // Accessors
     float getW() const { return w; }
@@ -107,7 +117,7 @@ public:
     }
 
     // Quaternion multiplication
-    Quaternion multiply(const Quaternion &q) const {
+    Quaternion operator*(const Quaternion &q) const {
         return Quaternion(
             w * q.w - x * q.x - y * q.y - z * q.z,
             w * q.x + x * q.w + y * q.z - z * q.y,
@@ -117,12 +127,12 @@ public:
     }
 
     // Scalar multiplication
-    Quaternion scale(float scalar) const {
+    Quaternion operator*(const float scalar) const {
         return Quaternion(w * scalar, x * scalar, y * scalar, z * scalar);
     }
 
     // Quaternion addition
-    Quaternion add(const Quaternion &q) const {
+    Quaternion operator+(const Quaternion &q) const {
         return Quaternion(w + q.w, x + q.x, y + q.y, z + q.z);
     }
 

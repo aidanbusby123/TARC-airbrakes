@@ -68,7 +68,10 @@ float ACC_Z_ZERO = 0;
 */
 
 
+void retractBrake();
+void deployBrake();
 
+void rotateAccelerometerToVertical();
 
 
 
@@ -209,20 +212,20 @@ void loop() {
   Serial.print(mag.magnetic.z, 4); Serial.println("");
 #endif
 
-  // print the heading, pitch and roll
+ // print the heading, pitch and roll
   roll = filter.getRoll();
   pitch = filter.getPitch();
   heading = filter.getYaw();
-  Serial.print("Orientation: ");
+  /*Serial.print("Orientation: ");
   Serial.print(heading);
   Serial.print(", ");
   Serial.print(pitch);
   Serial.print(", ");
   Serial.println(roll);
-
+*/
   
   filter.getQuaternion(&qw, &qx, &qy, &qz);
-  Serial.print("Quaternion: ");
+ /* Serial.print("Quaternion: ");
   Serial.print(qw, 4);
   Serial.print(", ");
   Serial.print(qx, 4);
@@ -231,7 +234,7 @@ void loop() {
   Serial.print(", ");
   Serial.println(qz, 4);  
 
-  
+  */
 #if defined(AHRS_DEBUG_OUTPUT)
   Serial.print("Took "); Serial.print(millis()-timestamp); Serial.println(" ms");
 #endif
@@ -275,7 +278,7 @@ void loop() {
     // Step 4: Integrate vertical velocity to get altitude
     altitude += vertical_velocity * dt;
 
-    // Print results
+ /*   // Print results
     Serial.print("X accel: ");
     Serial.println(accel.acceleration.x);
     Serial.print("Y accel: ");
@@ -290,7 +293,7 @@ void loop() {
     Serial.println(altitude);
   }
 
-  
+  */
 }
 
 

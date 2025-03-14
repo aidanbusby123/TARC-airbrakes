@@ -18,9 +18,11 @@ Servo brake;
 struct state {
   // Local acceleration vector
   Vec3 AccelLocal = Vec3(0.0f, 0.0f, 0.0f);
+  Quaternion AccelLocalQuaternion;
 
   // Global vertical acceleration
   Vec3 Accel = Vec3(0.0f, 0.0f, 0.0f);
+  Quaternion AccelQuaternion;
 
   // Local velocity vector
 
@@ -56,10 +58,12 @@ float ACC_Z_ZERO = 0;
 
 int DELTA_T = 0;
 
-long TIME = 0;
-long dT = 0;
+long t = 0;
+float DeltaT = 0;
 
-
+float dt = 0;
+float time_now = 0;
+float time_last = 0;
 
 void setup() {
   digitalWrite(13, HIGH);
@@ -96,13 +100,12 @@ void setup() {
   }
 
   brake.attach(9);
-
-  retractBrake();
+  /*retractBrake();
   delay(500);
   deployBrake();
   delay(500);
-  retractBrake();
-
+  retractBrake();*/
+  
   
   // use to set sea level pressure for current location
   // this is needed for accurate altitude measurement
@@ -143,7 +146,7 @@ void setup() {
 
 
 void loop() {
-  TIME = micros();
+  t = micros();
   readSensors();
   updateState();
 
@@ -164,7 +167,8 @@ void loop() {
 
   Serial.print(",z:");
   Serial.println(ACC_Z); */
-  dT = micros()-TIME;
+  DeltaT = (float)(micros()-t)/1000000.0f;
+  
 }
 
 
@@ -240,20 +244,79 @@ float ALTITUDE = 0.0f;
 
 long uS_dT = 0;
 
+Quaternion DeltaRotQuaternion; // Quaternion to describe change in rotation angle from gyroscope data.
+Quaternion TempQuaternion; // Temprorary quaternion
+
 
 void updateState(){
   //RocketState.Vel_Local.set_z((ACC_Z-ACC_Z_ZERO) * ((float) dT / 1000000.0));
   //ALTITUDE = 0.9 * (ALTITUDE + V_Z * ((float) dT / 1000000.0) + 1/2 * (ACC_Z-ACC_Z_ZERO) * pow((float) dT / 1000000.0, 2)) + 0.1 * MPL_ALTI;
 
-  Quaternion DeltaRotQuaternion = Quaternion(0, GYRO_X, GYRO_Y, GYRO_Z); // Rotation quaternion for change in rotation angle, using gyroscope
-  RocketState.RotQuaternion = RocketState.RotQuaternion + 1/2 * DeltaRotQuaternion.multiply(RocketState.RotQuaternion); // q_{i+1} = q_{i} + q_{gyro}*q_{i}* dt/2
+
+  RocketState.AccelLocal.setX(ACC_X);
+  RocketState.AccelLocal.setY(ACC_Y);
+  RocketState.AccelLocal.setZ(ACC_Z);
 
 
+  // Update rocket rotation quaternions
+
+  time_now = micros();
+  dt = time_now - time_last;
+  time_last = time_now;
+  DeltaRotQuaternion = Quaternion(1, GYRO_X * dt/1000000.0f * 0.5, GYRO_Y * dt/1000000.0f * 0.5, GYRO_Z * dt/1000000.0f * 0.5); // Rotation quaternion for change in rotation angle, using gyroscope
   
-  Serial.print("Alt:");
-  Serial.print(ALTITUDE);
-  Serial.print(",BAR:");
-  Serial.println(MPL_ALTI);
+  TempQuaternion = RocketState.RotQuaternion + (((DeltaRotQuaternion * RocketState.RotQuaternion))); // Update rotation quaternion, q_{i+1} = q_{i} + q_{gyro}*q_{i}* dt/2 
+  RocketState.RotQuaternion = TempQuaternion.normalize(); // Normalize the temporary quaternion
 
+
+
+  // Convert local acceleration to global acceleration
+
+  RocketState.AccelLocalQuaternion.setX(RocketState.AccelLocal.getX());
+  RocketState.AccelLocalQuaternion.setY(RocketState.AccelLocal.getY());
+  RocketState.AccelLocalQuaternion.setZ(RocketState.AccelLocal.getZ());
+
+  RocketState.AccelQuaternion = (RocketState.RotQuaternion * RocketState.AccelLocalQuaternion) * RocketState.RotQuaternion.conjugate();
+  
+  /*Serial.print("DeltaT: ");
+  Serial.println(DeltaT);
+*/
+/*
+  Serial.print("Gyro: ");
+  Serial.print(DeltaRotQuaternion.getX());
+  Serial.print(", ");
+  Serial.print(DeltaRotQuaternion.getY());
+  Serial.print(", ");
+  Serial.print(DeltaRotQuaternion.getZ());
+  Serial.print(", ");
+  */
+  /*Serial.print("Quaternion:");
+  Serial.print(RocketState.RotQuaternion.getX());
+  Serial.print(", ");
+  Serial.print(RocketState.RotQuaternion.getY());
+  Serial.print(", ");
+  Serial.println(RocketState.RotQuaternion.getZ());
+*/
+/*  Serial.print(GYRO_X, 5);
+  Serial.print(", ");
+  Serial.print(GYRO_Y, 5);
+  Serial.print(", ");
+  Serial.print(GYRO_Z, 5);
+  Serial.print(", ");
+  Serial.print(ACC_X, 5);
+  Serial.print(", ");
+  Serial.print(ACC_Y, 5);
+  Serial.print(", ");
+  Serial.println(ACC_Z, 5);
+  //Serial.print(",BAR:");
+  //Serial.println(MPL_ALTI);
+  */
+
+  Serial.print(RocketState.AccelQuaternion.getX());
+  Serial.print(", ");
+  Serial.print(RocketState.AccelQuaternion.getY());
+  Serial.print(", ");
+  Serial.println(RocketState.AccelQuaternion.getZ());
+  
   uS_dT = micros();
 }
