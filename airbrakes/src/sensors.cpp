@@ -81,14 +81,16 @@ void setupSensors(void) {
 
  // Serial.println("setup_sensors check 2");
   
-  baro.setMode(MPL3115A2_ALTIMETER);
-  baro.getPressure();
-  baro.setSeaPressure(baro.getPressure());
+  baro.setMode(MPL3115A2_BAROMETER);
 
-  for (int i = 0; i < 5; i++){
-    baro.getPressure();
-    baro.setSeaPressure(baro.getPressure());
+  for (int i = 0; i < 10; i++){
+    baro.startOneShot();
+    while (!baro.conversionComplete())
+      delay(10);
+    
   }
+
+  //baro.setSeaPressure(890.3);
 
  //bmp_baro.readAltitude(rocketConfig.getPressure());
  //bmp_baro.setOutputDataRate(BMP3_ODR_100_HZ);
@@ -103,11 +105,13 @@ void setupSensors(void) {
 
   for (int i = 0; i < 100; i++){
     readSensors();
+    rocketState.updateState();
     rocketState.stepTime();
-    rocketState.updateDeltaT();
   }
 
  // Serial.println("setup_sensors check 3");
+
+ baro.startOneShot();
 }
 
 

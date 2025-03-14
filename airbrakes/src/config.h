@@ -19,6 +19,7 @@ class config {
         float max_time;
         float drag_coefficient;
         float trigger_acceleration;
+        float mass;
     public:
         float ground_lora_address;
         JsonDocument configJSON;

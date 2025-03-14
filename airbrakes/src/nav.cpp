@@ -145,3 +145,9 @@ void state::updateEulerAngles(){
   ay = temp_w * (-qy) - temp_x * (-qz) + temp_y * qw + temp_z * (-qx);
   az = temp_w * (-qz) + temp_x * (-qy) - temp_y * (-qx) + temp_z * qw;
 }*/
+
+float state::calcBaroAltitude(){
+  return 44330.0 * (1 - pow((rocketState.getBaroPressure()/rocketState.getGroundPressure()), 0.1903));
+}
+
+

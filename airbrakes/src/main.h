@@ -180,6 +180,7 @@ class state{
 
         float baro_altitude = 0.0f; // Barometric altitude
         float ground_altitude = 0.0f; // altitude measurement for ground
+        float ground_pressure = 0.0f; // pressure at ground level
         float altitude = 0.0f; // Real altitude, AGL
 
         float baro_pressure = 0.0f; // Barometric pressure
@@ -258,6 +259,7 @@ class state{
 
         float getBaroAltitude() { return baro_altitude; }
         float getGroundAltitude() { return ground_altitude; }
+        float getGroundPressure() { return ground_pressure; }
         float getBaroPressure() { return baro_pressure; } 
 
         float getBaroTemperature() { return baro_temperature; }
@@ -303,6 +305,7 @@ class state{
         void setBaroAltitude(float baro_altitude) { this->baro_altitude = baro_altitude; }
         void setAltitude(float altitude) { this->altitude = altitude; }
         void setGroundAltitude(float ground_altitude) { this->ground_altitude = ground_altitude; }
+        void setGroundPressure(float ground_pressure) { this->ground_pressure = ground_pressure; }
         void setBaroPressure(float baro_pressure) { this->baro_pressure = baro_pressure; }
 
         void setBaroTemperature(float baroTemperature) { this->baro_temperature = baroTemperature; }
@@ -316,6 +319,7 @@ class state{
         void localizeVelocity();
         void localizeAcceleration();
         void updateAcceleration();
+        float calcBaroAltitude();
 
         void updatePos();
 

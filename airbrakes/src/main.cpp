@@ -207,17 +207,16 @@ void setup()
 
   setupSensors(); // setup sensors
 
-  readSensors(); // Read sensors
+  Serial.println("Sensors are set up");
+  //readSensors(); // Read sensors
+
+  Serial.println("Initial sensor read");
 
 
-
-  for (int i = 0; i < (int)(30.0f/((float)STEP_TIME/1000.0f)); i++){
+  for (int i = 0; i < (int)(5.0f/((float)STEP_TIME/1000.0f)); i++){
     readSensors();
     //rocketState.updateTime();
-    rocketStatus.updateTime();
-    rocketState.updateAcceleration();
-    rocketState.updateEulerAngles();
-    rocketState.setGroundAltitude(rocketState.getBaroAltitude());
+    rocketState.updateState();
     rocketState.stepTime();
   }
 
@@ -235,6 +234,8 @@ void setup()
 
 void loop()
 {
+  Serial.println(rocketState.getBaroAltitude());
+  Serial.println(rocketState.getBaroPressure());
   rocketStatus.updateTime();
 
   readSensors();
@@ -368,14 +369,19 @@ float filter_dt;
 void readSensors()
 {
 
-  if (!baro.conversionComplete())
+  if (baro.conversionComplete())
   {
+    MPL_PRESSURE = baro.getLastConversionResults(MPL3115A2_PRESSURE); // float, hPa
+    MPL_TEMP = baro.getLastConversionResults(MPL3115A2_TEMPERATURE);
 
-/*
-  bno055.getEvent(&accel, Adafruit_BNO055::VECTOR_ACCELEROMETER);
-  bno055.getEvent(&gyro, Adafruit_BNO055::VECTOR_GYROSCOPE);
-  bno055.getEvent(&mag, Adafruit_BNO055::VECTOR_MAGNETOMETER);
-*/
+    
+
+    rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
+    rocketState.setBaroPressure(MPL_PRESSURE);
+    rocketState.setBaroTemperature(MPL_TEMP);
+
+    baro.startOneShot();
+  }
 
   lsm.getEvent(&accel, &mag, &gyro, &tempp);
 
@@ -392,32 +398,7 @@ void readSensors()
   MAG_Z = mag.magnetic.z;
 
   calibrateSensors();
-  }
 
-  else
-  {
-  // Updated every ~1 second (1 hz)
-  // calibrated altitude data
-  
-  MPL_PRESSURE = baro.getLastConversionResults(MPL3115A2_PRESSURE); // float, hPa
-  MPL_ALTI = baro.getLastConversionResults(MPL3115A2_ALTITUDE);     // float, m
-  MPL_TEMP = baro.getLastConversionResults(MPL3115A2_TEMPERATURE);
-  baro.startOneShot();
-
-
-  rocketState.setBaroAltitude(MPL_ALTI);
-  rocketState.setBaroPressure(MPL_PRESSURE);
-  rocketState.setBaroTemperature(MPL_TEMP);
-  
-  //Serial.println(rocketConfig.getPressure());
- // Serial.println(bmp_baro.readPressure());
-  //Serial.println(bmp_baro.readAltitude(rocketConfig.getPressure()));
-  //rocketState.setBaroAltitude(bmp_baro.readAltitude(rocketConfig.getPressure()));
-  //rocketState.setBaroPressure(bmp_baro.readPressure());
-
-  calibrateSensors();
-
-  }
 
   rocketState.setAX_Local(ACC_X);
   rocketState.setAY_Local(ACC_Y);

@@ -81,6 +81,10 @@ bool config::loadConfigFromFile(){
             trigger_acceleration = DEFAULT_TRIGGER_ACCEL;
 
         max_time = configJSON["max_time"];
+
+        mass = configJSON["rocket_mass"];
+        if (mass <= 0)
+            mass = INIT_MASS;
         Serial.println("config loaded");
 
     }
