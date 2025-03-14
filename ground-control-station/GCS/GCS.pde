@@ -16,6 +16,7 @@ float pitch = 0.0F;
 float yaw   = 0.0F;
 float temp  = 0.0F;
 float alt   = 0.0F;
+float baro_alt = 0.0F;
 float apogee = 0.0F;
 float time = 0.0F;
 
@@ -78,6 +79,7 @@ GLabel accel_x_Label, accel_y_Label, accel_z_Label, gyro_x_Label, gyro_y_Label, 
 GLabel accel_x_local_Label, accel_y_local_Label, accel_z_local_Label;
 GLabel vel_x_Label, vel_y_Label, vel_z_Label, vel_x_local_Label, vel_y_local_Label, vel_z_local_Label;
 GLabel alt_Label;
+GLabel baro_alt_Label;
 GLabel apogee_Label;
 
 void setup()
@@ -124,7 +126,9 @@ void setup()
   
   time_Label = new GLabel(this, 10, 20, 200, 20, "Time: 0.0");
   alt_Label = new GLabel(this, 10, 50, 200, 20, "Altitude: 0.0");
+  baro_alt_Label=new GLabel(this, 10, 350, 200, 20, "Baro altitude: 0.0");
   apogee_Label = new GLabel(this, 10, 65, 200, 20, "Predicted Apogee: 0.0");
+ 
   
   accel_x_Label = new GLabel(this, 10, 80, 200, 20, "AX: 0.0");
   accel_y_Label = new GLabel(this, 10, 110, 200, 20, "AY: 0.0");
@@ -149,6 +153,7 @@ void setup()
   dataPanel.addControl(time_Label);
   dataPanel.addControl(alt_Label);
   dataPanel.addControl(apogee_Label);
+  dataPanel.addControl(baro_alt_Label);
   
   textSize(30);
   
@@ -239,7 +244,7 @@ void draw()
   if (dataHistory.size() > 0){
     accelHistory[HISTORY_WIDTH-1] = dataHistory.get((dataHistory.size()-1))[4];
     for (int i = 1; i < HISTORY_WIDTH; i++){
-     line(i-1, -accelHistory[i-1]*5, i, -accelHistory[i]*5);
+     line(i-1, -accelHistory[i-1]*5-300, i, -accelHistory[i]*5-300);
   }
   } else {}
   
