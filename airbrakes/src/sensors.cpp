@@ -83,12 +83,12 @@ void setupSensors(void) {
   
   baro.setMode(MPL3115A2_BAROMETER);
 
-  for (int i = 0; i < 10; i++){
+ /* for (int i = 0; i < 10; i++){
     baro.startOneShot();
     while (!baro.conversionComplete())
       delay(10);
     
-  }
+  }*/
 
   //baro.setSeaPressure(890.3);
 
@@ -103,15 +103,18 @@ void setupSensors(void) {
 
   calibrateSensors();
 
-  for (int i = 0; i < 100; i++){
-    readSensors();
+  for (int i = 0; i < 10; i++){
+    baro.startOneShot();
+    while (!baro.conversionComplete())
+      delay(10);
+    rocketState.setGroundPressure(baro.getLastConversionResults(MPL3115A2_PRESSURE));
+    rocketState.setBaroTemperature(baro.getLastConversionResults(MPL3115A2_TEMPERATURE));
     rocketState.updateState();
     rocketState.stepTime();
   }
 
  // Serial.println("setup_sensors check 3");
-
- baro.startOneShot();
+  baro.startOneShot();
 }
 
 

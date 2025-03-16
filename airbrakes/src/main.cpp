@@ -47,14 +47,14 @@
 SdFile Config;
 
 Adafruit_MPL3115A2 baro;
-//Adafruit_BMP3XX bmp_baro;
+// Adafruit_BMP3XX bmp_baro;
 
 // V1
-
+/*
 Adafruit_LSM6DS33 lsm6ds;
 Adafruit_LPS25 lps;
 Adafruit_LIS3MDL lis3mdl;
-
+*/
 Adafruit_BNO055 bno055;
 
 Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
@@ -146,7 +146,6 @@ void setup()
   }
   else
   {
-
   }
 
   initColors();
@@ -160,23 +159,20 @@ void setup()
   statusLight.clear();
   statusLight.show();
 
-  
-
   rocketState.reset();
 
   rocketState.stateType = ROCKET;
 
-  if (initSD() == false){
+  if (initSD() == false)
+  {
     statusLight.setPixelColor(0, RED);
     statusLight.show();
-    delay (1000);
+    delay(1000);
   }
 
   initLogs(); // Initialize state history logs
 
   Serial.println("logs initialized");
-
-
 
   rocketControl.initBrake();
   Serial.println("brake intialized");
@@ -194,10 +190,7 @@ void setup()
 
   Serial.println("config intitialized");
 
-
-
   airBrakeState.loadConfig(rocketConfig);
-
 
   Serial.println("config finished");
 
@@ -208,14 +201,14 @@ void setup()
   setupSensors(); // setup sensors
 
   Serial.println("Sensors are set up");
-  //readSensors(); // Read sensors
+  // readSensors(); // Read sensors
 
-  Serial.println("Initial sensor read");
+  // baro.startOneShot();
 
-
-  for (int i = 0; i < (int)(5.0f/((float)STEP_TIME/1000.0f)); i++){
+  for (int i = 0; i < (int)(5.0f / ((float)STEP_TIME / 1000.0f)); i++)
+  {
     readSensors();
-    //rocketState.updateTime();
+    rocketState.updateTime();
     rocketState.updateState();
     rocketState.stepTime();
   }
@@ -229,7 +222,6 @@ void setup()
   statusLight.setPixelColor(0, WHITE);
   statusLight.show();
   delay(1000);
-
 }
 
 void loop()
@@ -275,7 +267,6 @@ void loop()
       // logSimState();
     }
 
-
     Serial.println("flightphase pad");
     if (rocketState.getAZ() > rocketConfig.getTriggerAcceleration())
     { // If launch is detected
@@ -288,7 +279,7 @@ void loop()
       // rocketControl.deployBrake(0);
     }
     rocketState.setGroundAltitude(rocketState.getBaroAltitude());
-    //Serial.println(rocketState.getAZ());
+    // Serial.println(rocketState.getAZ());
 
     break;
 
@@ -320,7 +311,6 @@ void loop()
     {
       rocketControl.deployBrake(0);
     }
-
 
     if (((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
     {
@@ -374,13 +364,12 @@ void readSensors()
     MPL_PRESSURE = baro.getLastConversionResults(MPL3115A2_PRESSURE); // float, hPa
     MPL_TEMP = baro.getLastConversionResults(MPL3115A2_TEMPERATURE);
 
-    
-
+    baro.startOneShot();
     rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
     rocketState.setBaroPressure(MPL_PRESSURE);
     rocketState.setBaroTemperature(MPL_TEMP);
 
-    baro.startOneShot();
+    // calibrateSensors();
   }
 
   lsm.getEvent(&accel, &mag, &gyro, &tempp);
@@ -388,7 +377,7 @@ void readSensors()
   ACC_X = accel.acceleration.x; // float, m/s2
   ACC_Y = accel.acceleration.y;
   ACC_Z = accel.acceleration.z;
-// flip sign when using lsm9ds1/0
+  // flip sign when using lsm9ds1/0
   GYRO_X = -gyro.gyro.x; // float, rad/s
   GYRO_Y = -gyro.gyro.y;
   GYRO_Z = -gyro.gyro.z;
@@ -398,7 +387,6 @@ void readSensors()
   MAG_Z = mag.magnetic.z;
 
   calibrateSensors();
-
 
   rocketState.setAX_Local(ACC_X);
   rocketState.setAY_Local(ACC_Y);
@@ -443,13 +431,13 @@ void state::stepTime()
   delay(STEP_TIME);
 }
 
-void state::updateTime(){
+void state::updateTime()
+{
   if (rocketState.flightPhase != PAD && rocketState.flightPhase != LAUNCH)
-    time = (float)micros()/1000000.0f - t_launch;
+    time = (float)micros() / 1000000.0f - t_launch;
   else
     time = 0;
 
-    
   updateDeltaT();
 }
 
@@ -466,7 +454,8 @@ void initPins()
   digitalWrite(BUZZER_PIN, LOW);
 }
 
-void initColors(){
+void initColors()
+{
   RED = statusLight.Color(255, 0, 0);
   GREEN = statusLight.Color(0, 255, 0);
   BLUE = statusLight.Color(0, 0, 255);

@@ -58,7 +58,9 @@ void updateSim(){
        //Serial.println("stepping sim");
         
         if (simState.getAltitude() < last_altitude && simState.getVZ() < 0){
-            apogee = simState.getAltitude();
+            if (count == 0){
+                apogee = simState.getAltitude();
+            } 
             if (count >= 4){
                 simState.setApogee(apogee);
                 rocketState.setApogee(apogee);
