@@ -8,6 +8,7 @@
 
 SdFile rocketStateLog;
 SdFile simStateLog;
+SdFile errorLog;
 
 stateHistory *rocketStateHistoryTemp;
 stateHistory *simStateHistoryTemp;
@@ -28,6 +29,8 @@ uint rocketStateHistory_size = 0;
 
 uint simStateHistory_index = 0;
 uint simStateHistory_size = 0;
+
+uint flightNum = 0;
 
 /*void SERCOM1_Handler()
 {
@@ -157,6 +160,7 @@ void initLogs()
     int filecount = 1;
     char rocketStateLogName[64] = "rocket_state_log.dat";
     char simStateLogName[64] = "sim_state_log.dat";
+
     rocketStateLog.open("/");
     if (rocketStateLog.exists(rocketStateLogName)){
         //Serial.println("already exists");
@@ -167,6 +171,7 @@ void initLogs()
                 if (!rocketStateLog.open(rocketStateLogName, O_RDWR | O_CREAT)){
                     sd.errorHalt("unable to open rocket state log, not enough space");
                 } else {
+                    flightNum = filecount;
                     break;
                 }
             }
@@ -201,6 +206,13 @@ void initLogs()
             sd.errorHalt("unable to open sim state log, unknown error");
         }
     }
+
+    if (!errorLog.open("error.log", FILE_WRITE)){
+        handleError("UNABLE TO OPEN ERROR LOG");
+    }
+    errorLog.print("FLIGHT #");
+    errorLog.println(flightNum);
+
 
     rocketStateHistory = new stateHistory[STATEHISTORY_SIZE];
     rocketStateHistory_size = STATEHISTORY_SIZE;
@@ -356,4 +368,9 @@ void logTempState(stateHistory* destHistoryTemp, stateHistory* destHistory, uint
 
     destHistoryTemp[i].flightPhase = destHistory[i].flightPhase;
 }
+}
+
+void logError(char *errormsg){
+    errorLog.println(errormsg);
+    errorLog.close();
 }

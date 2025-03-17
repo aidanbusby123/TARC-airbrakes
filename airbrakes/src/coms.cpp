@@ -26,12 +26,20 @@ void readSerial(){
                 isMessage = true;
             }
             if (count == 1){
-                serialPacket.type = byte;
+                if (byte == MSG_TYPE_CALIBRATION || byte == MSG_TYPE_CONFIG || byte == MSG_TYPE_TELEMETRY)
+                    serialPacket.type = byte;
+                else{
+                    isMessage = false;
+                    count = 0;
+                }
             }
             if (count == 2){
                 serialPacket.data_size = byte;
                 if (byte > 0){
                     serialPacket.data = (uint8_t*)malloc(serialPacket.data_size);
+                } else {
+                    isMessage = false;
+                    count = 0;
                 }
             }
             

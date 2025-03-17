@@ -43,6 +43,7 @@
 #include "sim.h"
 #include "config.h"
 #include "coms.h"
+#include "telemetry.h"
 
 SdFile Config;
 
@@ -492,4 +493,18 @@ void initColors()
   BLUE = statusLight.Color(0, 0, 255);
   YELLOW = statusLight.Color(255, 255, 0);
   WHITE = statusLight.Color(255, 255, 255);
+}
+
+
+void handleError(char *errormsg){
+  if (strlen(errormsg) < 0){
+    handleError("LEN OF ERROR MSG IS ZERO");
+  } 
+  if (errorLog.isOpen()){
+    logError(errormsg);
+  }
+  Serial.println(errormsg);
+  rocketState.setFlightPhase(ERROR);
+  while (1)
+    delay (10);
 }

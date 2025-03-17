@@ -431,6 +431,10 @@ class status{
 extern stateHistory* rocketStateHistory;
 extern stateHistory* simStateHistory;
 
+
+extern SdFile errorLog;
+
+
 extern uint rocketStateHistory_index;
 extern uint rocketStateHistory_size;
 
@@ -470,6 +474,7 @@ void logSimState();
 void closeLogs();
 void writeRocketStateLog();
 void writeSimStateLog();
+void handleError(char *errormsg);
 
 void sendRocketTelemetry();
 
