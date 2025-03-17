@@ -169,7 +169,7 @@ void initLogs()
             if (!rocketStateLog.exists(rocketStateLogName)){
                 //Serial.println(rocketStateLogName);
                 if (!rocketStateLog.open(rocketStateLogName, O_RDWR | O_CREAT)){
-                    sd.errorHalt("unable to open rocket state log, not enough space");
+                    handleError("UNABLE TO OPEN ROCKET STATE LOG, NOT ENOUGH SPACE");
                 } else {
                     flightNum = filecount;
                     break;
@@ -177,11 +177,11 @@ void initLogs()
             }
         }
         if (rocketStateLog.isOpen() == false){
-            sd.errorHalt("unable to open rocket state log, not open");
+            handleError("ROCKET STATE LOG NOT OPEN");
         }
     } else {
         if (!rocketStateLog.open(rocketStateLogName, O_RDWR | O_CREAT)){
-            sd.errorHalt("unable to open rocket state log, unknown error");
+            handleError("UNABLE TO OPEN ROCKET STATE LOG, UNKNOWN ERROR");
         }
     }
 
@@ -192,18 +192,18 @@ void initLogs()
             if (!simStateLog.exists(simStateLogName)){
                // Serial.println(simStateLogName);
                 if (!simStateLog.open(simStateLogName, O_RDWR | O_CREAT)){
-                    sd.errorHalt("unable to open sim state log, not enough space");
+                    handleError("UNABLE TO OPEN SIM STATE LOG, NOT ENOUGH SPACE");
                 } else {
                     break;
                 }
             }
         }
         if (simStateLog.isOpen() == false){
-            sd.errorHalt("unable to open sim state log, not open");
+            handleError("SIM STATE LOG IS NOT OPEN");
         }
     } else {
         if (!simStateLog.open(simStateLogName, O_RDWR | O_CREAT)){
-            sd.errorHalt("unable to open sim state log, unknown error");
+            handleError("UNABLE TO OPEN SIM STATE LOG, UNKNOWN ERROR");
         }
     }
 

@@ -121,10 +121,10 @@ void state::updatePos(){
   }
 }
 
-void state::updateEulerAngles(){
-  roll = atan2(2*(qw*qx + qy*qz), qw*qw - qx*qx - qy*qy + qz*qz);
-  pitch = asin(2*(qw*qy - qx*qz));
-  yaw = atan2(2*(qw*qz + qx*qy), qw*qw + qx*qx - qy*qy - qz*qz);
+void state::updateEulerAngles(){ // not sure if this will work, used quat multiplication to rotate coordinate system to get actual pitch, roll, yaw
+  roll = atan2(2*(qw*(-qz) + qy*qx), qw*qw - qz*qz - qy*qy + qx*qx);
+  pitch = asin(2*(qw*qy + qz*qx));
+  yaw = atan2(2*(qw*qx -qz*qy), qw*qw + qz*qz - qy*qy - qx*qx);
 }
 
 /*void state::globalizeForces(){

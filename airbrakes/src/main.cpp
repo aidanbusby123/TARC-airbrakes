@@ -143,7 +143,7 @@ void setup()
 
   if (!initSensors())
   {
-    Serial.println("Failed to initialize sensors!");
+    handleError("UNABLE TO INIT SENSORS");
   }
   else
   {
@@ -166,9 +166,7 @@ void setup()
 
   if (initSD() == false)
   {
-    statusLight.setPixelColor(0, RED);
-    statusLight.show();
-    delay(1000);
+    handleError("UNABLE TO INIT SD CARD");
   }
 
   initLogs(); // Initialize state history logs

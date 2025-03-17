@@ -9,8 +9,8 @@ Also, figure out how to convert euler angles to quaternions, will help with simu
 
 state simState;
 //float dragCoefficient = 0.0f;
-float dragCoefficient = 0.52f;
-float crossSection = 0.00342f;
+//float dragCoefficient = 0.52f;
+//float crossSection = 0.00342f;
 
 state k1, k2, k3, k4;
 
