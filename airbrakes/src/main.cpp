@@ -248,9 +248,7 @@ void loop()
     {
       if (rocketState.getPitch() > 0)
       {
-        statusLight.setPixelColor(0, GREEN);
-        statusLight.show();
-        rocketState.flightPhase = LAUNCH;
+        rocketState.setFlightPhase(LAUNCH);
         // digitalWrite()
       }
     }
@@ -270,11 +268,7 @@ void loop()
     Serial.println("flightphase pad");
     if (rocketState.getAZ() > rocketConfig.getTriggerAcceleration())
     { // If launch is detected
-      Serial.println("flighphase ignition");
-      rocketState.flightPhase = IGNITION;
-      statusLight.setPixelColor(0, BLUE);
-      statusLight.show();
-      rocketState.t_launch = rocketStatus.t;
+      rocketState.setFlightPhase(IGNITION);
 
       // rocketControl.deployBrake(0);
     }
@@ -286,8 +280,7 @@ void loop()
   case IGNITION:
     if ((rocketState.time) > BURN_TIME)
     {
-      rocketState.flightPhase = COAST;
-      Serial.println("flightphase coast");
+      rocketState.setFlightPhase(COAST);
     }
     if (((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
     {
@@ -439,6 +432,44 @@ void state::updateTime()
     time = 0;
 
   updateDeltaT();
+}
+
+
+void state::setFlightPhase(phase flightPhase){
+  this->flightPhase = flightPhase;
+  switch (flightPhase){
+    case PAD:
+      statusLight.setPixelColor(0, WHITE);
+      statusLight.show();
+      Serial.println("FLIGHTPHASE: PAD");
+      break;
+
+    case LAUNCH:
+      statusLight.setPixelColor(0, GREEN);
+      statusLight.show();
+      Serial.println("FLIGHTPHASE: LAUNCH");
+      break;
+
+    case IGNITION:
+      statusLight.setPixelColor(0, BLUE);
+      statusLight.show();
+      rocketState.t_launch = rocketStatus.t;
+      Serial.println("FLIGHTPHASE: IGNITION");
+      break;
+
+    case LAND:
+      statusLight.setPixelColor(0, WHITE);
+      statusLight.show();
+      Serial.println("FLIGHTPHASE: LAND");
+      break;
+
+    case ERROR:
+      statusLight.setPixelColor(0, RED);
+      statusLight.show();
+      Serial.println("FLIGHTPHASE: ERROR");
+      break;
+
+  }
 }
 
 void status::updateTime()

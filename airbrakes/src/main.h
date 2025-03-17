@@ -126,10 +126,10 @@ enum phase {
     PAD,
     LAUNCH,
     IGNITION,
-    POWERED,
     COAST,
     APOGEE,
-    LAND
+    LAND,
+    ERROR
 };
 
 enum statetype{ // What kind of state (simulation or physical)
@@ -267,6 +267,8 @@ class state{
         float getAirPressure();
         float getAirDensity();
 
+        phase getFlightPhase() { return flightPhase; }
+
         // Set state values
 
         void setMass(float mass) { this->mass = mass; }
@@ -311,6 +313,7 @@ class state{
         void setBaroTemperature(float baroTemperature) { this->baro_temperature = baroTemperature; }
 
 
+        void setFlightPhase(phase flightPhase);
         void updateState();
         
         void globalizeAcceleration();
