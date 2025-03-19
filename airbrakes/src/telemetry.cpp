@@ -276,6 +276,7 @@ void closeLogs()
 {
     rocketStateLog.close();
     simStateLog.close();
+    errorLog.close();
 }
 
 void logState(stateHistory* destHistory, uint destHistory_index, state sourceState){
@@ -370,7 +371,7 @@ void logTempState(stateHistory* destHistoryTemp, stateHistory* destHistory, uint
 }
 }
 
-void logError(char *errormsg){
+void logError(const char *errormsg){
     errorLog.println(errormsg);
     errorLog.close();
 }

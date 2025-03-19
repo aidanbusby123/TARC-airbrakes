@@ -2,6 +2,9 @@
 #include "sensor_calibration.h"
 #include <ArduinoJson.h>
 
+byte caldata[68]; // buffer to receive magnetic calibration data
+byte calcount=0;
+
 uint16_t sensorCalibration::crc16_update(uint16_t crc, uint8_t a) {
   int i;
   crc ^= a;
@@ -156,4 +159,86 @@ bool sensorCalibration::calibrate(sensors_event_t &event){
   }
   return true;
 }
+
+void sensorCalibration::receiveCalibration() {
+  uint16_t crc;
+  byte b, i;
+
+  while (Serial.available()) {
+    b = Serial.read();
+    if (calcount == 0 && b != 117) {
+      // first byte must be 117
+      return;
+    }
+    if (calcount == 1 && b != 84) {
+      // second byte must be 84
+      calcount = 0;
+      return;
+    }
+    // store this byte
+    caldata[calcount++] = b;
+    if (calcount < 68) {
+      // full calibration message is 68 bytes
+      return;
+    }
+    // verify the crc16 check
+    crc = 0xFFFF;
+    for (i=0; i < 68; i++) {
+      crc = crc16_update(crc, caldata[i]);
+    }
+    if (crc == 0) {
+      // data looks good, use it
+      float offsets[16];
+      memcpy(offsets, caldata+2, 16*4);
+      cal.accel_zerog[0] = offsets[0];
+      cal.accel_zerog[1] = offsets[1];
+      cal.accel_zerog[2] = offsets[2];
+      
+      cal.gyro_zerorate[0] = offsets[3];
+      cal.gyro_zerorate[1] = offsets[4];
+      cal.gyro_zerorate[2] = offsets[5];
+      
+      cal.mag_hardiron[0] = offsets[6];
+      cal.mag_hardiron[1] = offsets[7];
+      cal.mag_hardiron[2] = offsets[8];
+
+      cal.mag_field = offsets[9];
+      
+      cal.mag_softiron[0] = offsets[10];
+      cal.mag_softiron[1] = offsets[13];
+      cal.mag_softiron[2] = offsets[14];
+      cal.mag_softiron[3] = offsets[13];
+      cal.mag_softiron[4] = offsets[11];
+      cal.mag_softiron[5] = offsets[15];
+      cal.mag_softiron[6] = offsets[14];
+      cal.mag_softiron[7] = offsets[15];
+      cal.mag_softiron[8] = offsets[12];
+
+      if (! cal.saveCalibration()) {
+        Serial.println("**WARNING** Couldn't save calibration");
+      } else {
+        Serial.println("Wrote calibration");    
+      }
+      calcount = 0;
+      return;
+    }
+    // look for the 117,84 in the data, before discarding
+    for (i=2; i < 67; i++) {
+      if (caldata[i] == 117 && caldata[i+1] == 84) {
+        // found possible start within data
+        calcount = 68 - i;
+        memmove(caldata, caldata + i, calcount);
+        return;
+      }
+    }
+    // look for 117 in last byte
+    if (caldata[67] == 117) {
+      caldata[0] = 117;
+      calcount = 1;
+    } else {
+      calcount = 0;
+    }
+  }
+}
+
 

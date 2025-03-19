@@ -6,6 +6,8 @@
 class sensorCalibration{
     public:
     static uint16_t crc16_update(uint16_t crc, uint8_t a);
+
+  void receiveCalibration();
     
   bool calibrate(sensors_event_t &event);
 
@@ -33,4 +35,5 @@ class sensorCalibration{
   bool saveCalibration();
   bool loadCalibrationFromFile();
   bool loadCalibrationFromPacket(char *caldata);
+
 };

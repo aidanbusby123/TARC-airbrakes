@@ -225,13 +225,14 @@ void setup()
 
 void loop()
 {
-  Serial.println(rocketState.getBaroAltitude());
-  Serial.println(rocketState.getBaroPressure());
+  //Serial.println(rocketState.getBaroAltitude());
+  //Serial.println(rocketState.getBaroPressure());
   rocketStatus.updateTime();
 
   readSensors();
 
   rocketState.updateState();
+
 
   switch (rocketState.flightPhase)
   {
@@ -242,10 +243,10 @@ void loop()
     // Serial.println("here we go!");
 
     Serial.print("pitch: ");
-    Serial.println(rocketState.getPitch());
+    Serial.println(360 / (2*PI) * sqrt(rocketState.getPitch() * rocketState.getPitch() + rocketState.getRoll() * rocketState.getRoll()));
     if (rocketStatus.t > LAUNCH_DELAY)
     {
-      if (rocketState.getPitch() > 0)
+      if ((sqrt(rocketState.getPitch() * rocketState.getPitch() + rocketState.getRoll() * rocketState.getRoll()) * 360 /(2*PI)) < 30)
       {
         rocketState.setFlightPhase(LAUNCH);
         // digitalWrite()
@@ -366,20 +367,21 @@ void readSensors()
 
   lsm.getEvent(&accel, &mag, &gyro, &tempp);
 
-  ACC_X = accel.acceleration.x; // float, m/s2
+
+
+  calibrateSensors();
+
+  ACC_X = -accel.acceleration.x; // float, m/s2
   ACC_Y = accel.acceleration.y;
   ACC_Z = accel.acceleration.z;
   // flip sign when using lsm9ds1/0
   GYRO_X = -gyro.gyro.x; // float, rad/s
-  GYRO_Y = -gyro.gyro.y;
-  GYRO_Z = -gyro.gyro.z;
+  GYRO_Y = gyro.gyro.y;
+  GYRO_Z = gyro.gyro.z;
 
   MAG_X = mag.magnetic.x;
   MAG_Y = mag.magnetic.y;
   MAG_Z = mag.magnetic.z;
-
-  calibrateSensors();
-
   rocketState.setAX_Local(ACC_X);
   rocketState.setAY_Local(ACC_Y);
   rocketState.setAZ_Local(ACC_Z);
@@ -466,6 +468,9 @@ void state::setFlightPhase(phase flightPhase){
       statusLight.setPixelColor(0, RED);
       statusLight.show();
       Serial.println("FLIGHTPHASE: ERROR");
+      break;
+
+    default:
       break;
 
   }
