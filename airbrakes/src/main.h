@@ -60,6 +60,7 @@
 #define SEAPRESSURE 1013.25
 #define AIR_MOLAR_MASS 0.029
 #define BOLTZMANN_COST 1.381
+#define BARO_GAIN 0.01
 
 #define STATEHISTORY_SIZE 4// size of state history buffers
 
@@ -205,6 +206,8 @@ class state{
 
         float drag_coefficient = 0.0f;
         float ref_area = 0.0f;
+
+        bool baroConversionFinished = false;
 
         // Rocket flight phase
 

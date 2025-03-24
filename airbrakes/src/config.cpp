@@ -46,9 +46,9 @@ bool config::loadConfigFromFile(){
             target_apogee = DEFAULT_TARGET_APOGEE;
         }
 
-        ref_area = configJSON["reference_area"];
+        ref_area = configJSON["ref_area"];
 
-        if (ref_area < 0){
+        if (ref_area <= 0){
             ref_area = DEFAULT_REF_AREA;
         }
 
@@ -82,7 +82,7 @@ bool config::loadConfigFromFile(){
 
         max_time = configJSON["max_time"];
 
-        mass = configJSON["rocket_mass"];
+        mass = configJSON["mass"];
         if (mass <= 0)
             mass = INIT_MASS;
         Serial.println("config loaded");
@@ -100,7 +100,7 @@ void config::loadConfigFromPacket(char *configdata){
 
     target_apogee = configJSON["target_apogee"];
 
-    ref_area = configJSON["reference_area"];
+    ref_area = configJSON["ref_area"];
 
     for (int i = 0; i < 3; i++){
         dragForceCoefCoefs[i] = configJSON["drag_force_coef_coefs"][i];

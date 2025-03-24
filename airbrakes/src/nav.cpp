@@ -28,9 +28,9 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
 
   // Very simple complimentary filter
 
-  if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH){
-    altitude = 0.9 * (altitude + vz * delta_t) + 0.1 * (baro_altitude - ground_altitude); 
-  } else if (stateType == SIM) {
+  if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
+    altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
+  } else {
     altitude = altitude + vz * delta_t;
   }
 }
@@ -114,8 +114,8 @@ void state::updatePos(){
   x += vx * delta_t;
   y += vy * delta_t;
   z += vz * delta_t;
-  if (stateType == ROCKET){
-    altitude = 0.99 * (altitude + vz * delta_t) + 0.01 * baro_altitude; 
+  if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
+    altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
   } else {
     altitude = altitude + vz * delta_t;
   }

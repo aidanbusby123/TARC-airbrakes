@@ -187,6 +187,11 @@ void setup()
   Serial.println("config init");
   rocketConfig.loadConfigFromFile();
 
+  Serial.println(rocketConfig.getDragCoef());
+
+  Serial.print("ref area: ");
+  Serial.println(rocketConfig.getRefArea());
+
   Serial.println("config intitialized");
 
   airBrakeState.loadConfig(rocketConfig);
@@ -200,6 +205,8 @@ void setup()
   setupSensors(); // setup sensors
 
   Serial.println("Sensors are set up");
+
+  
   // readSensors(); // Read sensors
 
   // baro.startOneShot();
@@ -220,6 +227,9 @@ void setup()
 
   statusLight.setPixelColor(0, WHITE);
   statusLight.show();
+
+  //runTestSim();
+  //delay(1000000);
   delay(1000);
 }
 
@@ -252,6 +262,7 @@ void loop()
         // digitalWrite()
       }
     }
+    rocketState.setGroundPressure(rocketState.getBaroPressure());
     break;
 
   case LAUNCH:
@@ -272,9 +283,9 @@ void loop()
 
       // rocketControl.deployBrake(0);
     }
-    rocketState.setGroundAltitude(rocketState.getBaroAltitude());
+    //rocketState.setGroundAltitude(rocketState.getBaroAltitude());
     // Serial.println(rocketState.getAZ());
-
+    rocketState.setGroundPressure(rocketState.getBaroPressure());
     break;
 
   case IGNITION:
@@ -361,6 +372,8 @@ void readSensors()
     rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
     rocketState.setBaroPressure(MPL_PRESSURE);
     rocketState.setBaroTemperature(MPL_TEMP);
+    rocketState.baroConversionFinished = true;
+    //rocketState.setAltitude(rocketState.calcBaroAltitude());
 
     // calibrateSensors();
   }

@@ -32,10 +32,10 @@ void initSim(){
     Serial.println("init sim");
     simState.drag_coefficient = rocketConfig.getDragCoef();
     Serial.println("drag force coefficient: ");
-    Serial.println(simState.ref_area);
+    Serial.println(simState.drag_coefficient);
     simState.ref_area = rocketConfig.getRefArea();
     Serial.println("reference area");
-    Serial.println();
+    Serial.println(rocketConfig.getRefArea(), 6);
     Serial.println("got reference area");
     simState.time = (float)(micros())/1000000.0f;
     simStartTime = simState.time;
@@ -97,7 +97,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     
     k2.setVZ_Local(k1.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
-    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * simState.drag_coefficient * simState.ref_area/ k1.getMass()) + getThrust()/k1.getMass());
+    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k1.getMass());
 
 
     k2.globalizeVelocity();
@@ -112,7 +112,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
 
     k3.setVZ_Local(k1.getVZ_Local() + k2.getAZ_Local() * k1.delta_t * 0.5f);
-    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * simState.drag_coefficient * simState.ref_area / k1.getMass()) + getThrust()/k2.getMass());
+    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k2.getMass());
 
 
     k3.globalizeVelocity();
@@ -124,7 +124,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     k3.localizeAcceleration();
 
     k4.setVZ_Local(k1.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
-    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * simState.drag_coefficient * simState.ref_area /k1.getMass()) + getThrust()/k2.getMass());
+    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() /k1.getMass()) + getThrust()/k2.getMass());
 
     k4.globalizeVelocity();
     k4.globalizeAcceleration();
@@ -145,7 +145,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     simState.globalizeVelocity();
 
-    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * simState.drag_coefficient * simState.ref_area /simState.getMass()));
+    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() /simState.getMass()));
    
     // gotta set these to zero to avoid fucking up next round of simulation.
     simState.setAX_Local(0);
@@ -207,7 +207,7 @@ float getAirDensity(){ // IMPORTANT!!! fix this, should not be defined here, sho
    // Serial.println(simState.getBaroPressure());
    // Serial.println(simState.getBaroTemperature());
    Serial.println((0.029 * rocketState.getBaroPressure() * 100.0f) / (8.31432 * (rocketState.getBaroTemperature()+273.15)), 4);
-    return ((0.029 * rocketState.getBaroPressure()* 100.0f) / (8.31432 * (rocketState.getBaroTemperature()+273.15))); // rho = MP/RT, gas density equation
+    return (((0.029 * rocketState.getBaroPressure()* 100.0f) / (8.31432 * (rocketState.getBaroTemperature()+273.15)))); // rho = MP/RT, gas density equation
     
     //return(1.20f);
 }
@@ -254,17 +254,18 @@ void runTestSim(){
     float lastVel = 0.0f;
     float apogee = 0.0f;
     simState.reset();
-    simState.setAltitude(42.95);
-    simState.setVZ_Local(73.93);
-    simState.setAZ_Local(-24.3);
+    simState.setAltitude(141);
+    simState.setVZ_Local(33.7);
+    simState.setAZ_Local(-9.7);
     simState.stateType = SIM;
     //Serial.println(simState.getVZ_Local());
     //Serial.println(simState.getVZ());
     simState.delta_t = 0.05;
     lastVel = simState.getVZ();
+
     //simState.updateState();
 
-   simState.setQuatW(1);
+    simState.setQuatW(1);
     simState.setQuatX(0.0);
 
     simState.globalizeVelocity();
@@ -285,7 +286,7 @@ void runTestSim(){
     while (1){
     if ((simState.time - simStartTime) < SIM_TIME_S){
         stepSim();
-        Serial.print(simState.time - simStartTime + 1.14);
+        Serial.print(simState.time - simStartTime + 1.3 );
         Serial.print(", ");
         Serial.print(simState.getAltitude());
         Serial.print(", ");
