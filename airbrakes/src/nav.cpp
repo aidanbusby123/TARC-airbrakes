@@ -147,7 +147,20 @@ void state::updateEulerAngles(){
 }*/
 
 float state::calcBaroAltitude(){
-  return 44330.0 * (1 - pow((rocketState.getBaroPressure()/rocketState.getGroundPressure()), 0.1903));
+  return  ((getGroundTemperature() / 0.0065) * (1 - pow((rocketState.getBaroPressure()/rocketState.getGroundPressure()), 0.1903)));
+}
+
+float state::calcActualTargetApogee(float comp_apogee){ // Competition altimeters use a base temperature of 15C, we need to thus change our target apogee to account for this
+  Serial.println((getBaroTemperature()+273.15) / (288.15f));
+  return (getBaroTemperature()+273.15f) / (288.15f);
 }
 
 
+void state::updateTargetApogee(float comp_apogee){
+  float actual_target_apogee = calcActualTargetApogee(rocketConfig.getTargetApogee());
+  if (actual_target_apogee <= 0){
+    handleError("Error: real target apogee is bad");
+  }
+
+  setTargetApogee(actual_target_apogee);
+}

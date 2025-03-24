@@ -219,6 +219,8 @@ void setup()
     rocketState.stepTime();
   }
 
+  rocketState.updateTargetApogee(rocketConfig.getTargetApogee());
+  
   Serial.println("set altitude");
 
   initSim();
@@ -263,6 +265,8 @@ void loop()
       }
     }
     rocketState.setGroundPressure(rocketState.getBaroPressure());
+    rocketState.setGroundTemperature(rocketState.getBaroTemperature());
+    rocketState.updateTargetApogee(rocketConfig.getTargetApogee());
     break;
 
   case LAUNCH:
@@ -286,6 +290,8 @@ void loop()
     //rocketState.setGroundAltitude(rocketState.getBaroAltitude());
     // Serial.println(rocketState.getAZ());
     rocketState.setGroundPressure(rocketState.getBaroPressure());
+    rocketState.setGroundTemperature(rocketState.getBaroTemperature());
+    rocketState.updateTargetApogee(rocketConfig.getTargetApogee());
     break;
 
   case IGNITION:
@@ -305,7 +311,7 @@ void loop()
   case COAST:
 
     // Needless to say, this bit could use some work.
-    if (rocketState.getApogee() >= rocketConfig.getTargetApogee())
+    if (rocketState.getApogee() >= rocketState.getTargetApogee())
     {
       rocketControl.deployBrake(75);
       statusLight.setPixelColor(0, YELLOW);

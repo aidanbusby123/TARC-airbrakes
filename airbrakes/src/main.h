@@ -182,7 +182,10 @@ class state{
         float baro_altitude = 0.0f; // Barometric altitude
         float ground_altitude = 0.0f; // altitude measurement for ground
         float ground_pressure = 0.0f; // pressure at ground level
+        float ground_temperature = 0.0f; // temperature at ground level
         float altitude = 0.0f; // Real altitude, AGL
+
+        float target_apogee = 0.0f;
 
         float baro_pressure = 0.0f; // Barometric pressure
 
@@ -191,7 +194,6 @@ class state{
 
         float air_pressure;
         float air_density;
-        float air_temperature;
 
         float last_time = 0;
         float now = 0;
@@ -263,9 +265,12 @@ class state{
         float getBaroAltitude() { return baro_altitude; }
         float getGroundAltitude() { return ground_altitude; }
         float getGroundPressure() { return ground_pressure; }
+        float getGroundTemperature() { return ground_temperature; }
         float getBaroPressure() { return baro_pressure; } 
 
         float getBaroTemperature() { return baro_temperature; }
+
+        float getTargetApogee() { return target_apogee; }
 
         float getAirPressure();
         float getAirDensity();
@@ -311,9 +316,12 @@ class state{
         void setAltitude(float altitude) { this->altitude = altitude; }
         void setGroundAltitude(float ground_altitude) { this->ground_altitude = ground_altitude; }
         void setGroundPressure(float ground_pressure) { this->ground_pressure = ground_pressure; }
+        void setGroundTemperature(float ground_temperature) { this->ground_temperature = ground_temperature; }
         void setBaroPressure(float baro_pressure) { this->baro_pressure = baro_pressure; }
 
         void setBaroTemperature(float baroTemperature) { this->baro_temperature = baroTemperature; }
+
+        void setTargetApogee(float target_apogee) { this->target_apogee = target_apogee; }
 
 
         void setFlightPhase(phase flightPhase);
@@ -326,6 +334,10 @@ class state{
         void localizeAcceleration();
         void updateAcceleration();
         float calcBaroAltitude();
+
+        float calcActualTargetApogee(float comp_apogee); // IMPORTANT: calculates the *actual* target altitude based off of the temperature discrepancy from the 15C standard and actual base temp
+
+        void updateTargetApogee(float comp_apogee);
 
         void updatePos();
 
