@@ -48,7 +48,7 @@ int MSG_END = 0xFb;
 int msg_size = 0;
 int msg_type = 0x8a;
 
-int HISTORY_WIDTH = 400;
+int HISTORY_WIDTH = 900;
 
 OBJModel model;
 
@@ -64,8 +64,16 @@ boolean      printSerial = false;
 
 ArrayList<float[]> dataHistory = new ArrayList<float[]>();
 
-float[] accelHistory= new float[HISTORY_WIDTH];
+float[] accel_x_History= new float[HISTORY_WIDTH];
+float[] accel_y_History = new float[HISTORY_WIDTH];
+float[] accel_z_History = new float[HISTORY_WIDTH];
 
+float[] vel_x_History = new float[HISTORY_WIDTH];
+float[] vel_y_History = new float[HISTORY_WIDTH];
+float[] vel_z_History = new float[HISTORY_WIDTH];
+
+
+float[] alt_History = new float[HISTORY_WIDTH];
 
 // UI controls.
 GPanel    configPanel;
@@ -74,6 +82,7 @@ GLabel    serialLabel;
 GCheckbox printSerialCheckbox;
 
 GPanel dataPanel;
+GPanel historyPanel;
 GLabel time_Label;
 GLabel accel_x_Label, accel_y_Label, accel_z_Label, gyro_x_Label, gyro_y_Label, gyro_z_Label;
 GLabel accel_x_local_Label, accel_y_local_Label, accel_z_local_Label;
@@ -81,15 +90,17 @@ GLabel vel_x_Label, vel_y_Label, vel_z_Label, vel_x_local_Label, vel_y_local_Lab
 GLabel alt_Label;
 GLabel baro_alt_Label;
 GLabel apogee_Label;
+GLabel pitchLabel;
 
 void setup()
 {
   size(1920, 1000, OPENGL);
  /// fullScreen();
   frameRate(30);
+
   model = new OBJModel(this);
   model.load("rocket.obj");
-  model.scale(0.5);
+  model.scale(0.75);
   
  logfile = new Table();
   
@@ -111,7 +122,7 @@ void setup()
   // Grab list of serial ports and choose one that was persisted earlier or default to the first port.
 
   // Build serial config UI.
-  configPanel = new GPanel(this, 10, 10, width-20, 90, "Configuration (click to hide/show)");
+  configPanel = new GPanel(this, 10, 10, 300, 90, "Configuration (click to hide/show)");
   serialLabel = new GLabel(this,  0, 20, 80, 25, "Serial port:");
   configPanel.addControl(serialLabel);
   serialList = new GDropList(this, 90, 20, 200, 200, 6);
@@ -121,39 +132,72 @@ void setup()
   printSerialCheckbox.setSelected(printSerial);
   configPanel.addControl(printSerialCheckbox);
   
-  dataPanel = new GPanel(this, 10, 110, 380, 200, "Telemetry");
+  dataPanel = new GPanel(this, 10, 110, 380, 450, "Telemetry");
   dataPanel.setCollapsed(false);
+  
+  historyPanel = new GPanel(this, 400, 20, 900, 220, "Telemetry Graph: ");
   
   time_Label = new GLabel(this, 10, 20, 200, 20, "Time: 0.0");
   alt_Label = new GLabel(this, 10, 50, 200, 20, "Altitude: 0.0");
-  baro_alt_Label=new GLabel(this, 10, 350, 200, 20, "Baro altitude: 0.0");
-  apogee_Label = new GLabel(this, 10, 65, 200, 20, "Predicted Apogee: 0.0");
+  baro_alt_Label=new GLabel(this, 10, 380, 200, 20, "Baro altitude: 0.0");
+  apogee_Label = new GLabel(this, 10, 80, 200, 20, "Predicted Apogee: 0.0");
  
   
-  accel_x_Label = new GLabel(this, 10, 80, 200, 20, "AX: 0.0");
-  accel_y_Label = new GLabel(this, 10, 110, 200, 20, "AY: 0.0");
-  accel_z_Label = new GLabel(this, 10, 140, 200, 20, "AZ: 0.0");
+  accel_x_Label = new GLabel(this, 10, 110, 200, 20, "AX: 0.0");
+  accel_y_Label = new GLabel(this, 10, 140, 200, 20, "AY: 0.0");
+  accel_z_Label = new GLabel(this, 10, 170, 200, 20, "AZ: 0.0");
   
-  accel_x_local_Label = new GLabel(this, 10, 170, 200, 20, "AX_Local: 0.0");
-  accel_y_local_Label = new GLabel(this, 10, 200, 200, 20, "AY_Local: 0.0");
-  accel_z_local_Label = new GLabel(this, 10, 230, 200, 20, "AZ_Local: 0.0");
+  accel_x_local_Label = new GLabel(this, 10, 200, 200, 20, "AX_Local: 0.0");
+  accel_y_local_Label = new GLabel(this, 10, 230, 200, 20, "AY_Local: 0.0");
+  accel_z_local_Label = new GLabel(this, 10, 260, 200, 20, "AZ_Local: 0.0");
   
-  vel_x_Label = new GLabel(this, 10, 260, 200, 20, "VX: 0.0");
-  vel_y_Label = new GLabel(this, 10, 290, 200, 20, "VY: 0.0");
-  vel_z_Label = new GLabel(this, 10, 320, 200, 20, "VZ: 0.0");
+  vel_x_Label = new GLabel(this, 10, 290, 200, 20, "VX: 0.0");
+  vel_y_Label = new GLabel(this, 10, 320, 200, 20, "VY: 0.0");
+  vel_z_Label = new GLabel(this, 10, 350, 200, 20, "VZ: 0.0");
+  
+  
+  Font font = new Font("Monospaced", Font.PLAIN, 20);
+  
+  time_Label.setFont(font);
+  alt_Label.setFont(font);
+  baro_alt_Label.setFont(font);
+  apogee_Label.setFont(font);
+  
+  accel_x_Label.setFont(font);
+  accel_y_Label.setFont(font);
+  accel_z_Label.setFont(font);
+  
+  accel_x_local_Label.setFont(font);
+  accel_y_local_Label.setFont(font);
+  accel_z_local_Label.setFont(font);
+  
+  vel_x_Label.setFont(font);
+  vel_y_Label.setFont(font);
+  vel_z_Label.setFont(font);
+  
+  
+  
   
   
   dataPanel.addControl(accel_x_Label);
   dataPanel.addControl(accel_y_Label);
   dataPanel.addControl(accel_z_Label);
+  
+  dataPanel.addControl(accel_x_local_Label);
+  dataPanel.addControl(accel_y_local_Label);
+  dataPanel.addControl(accel_z_local_Label);
 
   dataPanel.addControl(vel_x_Label);
   dataPanel.addControl(vel_y_Label);
   dataPanel.addControl(vel_z_Label);
+  
+  
   dataPanel.addControl(time_Label);
   dataPanel.addControl(alt_Label);
   dataPanel.addControl(apogee_Label);
   dataPanel.addControl(baro_alt_Label);
+  
+  
   
   textSize(30);
   
@@ -191,21 +235,21 @@ void draw()
   
   time_Label.setText("time: " + nf(time, 1, 2));
   alt_Label.setText("altitude: " + nf(alt, 1, 2));
-  apogee_Label.setText("apogee" + nf(apogee, 1, 2));
+  apogee_Label.setText("apogee: " + nf(apogee, 1, 2));
+  baro_alt_Label.setText("baro alt: " + nf(baro_alt, 1, 2));
   accel_x_Label.setText("AX: " + nf(ax, 1, 2));
   accel_y_Label.setText("AY: " + nf(ay, 1, 2));
   accel_z_Label.setText("AZ: " + nf(az, 1, 2));
+  accel_x_local_Label.setText("AX Local: " + nf(ax_local, 1, 2));
+  accel_y_local_Label.setText("AY Local: " + nf(ay_local, 1, 2));
+  accel_z_local_Label.setText("AZ Local: " + nf(az_local, 1, 2));
   vel_x_Label.setText("VX: " + nf(vx, 1, 2));
   vel_y_Label.setText("VY: " + nf(vy, 1, 2));
   vel_z_Label.setText("VZ: " + nf(vz, 1, 2));
+
+
   
-  Font font = new Font("Monospaced", Font.PLAIN, 20);
-  alt_Label.setFont(new Font("Monospaced", Font.PLAIN, 20));
-  apogee_Label.setFont(new Font("Monospaced", Font.PLAIN, 20));
-  accel_z_Label.setFont(new Font("Monospaced", Font.PLAIN, 20));
-  vel_z_Label.setFont(new Font("Monospaced", Font.PLAIN, 20));
-  
-  background(0,0, 0);
+  background(27,164, 256);
   
   
   
@@ -222,10 +266,38 @@ void draw()
   newRow.setFloat("vz", vz);
   
   saveTable(logfile, "logfile.csv");
+  
+
 
   // Set a new co-ordinate space
   pushMatrix();
-
+  stroke(0, 0, 255);
+    for (int i = 1; i < HISTORY_WIDTH-1; i++){
+    accel_x_History[i] = accel_x_History[i+1];
+    accel_y_History[i] = accel_y_History[i+1];
+    accel_z_History[i] = accel_z_History[i+1];
+    
+    alt_History[i] = alt_History[i+1];
+  }
+  
+  if (dataHistory.size() > 0){
+    accel_x_History[HISTORY_WIDTH-1] = dataHistory.get((dataHistory.size()-1))[2];
+    accel_y_History[HISTORY_WIDTH-1] = dataHistory.get(dataHistory.size()-1)[3];
+    accel_z_History[HISTORY_WIDTH-1] = dataHistory.get((dataHistory.size()-1))[4];
+    
+    alt_History[HISTORY_WIDTH-1] = dataHistory.get(dataHistory.size()-1)[26];
+    
+    for (int i = 1; i < HISTORY_WIDTH; i++){
+      stroke(255, 0, 0);
+     line(i-1+400, -accel_x_History[i-1]*5+50, i+400, -accel_x_History[i]*5+50);
+     stroke(0, 0, 255);
+     line(i-1+400, -accel_y_History[i-1]*5+80, i+400, -accel_y_History[i]*5 + 80);
+     stroke(0, 255, 0);
+     line(i-1+400, -accel_z_History[i-1]*5 + 110, i+400, -accel_z_History[i]*5 + 110);
+     stroke(255, 255, 255);
+     line(i-1+400, -alt_History[i-1]*15 + 140, i+400, -alt_History[i]*15 + 140);
+  }
+  } else {}
 
   // Simple 3 point lighting for dramatic effect.
   // Slightly red light in upper right, slightly blue light in upper left, and white light from behind.
@@ -238,16 +310,8 @@ void draw()
   
   stroke(255, 255, 255);
   
-  for (int i = 1; i < HISTORY_WIDTH-1; i++){
-    accelHistory[i] = accelHistory[i+1];
-  }
-  if (dataHistory.size() > 0){
-    accelHistory[HISTORY_WIDTH-1] = dataHistory.get((dataHistory.size()-1))[4];
-    for (int i = 1; i < HISTORY_WIDTH; i++){
-     line(i-1, -accelHistory[i-1]*5-300, i, -accelHistory[i]*5-300);
-  }
-  } else {}
-  
+
+    translate(0, 200);
   
    stroke(255, 0, 0);
    strokeWeight(5);
@@ -260,6 +324,8 @@ void draw()
    stroke(0, 0, 255);
    strokeWeight(5);
    line(0, 0, 0, 0, 0, -ay*accelScale);
+
+
 
   //println(qx);
   // Rotate shapes around the X/Y/Z axis (values in radians, 0..Pi*2)
@@ -281,7 +347,7 @@ applyMatrix(
   0.0F, -1.0F, 0.0F, 0.0F,
   0.0, 0.0, 0.0, 1
   );
-
+translate(0, -150);
 
 
 /*applyMatrix(1, 2*(qx*qy - qw*qz), 0, 0,

@@ -87,6 +87,14 @@ bool config::loadConfigFromFile(){
             mass = INIT_MASS;
         Serial.println("config loaded");
 
+        brake_retracted = configJSON["brake_retracted"];
+        brake_deployed = configJSON["brake deployed"];
+
+        if (brake_retracted == brake_deployed){
+            brake_retracted = BRAKE_RETRACTED;
+            brake_deployed = BRAKE_DEPLOYED;
+        }
+
     }
     return true;
 }
@@ -129,3 +137,4 @@ float config::getRefArea(){
 float config::getTargetApogee(){
     return target_apogee;
 }
+

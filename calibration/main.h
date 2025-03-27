@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_Sensor.h>
 #include <SensorFusion.h>
-#include <Servo.h>
+
 #include <Adafruit_I2CDevice.h>
 //#include <Adafruit_ZeroDMA.h>
 #include <Adafruit_ADXL343.h>
@@ -39,15 +39,15 @@
 //#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <SdFat.h>
 
-#define AIRBRAKE_V7
-
 #pragma once
 //#include <Wire.h>
 
-//#include"maths.h"
+
 #include "config.h"
-#include "sensor_calibration.h"
-#include "coms.h"
+
+
+extern Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
+
 
 #define STEP_TIME 10
 #define TEST_TIME 60.0f
@@ -63,18 +63,15 @@
 #define AIR_MOLAR_MASS 0.029
 #define BOLTZMANN_COST 1.381
 
-#ifdef AIRBRAKE_V7
-#define BARO_GAIN 0.01
-#else
-#define BARO_GAIN 0.5
-#endif
-
-#define STATEHISTORY_SIZE 1// size of state history buffers
+#define STATEHISTORY_SIZE 4// size of state history buffers
 
 #define DEFAULT_TRIGGER_ACCEL 10.0
 #define TRIGGER_VEL 5.0
 
 #define LOG_TIME_STEP 0.1
+
+#define BRAKE_RETRACTED 60
+#define BRAKE_DEPLOYED 148
 
 
 #define DEPLOYMENT_COEFS_SIZE 3
@@ -90,7 +87,40 @@
 #define LED_PIN 3
 
 
-extern Adafruit_NeoPixel statusLight;
+class sensorCalibration{
+    public:
+    static uint16_t crc16_update(uint16_t crc, uint8_t a);
+
+  void receiveCalibration();
+    
+  bool calibrate(sensors_event_t &event);
+
+  /**! XYZ vector of offsets for zero-g, in m/s^2 */
+  float accel_zerog[3] = {0, 0, 0};
+
+  /**! XYZ vector of offsets for zero-rate, in rad/s */
+  float gyro_zerorate[3] = {0, 0, 0};
+
+  /**! XYZ vector of offsets for hard iron calibration (in uT) */
+  float mag_hardiron[3] = {0, 0, 0};
+
+  /**! The 3x3 matrix for soft-iron calibration (unitless) */
+  float mag_softiron[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+
+  /**! The magnetic field magnitude in uTesla */
+  float mag_field = 50;
+
+  char calfilename[64] = {0};
+  SdFile calfile;
+
+  JsonDocument calibJSON;
+
+  bool begin(const char* filename);
+  bool saveCalibration();
+  bool loadCalibrationFromFile();
+  bool loadCalibrationFromPacket(char *caldata);
+  void close();
+};
 
 extern uint32_t RED;
 extern uint32_t GREEN;
@@ -98,10 +128,10 @@ extern uint32_t BLUE;
 extern uint32_t YELLOW;
 extern uint32_t WHITE;
 
-
+extern sensorCalibration cal;
 
 extern Adafruit_MPL3115A2 baro;
-extern Adafruit_BMP3XX bmp_baro;
+//extern Adafruit_BMP3XX bmp_baro;
 
 //V1
 extern Adafruit_LSM6DS33 lsm6ds;
@@ -122,7 +152,6 @@ extern sensors_event_t gyro;
 extern sensors_event_t mag;
 extern sensors_event_t tempp;
 
-extern Servo brake;
 
 //extern FatVolume fatfs;
 extern SdFat sd;
@@ -186,10 +215,7 @@ class state{
         float baro_altitude = 0.0f; // Barometric altitude
         float ground_altitude = 0.0f; // altitude measurement for ground
         float ground_pressure = 0.0f; // pressure at ground level
-        float ground_temperature = 0.0f; // temperature at ground level
         float altitude = 0.0f; // Real altitude, AGL
-
-        float target_apogee = 0.0f;
 
         float baro_pressure = 0.0f; // Barometric pressure
 
@@ -198,6 +224,7 @@ class state{
 
         float air_pressure;
         float air_density;
+        float air_temperature;
 
         float last_time = 0;
         float now = 0;
@@ -212,8 +239,6 @@ class state{
 
         float drag_coefficient = 0.0f;
         float ref_area = 0.0f;
-
-        bool baroConversionFinished = false;
 
         // Rocket flight phase
 
@@ -269,12 +294,9 @@ class state{
         float getBaroAltitude() { return baro_altitude; }
         float getGroundAltitude() { return ground_altitude; }
         float getGroundPressure() { return ground_pressure; }
-        float getGroundTemperature() { return ground_temperature; }
         float getBaroPressure() { return baro_pressure; } 
 
         float getBaroTemperature() { return baro_temperature; }
-
-        float getTargetApogee() { return target_apogee; }
 
         float getAirPressure();
         float getAirDensity();
@@ -320,12 +342,9 @@ class state{
         void setAltitude(float altitude) { this->altitude = altitude; }
         void setGroundAltitude(float ground_altitude) { this->ground_altitude = ground_altitude; }
         void setGroundPressure(float ground_pressure) { this->ground_pressure = ground_pressure; }
-        void setGroundTemperature(float ground_temperature) { this->ground_temperature = ground_temperature; }
         void setBaroPressure(float baro_pressure) { this->baro_pressure = baro_pressure; }
 
         void setBaroTemperature(float baroTemperature) { this->baro_temperature = baroTemperature; }
-
-        void setTargetApogee(float target_apogee) { this->target_apogee = target_apogee; }
 
 
         void setFlightPhase(phase flightPhase);
@@ -338,10 +357,6 @@ class state{
         void localizeAcceleration();
         void updateAcceleration();
         float calcBaroAltitude();
-
-        float calcActualTargetApogee(float comp_apogee); // IMPORTANT: calculates the *actual* target altitude based off of the temperature discrepancy from the 15C standard and actual base temp
-
-        void updateTargetApogee(float comp_apogee);
 
         void updatePos();
 
@@ -356,7 +371,7 @@ class state{
 
 class controller{
     private:
-        Servo brake;
+        //Servo brake;
     public:
         void deployBrake(float percent);
         bool initBrake();

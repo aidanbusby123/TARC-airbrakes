@@ -30,8 +30,13 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
 
   if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
     altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
-  } else {
+    baroConversionFinished = false;
+  } else if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH) {
     altitude = altitude + vz * delta_t;
+  }
+  else if (stateType == SIM){
+    altitude = altitude + vz * delta_t;
+
   }
 }
 
@@ -116,8 +121,13 @@ void state::updatePos(){
   z += vz * delta_t;
   if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
     altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
-  } else {
+    baroConversionFinished = false;
+  } else if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH) {
     altitude = altitude + vz * delta_t;
+  }
+  else if (stateType == SIM){
+    altitude = altitude + vz * delta_t;
+
   }
 }
 
@@ -147,12 +157,13 @@ void state::updateEulerAngles(){
 }*/
 
 float state::calcBaroAltitude(){
-  return  ((getGroundTemperature() / 0.0065) * (1 - pow((rocketState.getBaroPressure()/rocketState.getGroundPressure()), 0.1903)));
+  return  (((getGroundTemperature() + 273.15f) / 0.0065) * (1 - pow((rocketState.getBaroPressure()/rocketState.getGroundPressure()), 0.1903)));
 }
 
 float state::calcActualTargetApogee(float comp_apogee){ // Competition altimeters use a base temperature of 15C, we need to thus change our target apogee to account for this
-  Serial.println((getBaroTemperature()+273.15) / (288.15f));
-  return (getBaroTemperature()+273.15f) / (288.15f);
+  //Serial.println((getBaroTemperature()+273.15) / (288.15f) * comp_apogee);
+ //Serial.println(getBaroTemperature());
+  return ((getBaroTemperature()+273.15f) / (288.15f) * comp_apogee);
 }
 
 

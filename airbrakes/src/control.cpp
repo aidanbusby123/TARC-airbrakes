@@ -3,7 +3,7 @@
 
 
 void controller::deployBrake(float percent){
-    brake.write(BRAKE_RETRACTED * (1-(percent/100.0f)) + BRAKE_DEPLOYED*percent/100.0f);
+    brake.write(rocketConfig.getBrakeRetracted() * (1-(percent/100.0f)) + rocketConfig.getBrakeDeployed()*percent/100.0f);
     airBrakeState.setTargetPercent(percent);
 }
         

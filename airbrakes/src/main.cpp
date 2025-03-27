@@ -48,7 +48,7 @@
 SdFile Config;
 
 Adafruit_MPL3115A2 baro;
-// Adafruit_BMP3XX bmp_baro;
+Adafruit_BMP3XX bmp_baro;
 
 // V1
 /*
@@ -82,6 +82,9 @@ Adafruit_NeoPixel statusLight(1, 20, NEO_GRB + NEO_KHZ800);
 float MPL_PRESSURE;
 float MPL_ALTI;
 float MPL_TEMP;
+
+float BMP_PRESSURE;
+float BMP_TEMPERATURE;
 
 float LPS_PRESSURE;
 float LPS_TEMP;
@@ -214,12 +217,13 @@ void setup()
   for (int i = 0; i < (int)(5.0f / ((float)STEP_TIME / 1000.0f)); i++)
   {
     readSensors();
-    rocketState.updateTime();
+    //rocketState.updateTime();
     rocketState.updateState();
     rocketState.stepTime();
   }
 
   rocketState.updateTargetApogee(rocketConfig.getTargetApogee());
+  Serial.println(rocketState.getBaroTemperature());
   
   Serial.println("set altitude");
 
@@ -232,6 +236,8 @@ void setup()
 
   //runTestSim();
   //delay(1000000);
+
+  
   delay(1000);
 }
 
@@ -244,6 +250,8 @@ void loop()
   readSensors();
 
   rocketState.updateState();
+
+  
 
 
   switch (rocketState.flightPhase)
@@ -292,6 +300,7 @@ void loop()
     rocketState.setGroundPressure(rocketState.getBaroPressure());
     rocketState.setGroundTemperature(rocketState.getBaroTemperature());
     rocketState.updateTargetApogee(rocketConfig.getTargetApogee());
+    //Serial.println(rocketState.getTargetApogee());
     break;
 
   case IGNITION:
@@ -313,6 +322,8 @@ void loop()
     // Needless to say, this bit could use some work.
     if (rocketState.getApogee() >= rocketState.getTargetApogee())
     {
+      statusLight.setPixelColor(0, RED);
+      statusLight.show();
       rocketControl.deployBrake(75);
       statusLight.setPixelColor(0, YELLOW);
       statusLight.show();
@@ -338,8 +349,10 @@ void loop()
       writeRocketStateLog();
       closeLogs();
 
-      exit(0);
+      //exit(0);
     }
+    Serial.println(rocketState.getTargetApogee());
+
 
     break;
 
@@ -352,6 +365,7 @@ void loop()
   default:
     break;
   }
+
 
   if (rocketState.flightPhase != PAD && rocketState.flightPhase != LAUNCH)
   {
@@ -368,6 +382,18 @@ float filter_dt;
 
 void readSensors()
 {
+  #ifdef AIRBRAKE_V7
+
+  BMP_PRESSURE = bmp_baro.readPressure();
+  BMP_TEMPERATURE = bmp_baro.readTemperature();
+
+  rocketState.setBaroPressure(BMP_PRESSURE);
+  rocketState.setBaroTemperature(BMP_TEMPERATURE);
+  rocketState.baroConversionFinished = true;
+
+  rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
+
+  #else
 
   if (baro.conversionComplete())
   {
@@ -375,14 +401,17 @@ void readSensors()
     MPL_TEMP = baro.getLastConversionResults(MPL3115A2_TEMPERATURE);
 
     baro.startOneShot();
-    rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
+    //rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
     rocketState.setBaroPressure(MPL_PRESSURE);
     rocketState.setBaroTemperature(MPL_TEMP);
     rocketState.baroConversionFinished = true;
     //rocketState.setAltitude(rocketState.calcBaroAltitude());
+    rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
 
     // calibrateSensors();
   }
+
+  #endif
 
   lsm.getEvent(&accel, &mag, &gyro, &tempp);
 

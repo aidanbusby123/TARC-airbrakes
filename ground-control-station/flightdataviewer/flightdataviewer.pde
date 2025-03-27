@@ -76,7 +76,7 @@ void setup()
       parsedFlightData.add(data);
   }*/
   
-  byte[] bytes = loadBytes("flightdata.dat");
+  byte[] bytes = loadBytes("/home/aidan/TARC_airbrake/Flightlogs/Wildcat2Flight5/rocket_state_log.dat");
   
   if (bytes == null)
     noLoop();
