@@ -39,7 +39,7 @@
 //#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <SdFat.h>
 
-//#define AIRBRAKE_V7
+#define AIRBRAKE_V7
 
 #pragma once
 //#include <Wire.h>

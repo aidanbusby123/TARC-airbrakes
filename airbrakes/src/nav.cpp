@@ -30,7 +30,9 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
 
   if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
     altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
+    #ifndef AIRBRAKE_V7
     baroConversionFinished = false;
+    #endif
   } else if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH) {
     altitude = altitude + vz * delta_t;
   }

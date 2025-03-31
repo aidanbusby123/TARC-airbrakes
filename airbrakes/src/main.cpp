@@ -177,7 +177,8 @@ void setup()
 
   Serial.println("logs initialized");
 
-  rocketControl.initBrake();
+
+  //rocketControl.initBrake();
   Serial.println("brake intialized");
   rocketControl.deployBrake(0);
   Serial.println("brake set to zero");
@@ -385,14 +386,18 @@ void readSensors()
 {
   #ifdef AIRBRAKE_V7
 
-  BMP_PRESSURE = bmp_baro.readPressure();
-  BMP_TEMPERATURE = bmp_baro.readTemperature();
+  BMP_PRESSURE = bmp_baro.pressure/100;
+  BMP_TEMPERATURE = bmp_baro.temperature;
 
   rocketState.setBaroPressure(BMP_PRESSURE);
+ 
   rocketState.setBaroTemperature(BMP_TEMPERATURE);
   rocketState.baroConversionFinished = true;
 
   rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
+
+  bmp_baro.performReading();
+  
 
   #else
 
@@ -414,11 +419,14 @@ void readSensors()
 
   #endif
 
+  
+
   lsm.getEvent(&accel, &mag, &gyro, &tempp);
 
 
 
   calibrateSensors();
+  
 
   ACC_X = -accel.acceleration.x; // float, m/s2
   ACC_Y = accel.acceleration.y;
@@ -434,6 +442,7 @@ void readSensors()
   rocketState.setAX_Local(ACC_X);
   rocketState.setAY_Local(ACC_Y);
   rocketState.setAZ_Local(ACC_Z);
+
 
   // Use Madgwick filter to update sensor filter
 

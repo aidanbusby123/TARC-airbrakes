@@ -55,7 +55,7 @@ bool initSensors(void) {
     return false;
   }
 
-  bmp_baro.setOutputDataRate(BMP3_ODR_100_HZ);
+  
 
   #else
 
@@ -124,6 +124,10 @@ void setupSensors(void) {
   calibrateSensors();
 
   #ifdef AIRBRAKE_V7
+
+  bmp_baro.setOutputDataRate(BMP3_ODR_200_HZ);
+  bmp_baro.setPressureOversampling(BMP3_OVERSAMPLING_8X);
+  bmp_baro.setTemperatureOversampling(BMP3_OVERSAMPLING_4X);
   
   for (int i = 0; i < 1000; i++){
     rocketState.setGroundPressure(bmp_baro.readPressure());

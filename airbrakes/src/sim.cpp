@@ -222,6 +222,12 @@ void stepSim(){ // do i need to update position for intermediaries?
     Serial.print(simState.getVY());
     Serial.print(" VZ:");
     Serial.println(simState.getVZ());
+    Serial.print(" VX Local: ");
+    Serial.print(simState.getVX_Local());
+    Serial.print(" VY Local: ");
+    Serial.print(simState.getVY_Local());
+    Serial.print(" VZ Local: ");
+    Serial.println(simState.getVZ_Local());
 
     simState.localizeVelocity();
     simState.localizeAcceleration();
