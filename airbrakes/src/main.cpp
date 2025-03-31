@@ -167,6 +167,7 @@ void setup()
 
   rocketState.stateType = ROCKET;
 
+
   if (initSD() == false)
   {
     handleError("UNABLE TO INIT SD CARD");
@@ -238,7 +239,7 @@ void setup()
   //delay(1000000);
 
   
-  delay(1000);
+  //delay(1000);
 }
 
 void loop()
@@ -558,4 +559,9 @@ void handleError(char *errormsg){
   rocketState.setFlightPhase(ERROR);
   while (1)
     delay (10);
+}
+
+void state::init(statetype stateType){
+  this->stateType = stateType;
+  mass = rocketConfig.getMass();  
 }

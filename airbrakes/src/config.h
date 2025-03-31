@@ -48,6 +48,7 @@ class config {
         float getTriggerAcceleration() { return trigger_acceleration; }
         float getBrakeRetracted() { return brake_retracted; }
         float getBrakeDeployed() { return brake_deployed; }
+        float getMass() { return mass; }
 };
 
 //SdFile configFile;

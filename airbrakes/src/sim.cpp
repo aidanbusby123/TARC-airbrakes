@@ -41,6 +41,7 @@ void initSim(){
     simStartTime = simState.time;
     simState.delta_t = 0.20f;
     Serial.println("sim initialized");
+    simState.stateType = SIM;
 }
 
 void updateSim(){
@@ -48,26 +49,52 @@ void updateSim(){
     float last_altitude = 0.0f;
     float apogee = 0.0f;
     uint count = 0;
+    
+    
     copyState(simState, rocketState);
+    //simState.setAX_Local(0);
+    //simState.setAY_Local(0);
+    simState.setVX(0);
+    simState.setVY(0);
+    simState.setAX(0);
+    simState.setAY(0);
+    //simState.setVX_Local(0);
+    //simState.setVY_Local(0);
+    simState.globalizeVelocity();
+    simState.globalizeAcceleration();
+    simState.localizeAcceleration();
+    simState.localizeVelocity();
     last_altitude = simState.getAltitude();
     simStartTime=simState.time;
+    
+    /*
+    simState.setAltitude(rocketState.getAltitude());
+    simState.setVZ_Local(simState.getVZ_Local());
+    simState.setAZ_Local(simState.getAZ_Local());
+    */
+   
 
     while ((simState.time-simStartTime) < SIM_TIME_S){
         last_vel = simState.getVZ();
         stepSim();
+        Serial.print("Altitude: ");
+        Serial.println(simState.getAltitude());
        //Serial.println("stepping sim");
         
-        if (simState.getAltitude() < last_altitude && simState.getVZ() < 0){
-            if (count == 0){
+        if (simState.getAltitude() < last_altitude){
+            
                 apogee = simState.getAltitude();
-            } 
-            if (count >= 4){
+
+           
+            
                 simState.setApogee(apogee);
                 rocketState.setApogee(apogee);
                 //Serial.println("Apogee reached");
+                simState.reset();
+                simStepNum = 0;
                 break;
-            }
-            count++;
+            
+            
           
         } else {
             count = 0;
@@ -79,11 +106,21 @@ void updateSim(){
         //logSimState();
     simState.reset();
     simStepNum = 0;
-    Serial.println("sim updated");
+    //Serial.println("sim updated");
 
 }
 
 void stepSim(){ // do i need to update position for intermediaries?
+    simState.setVX(0);
+    simState.setVY(0);
+    simState.setAX_Local(0);
+    simState.setAY_Local(0);
+
+    simState.globalizeVelocity();
+    simState.localizeVelocity();
+    //simState.localizeAcceleration(); 
+    simState.globalizeAcceleration();    
+
     copyState(k1, simState);
 
     k1.delta_t = simState.delta_t;
@@ -98,7 +135,10 @@ void stepSim(){ // do i need to update position for intermediaries?
     
     k2.setVZ_Local(k1.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
     k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k1.getMass());
-
+    k2.setAX_Local(0);
+    k2.setAY_Local(0);
+   // k2.setVX_Local(0);
+   // k2.setVY_Local(0);
 
     k2.globalizeVelocity();
     k2.globalizeAcceleration();
@@ -113,7 +153,10 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     k3.setVZ_Local(k1.getVZ_Local() + k2.getAZ_Local() * k1.delta_t * 0.5f);
     k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k2.getMass());
-
+    k3.setAX_Local(0);
+    k3.setAY_Local(0);
+   // k3.setVX_Local(0);
+   // k3.setVY_Local(0);
 
     k3.globalizeVelocity();
     k3.globalizeAcceleration();
@@ -125,6 +168,10 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     k4.setVZ_Local(k1.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
     k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() /k1.getMass()) + getThrust()/k2.getMass());
+    k4.setAX_Local(0);
+    k4.setAY_Local(0);
+   //k4.setVX_Local(0);
+   //k4.setVY_Local(0);
 
     k4.globalizeVelocity();
     k4.globalizeAcceleration();
@@ -140,8 +187,10 @@ void stepSim(){ // do i need to update position for intermediaries?
     k4.updatePos();
 
     simState.setAltitude(simState.getAltitude() + (float)(1.0f/6.0f) * (k1.getVZ() + 2 * k2.getVZ() + 2 * k3.getVZ() + k4.getVZ()) * simState.delta_t);
-    simState.setVZ_Local(simState.getVZ_Local() + (float)(1.0f/6.0f) * (k1.getAZ_Local() + 2 * k2.getAZ_Local() + 2* k3.getAZ_Local() + k4.getAZ_Local()) * simState.delta_t);
-    
+    simState.setVZ_Local(simState.getVZ_Local() + (float)(1.0f/6.0f) * (k1.getAZ_Local() + 2 * k2.getAZ_Local() + 2 * k3.getAZ_Local() + k4.getAZ_Local()) * simState.delta_t);
+
+    simState.setVX_Local(0);
+    simState.setVY_Local(0);
 
     simState.globalizeVelocity();
 
@@ -151,9 +200,28 @@ void stepSim(){ // do i need to update position for intermediaries?
     simState.setAX_Local(0);
     simState.setAY_Local(0);
 
+    
     simState.globalizeAcceleration();
 
     simState.setAZ(simState.getAZ()-float(GRAVITY));
+    Serial.print("AX: ");
+    Serial.print(simState.getAX());
+    Serial.print(" AY: ");
+    Serial.print(simState.getAY());
+    Serial.print(" AZ:");
+    Serial.println(simState.getAZ());
+    Serial.print(" AX Local: ");
+    Serial.print(simState.getAX_Local());
+    Serial.print(" AY Local: ");
+    Serial.print(simState.getAY_Local());
+    Serial.print(" AZ Local: ");
+    Serial.println(simState.getAZ_Local());
+    Serial.print(" VX: ");
+    Serial.print(simState.getVX());
+    Serial.print(" VY: ");
+    Serial.print(simState.getVY());
+    Serial.print(" VZ:");
+    Serial.println(simState.getVZ());
 
     simState.localizeVelocity();
     simState.localizeAcceleration();
@@ -254,24 +322,29 @@ void runTestSim(){
     float lastVel = 0.0f;
     float apogee = 0.0f;
     simState.reset();
-    simState.setAltitude(141);
-    simState.setVZ_Local(33.7);
-    simState.setAZ_Local(-9.7);
+    simState.setAltitude(217);
+    simState.setVZ_Local(5.5);
+    simState.setVX_Local(-12);
+    simState.setVY_Local(10);
+    simState.setAZ_Local(-4);
     simState.stateType = SIM;
     //Serial.println(simState.getVZ_Local());
     //Serial.println(simState.getVZ());
-    simState.delta_t = 0.05;
+    simState.delta_t = 0.20;
     lastVel = simState.getVZ();
 
     //simState.updateState();
 
-    simState.setQuatW(1);
-    simState.setQuatX(0.0);
+    simState.setQuatW(-0.4);
+    simState.setQuatX(-0.5);
+    simState.setQuatY(-0.3);
+    simState.setQuatZ(0.7);
 
     simState.globalizeVelocity();
 
     simState.globalizeAcceleration();
-    simState.setAZ(simState.getAZ()-(float)GRAVITY);
+    //simState.setAZ(simState.getAZ()-(float)GRAVITY);
+
     Serial.print("initial global accel: ");
     Serial.println(simState.getAZ());
     simState.localizeAcceleration();

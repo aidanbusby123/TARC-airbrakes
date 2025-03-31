@@ -39,7 +39,7 @@
 //#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <SdFat.h>
 
-#define AIRBRAKE_V7
+//#define AIRBRAKE_V7
 
 #pragma once
 //#include <Wire.h>
@@ -64,7 +64,7 @@
 #define BOLTZMANN_COST 1.381
 
 #ifdef AIRBRAKE_V7
-#define BARO_GAIN 0.01
+#define BARO_GAIN 0.1
 #else
 #define BARO_GAIN 0.5
 #endif
@@ -226,6 +226,7 @@ class state{
         // Get state values
 
         void reset();
+        void init(statetype stateType);
 
         float getMass() { return mass; }
 

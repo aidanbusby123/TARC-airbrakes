@@ -119,10 +119,10 @@ void state::updatePos(){
   x += vx * delta_t;
   y += vy * delta_t;
   z += vz * delta_t;
-  if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
+  if ((stateType == ROCKET) && (flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true)){
     altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
     baroConversionFinished = false;
-  } else if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH) {
+  } else if ((stateType == ROCKET) && (flightPhase != PAD && flightPhase != LAUNCH)) {
     altitude = altitude + vz * delta_t;
   }
   else if (stateType == SIM){
