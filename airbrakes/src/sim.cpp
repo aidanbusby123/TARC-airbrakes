@@ -39,7 +39,7 @@ void initSim(){
     Serial.println("got reference area");
     simState.time = (float)(micros())/1000000.0f;
     simStartTime = simState.time;
-    simState.delta_t = 0.20f;
+    simState.delta_t = 0.10f;
     Serial.println("sim initialized");
     simState.stateType = SIM;
 }
@@ -59,6 +59,10 @@ void updateSim(){
     //simState.setVY(0);
     //simState.setAX(0);
     //simState.setAY(0);
+
+    simState.setVX_Local(0);
+    simState.setVY_Local(0);
+    simState.globalizeVelocity();
 
     last_altitude = simState.getAltitude();
     simStartTime=simState.time;
@@ -85,9 +89,10 @@ void updateSim(){
             
                 simState.setApogee(apogee);
                 rocketState.setApogee(apogee);
-                //Serial.println("Apogee reached");
+                Serial.println("Apogee reached");
                 simState.reset();
                 simStepNum = 0;
+
                 break;
             
             
@@ -113,10 +118,11 @@ void stepSim(){ // do i need to update position for intermediaries?
     //simState.localizeAcceleration(); 
    // simState.globalizeAcceleration();    
 
-    simState.setAX_Local(0);
+    /*simState.setAX_Local(0);
     simState.setAY_Local(0);
-    simState.globalizeAcceleration(); // Try this?
+    simState.globalizeAcceleration(); // Try this?*/
 
+    /* Fixed the code, assuming that the VX_Local and VY_Local start out zeroed.*/
     copyState(k1, simState);
 
     k1.delta_t = simState.delta_t;
@@ -129,7 +135,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     // Runge Kutta 4th Order approximation
 
     
-    k2.setVZ_Local(k1.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
+    k2.setVZ_Local(k2.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
     k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k1.getMass());
     k2.setAX_Local(0);
     k2.setAY_Local(0);
@@ -141,12 +147,16 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     k2.setAZ(k2.getAZ()-(float)GRAVITY);
 
-    
-    k2.localizeVelocity();
     k2.localizeAcceleration();
+    k2.localizeVelocity();
 
+    k2.setVX_Local(k2.getVX_Local() + k1.getAX_Local() * k1.delta_t * 0.5f);
+    k2.setVY_Local(k2.getVY_Local() + k1.getAY_Local() * k1.delta_t * 0.5f);
+    
+    k2.globalizeVelocity();
+    
 
-    k3.setVZ_Local(k1.getVZ_Local() + k2.getAZ_Local() * k1.delta_t * 0.5f);
+    k3.setVZ_Local(k3.getVZ_Local() + k2.getAZ_Local() * k1.delta_t * 0.5f);
     k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k2.getMass());
     k3.setAX_Local(0);
     k3.setAY_Local(0);
@@ -160,7 +170,12 @@ void stepSim(){ // do i need to update position for intermediaries?
     k3.localizeVelocity();
     k3.localizeAcceleration();
 
-    k4.setVZ_Local(k1.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
+    k3.setVX_Local(k3.getVX_Local() + k2.getAX_Local() * k2.delta_t * 0.5f);
+    k3.setVY_Local(k3.getVY_Local() + k2.getAY_Local() * k2.delta_t * 0.5f);
+
+    k3.globalizeVelocity();
+
+    k4.setVZ_Local(k4.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
     k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() /k1.getMass()) + getThrust()/k2.getMass());
     k4.setAX_Local(0);
     k4.setAY_Local(0);
@@ -173,6 +188,12 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     k4.localizeVelocity();
     k4.localizeAcceleration();
+
+    k4.setVX_Local(k4.getVX_Local() + k3.getAX_Local() * k3.delta_t);
+    k4.setVY_Local(k4.getVY_Local() + k3.getAY_Local() * k3.delta_t);
+
+    k4.globalizeVelocity();
+
 
     k1.updatePos();
     k2.updatePos();
@@ -194,7 +215,18 @@ void stepSim(){ // do i need to update position for intermediaries?
     
     simState.globalizeAcceleration();
 
+    simState.setVX_Local(simState.getVX_Local() + (float)(1.0f/6.0f) * (k1.getVX_Local() + 2 * k2.getVX_Local() + 2 * k3.getVX_Local() + k4.getVX_Local()));
+    simState.setVY_Local(simState.getVY_Local() + (float)(1.0f/6.0f) * (k1.getVY_Local() + 2 * k2.getVY_Local() + 2 * k3.getVY_Local() + k4.getVY_Local()));
+    
+    simState.globalizeVelocity();
+
+
     simState.setAZ(simState.getAZ()-float(GRAVITY));
+
+    simState.localizeVelocity();
+    simState.localizeAcceleration();
+
+
     Serial.print("AX: ");
     Serial.print(simState.getAX());
     Serial.print(" AY: ");
@@ -220,8 +252,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     Serial.print(" VZ Local: ");
     Serial.println(simState.getVZ_Local());
 
-    simState.localizeVelocity();
-    simState.localizeAcceleration();
+
 
     k1.reset();
     k2.reset();

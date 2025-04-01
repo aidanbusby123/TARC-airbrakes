@@ -179,7 +179,7 @@ void setup()
   Serial.println("logs initialized");
 
 
-  rocketControl.initBrake();
+  //rocketControl.initBrake();
   Serial.println("brake intialized");
   rocketControl.deployBrake(0);
   Serial.println("brake set to zero");
@@ -342,7 +342,7 @@ void loop()
       logRocketState();
       sendRocketTelemetry();
     }
-    if (rocketState.time > rocketConfig.getMaxTime())
+    if (rocketState.time > 1000000)
     {
       Serial.println("flightphase land");
       rocketState.flightPhase = LAND;
