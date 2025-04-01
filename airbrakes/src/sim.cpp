@@ -52,18 +52,14 @@ void updateSim(){
     
     
     copyState(simState, rocketState);
+    
     //simState.setAX_Local(0);
     //simState.setAY_Local(0);
-    simState.setVX(0);
-    simState.setVY(0);
-    simState.setAX(0);
-    simState.setAY(0);
-    //simState.setVX_Local(0);
-    //simState.setVY_Local(0);
-    simState.globalizeVelocity();
-    simState.globalizeAcceleration();
-    simState.localizeAcceleration();
-    simState.localizeVelocity();
+    //simState.setVX(0);
+    //simState.setVY(0);
+    //simState.setAX(0);
+    //simState.setAY(0);
+
     last_altitude = simState.getAltitude();
     simStartTime=simState.time;
     
@@ -111,15 +107,15 @@ void updateSim(){
 }
 
 void stepSim(){ // do i need to update position for intermediaries?
-    simState.setVX(0);
-    simState.setVY(0);
+    //simState.setVX(0);
+    //simState.setVY(0);
+
+    //simState.localizeAcceleration(); 
+   // simState.globalizeAcceleration();    
+
     simState.setAX_Local(0);
     simState.setAY_Local(0);
-
-    simState.globalizeVelocity();
-    simState.localizeVelocity();
-    //simState.localizeAcceleration(); 
-    simState.globalizeAcceleration();    
+    simState.globalizeAcceleration(); // Try this?
 
     copyState(k1, simState);
 
@@ -137,8 +133,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k1.getMass());
     k2.setAX_Local(0);
     k2.setAY_Local(0);
-   // k2.setVX_Local(0);
-   // k2.setVY_Local(0);
+
 
     k2.globalizeVelocity();
     k2.globalizeAcceleration();
@@ -155,8 +150,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k2.getMass());
     k3.setAX_Local(0);
     k3.setAY_Local(0);
-   // k3.setVX_Local(0);
-   // k3.setVY_Local(0);
+
 
     k3.globalizeVelocity();
     k3.globalizeAcceleration();
@@ -170,8 +164,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() /k1.getMass()) + getThrust()/k2.getMass());
     k4.setAX_Local(0);
     k4.setAY_Local(0);
-   //k4.setVX_Local(0);
-   //k4.setVY_Local(0);
+
 
     k4.globalizeVelocity();
     k4.globalizeAcceleration();
@@ -188,9 +181,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     simState.setAltitude(simState.getAltitude() + (float)(1.0f/6.0f) * (k1.getVZ() + 2 * k2.getVZ() + 2 * k3.getVZ() + k4.getVZ()) * simState.delta_t);
     simState.setVZ_Local(simState.getVZ_Local() + (float)(1.0f/6.0f) * (k1.getAZ_Local() + 2 * k2.getAZ_Local() + 2 * k3.getAZ_Local() + k4.getAZ_Local()) * simState.delta_t);
-
-    simState.setVX_Local(0);
-    simState.setVY_Local(0);
+;
 
     simState.globalizeVelocity();
 

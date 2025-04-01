@@ -163,9 +163,10 @@ void setup()
   statusLight.clear();
   statusLight.show();
 
+  rocketState.init(ROCKET);
   rocketState.reset();
 
-  rocketState.stateType = ROCKET;
+  
 
 
   if (initSD() == false)
@@ -178,7 +179,7 @@ void setup()
   Serial.println("logs initialized");
 
 
-  //rocketControl.initBrake();
+  rocketControl.initBrake();
   Serial.println("brake intialized");
   rocketControl.deployBrake(0);
   Serial.println("brake set to zero");
