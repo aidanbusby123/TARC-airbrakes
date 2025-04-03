@@ -1,6 +1,14 @@
 #include "main.h"
 
 void state::updateState () { // Really only for rocketState, not for runge-kutta
+  updateAirDensity();
+  #ifdef DYNAMIC_DRAG
+  if (stateType == ROCKET){
+    updateDrag();
+    Serial.println(drag);
+    Serial.println(drag_coefficient);
+  }
+  #endif
   updateAcceleration();
 
   updateTime();
@@ -40,6 +48,7 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
     altitude = altitude + vz * delta_t;
 
   }
+
 }
 
 void state::updateAcceleration(){
@@ -177,3 +186,18 @@ void state::updateTargetApogee(float comp_apogee){
 
   setTargetApogee(actual_target_apogee);
 }
+
+
+void state::updateDrag(){ // needs to be called before 
+  drag = az_local;
+  updateDragCoef();
+}
+
+void state::updateDragCoef(){
+  drag_coefficient = sqrt((2 * mass * abs(az_local))/(air_density * ref_area * vz_local * abs(vz_local)));
+}
+
+void state::updateAirDensity(){
+  air_density = (((0.029 * getBaroPressure()* 100.0f) / (8.31432 * (getBaroTemperature()+273.15)))); // rho = MP/RT, gas density equation
+}
+

@@ -40,6 +40,7 @@
 #include <SdFat.h>
 
 #define AIRBRAKE_V7
+#define DYNAMIC_DRAG
 
 #pragma once
 //#include <Wire.h>
@@ -183,6 +184,9 @@ class state{
 
         float apogee = 0.0f;
 
+        float drag = 0.0f;
+        float drag_coefficient = 0.0f;
+
         float baro_altitude = 0.0f; // Barometric altitude
         float ground_altitude = 0.0f; // altitude measurement for ground
         float ground_pressure = 0.0f; // pressure at ground level
@@ -210,7 +214,6 @@ class state{
         float time = 0;
         float t_launch = 0;
 
-        float drag_coefficient = 0.0f;
         float ref_area = 0.0f;
 
         bool baroConversionFinished = false;
@@ -267,6 +270,9 @@ class state{
 
         float getApogee() { return apogee; }
 
+        float getDrag() { return drag; }
+        float getDragCoef() { return drag_coefficient; }
+
         float getBaroAltitude() { return baro_altitude; }
         float getGroundAltitude() { return ground_altitude; }
         float getGroundPressure() { return ground_pressure; }
@@ -278,7 +284,7 @@ class state{
         float getTargetApogee() { return target_apogee; }
 
         float getAirPressure();
-        float getAirDensity();
+        float getAirDensity() { return air_density; }
 
         phase getFlightPhase() { return flightPhase; }
 
@@ -317,6 +323,9 @@ class state{
 
         void setApogee(float apogee) { this->apogee = apogee; }
 
+        void setDrag(float drag) { this->drag = drag; }
+        void setDragCoef(float drag_coefficient) { this->drag_coefficient = drag_coefficient; }
+
         void setBaroAltitude(float baro_altitude) { this->baro_altitude = baro_altitude; }
         void setAltitude(float altitude) { this->altitude = altitude; }
         void setGroundAltitude(float ground_altitude) { this->ground_altitude = ground_altitude; }
@@ -344,9 +353,14 @@ class state{
 
         void updateTargetApogee(float comp_apogee);
 
+        void updateAirDensity();
+
         void updatePos();
 
         void updateEulerAngles();
+
+        void updateDrag();
+        void updateDragCoef();
 
         void updateDeltaT();
         void updateTime();
@@ -380,6 +394,7 @@ class brakeState{
         void setTargetPercent(float percent);
         float getDragForceCoef();
         float getDeployTime(); // get amount of time that airbrake has been deploying
+        float getPercentDeployed() { return percentDeployed; }
         void updateDeltaT();
         void updateDeployTime();
         void updateState();

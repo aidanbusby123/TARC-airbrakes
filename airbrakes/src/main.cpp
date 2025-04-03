@@ -193,10 +193,17 @@ void setup()
   Serial.println("config init");
   rocketConfig.loadConfigFromFile();
 
+  rocketState.setMass(rocketConfig.getMass());
+  rocketState.setDragCoef(rocketConfig.getDragCoef());
+
   Serial.println(rocketConfig.getDragCoef());
 
   Serial.print("ref area: ");
   Serial.println(rocketConfig.getRefArea());
+  
+  Serial.println("rocket mass: ");
+  Serial.println(rocketState.getMass());
+
 
   Serial.println("config intitialized");
 
@@ -231,6 +238,8 @@ void setup()
   Serial.println("set altitude");
 
   initSim();
+  Serial.println("sim mass");
+  Serial.println(simState.getMass());
 
   rocketStatus.use_lora = false;
 
@@ -253,8 +262,6 @@ void loop()
   readSensors();
 
   rocketState.updateState();
-
-  
 
 
   switch (rocketState.flightPhase)
@@ -325,15 +332,36 @@ void loop()
     // Needless to say, this bit could use some work.
     if (rocketState.getApogee() >= rocketState.getTargetApogee())
     {
+      #ifdef DYNAMIC_DRAG
+      statusLight.setPixelColor(0, RED);
+      statusLight.show();
+  
+      if (airBrakeState.getPercentDeployed() < 75){
+        rocketControl.deployBrake(airBrakeState.getPercentDeployed() + 5);
+      }
+      statusLight.setPixelColor(0, YELLOW);
+      statusLight.show();
+      #else
       statusLight.setPixelColor(0, RED);
       statusLight.show();
       rocketControl.deployBrake(75);
       statusLight.setPixelColor(0, YELLOW);
       statusLight.show();
+      #endif
     }
     else
     {
+      #ifdef DYNAMIC_DRAG
+      statusLight.setPixelColor(0, RED);
+      statusLight.show();
+      if (airBrakeState.getPercentDeployed() > 0){
+        rocketControl.deployBrake(airBrakeState.getPercentDeployed() - 5);
+      }
+      statusLight.setPixelColor(0, YELLOW);
+      statusLight.show();
+      #else
       rocketControl.deployBrake(0);
+      #endif
     }
 
     if (((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
@@ -342,7 +370,7 @@ void loop()
       logRocketState();
       sendRocketTelemetry();
     }
-    if (rocketState.time > 1000000)
+    if (rocketState.time > rocketConfig.getMaxTime())
     {
       Serial.println("flightphase land");
       rocketState.flightPhase = LAND;
@@ -397,6 +425,8 @@ void readSensors()
 
   rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
 
+  //rocketState.updateAirDensity();
+
   bmp_baro.performReading();
   
 
@@ -414,6 +444,8 @@ void readSensors()
     rocketState.baroConversionFinished = true;
     //rocketState.setAltitude(rocketState.calcBaroAltitude());
     rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
+
+    rocketState.updateAirDensity();
 
     // calibrateSensors();
   }
@@ -573,5 +605,4 @@ void handleError(char *errormsg){
 
 void state::init(statetype stateType){
   this->stateType = stateType;
-  mass = rocketConfig.getMass();  
 }

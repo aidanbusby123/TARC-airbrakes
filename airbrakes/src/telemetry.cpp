@@ -280,6 +280,7 @@ void closeLogs()
 }
 
 void logState(stateHistory* destHistory, uint destHistory_index, state sourceState){
+    destHistory[destHistory_index].mass = sourceState.getMass();
     destHistory[destHistory_index].time = sourceState.time;
 
     destHistory[destHistory_index].ax = sourceState.getAX();
@@ -321,12 +322,17 @@ void logState(stateHistory* destHistory, uint destHistory_index, state sourceSta
 
     destHistory[destHistory_index].baro_temperature = sourceState.getBaroTemperature();
 
+    destHistory[destHistory_index].air_density = sourceState.getAirDensity();
+
+    destHistory[destHistory_index].drag_coefficient = sourceState.getDragCoef();
+
     destHistory[destHistory_index].flightPhase = sourceState.flightPhase;
 
 }
 
 void logTempState(stateHistory* destHistoryTemp, stateHistory* destHistory, uint destHistory_size){
     for (int i = 0; i < destHistory_size; i++){
+    destHistoryTemp[i].mass = destHistory[i].mass;
         destHistoryTemp[i].time = destHistory[i].time;
     destHistoryTemp[i].ax = destHistory[i].ax;
     destHistoryTemp[i].ay = destHistory[i].ay;
@@ -366,6 +372,11 @@ void logTempState(stateHistory* destHistoryTemp, stateHistory* destHistory, uint
     destHistoryTemp[i].baro_pressure = destHistory[i].baro_pressure;
 
     destHistoryTemp[i].baro_temperature = destHistory[i].baro_temperature;
+    destHistoryTemp[i].air_pressure = destHistory[i].air_pressure;
+    destHistoryTemp[i].air_density = destHistory[i].air_density;
+    destHistoryTemp[i].air_temperature = destHistory[i].air_temperature;
+
+    destHistoryTemp[i].drag_coefficient = destHistory[i].drag_coefficient;
 
     destHistoryTemp[i].flightPhase = destHistory[i].flightPhase;
 }
