@@ -55,7 +55,7 @@
 #define START_TIME 20.0f
 
 #define INIT_MASS 0.478
-#define BURN_TIME 1.1
+#define BURN_TIME 1.2
 
 #define LAUNCH_DELAY 4
 
@@ -203,6 +203,8 @@ class state{
         float air_pressure;
         float air_density;
 
+        float ref_area = 0.0f;
+
         float last_time = 0;
         float now = 0;
 
@@ -214,7 +216,7 @@ class state{
         float time = 0;
         float t_launch = 0;
 
-        float ref_area = 0.0f;
+      
 
         bool baroConversionFinished = false;
 
@@ -272,6 +274,7 @@ class state{
 
         float getDrag() { return drag; }
         float getDragCoef() { return drag_coefficient; }
+        float getRefArea() { return ref_area; }
 
         float getBaroAltitude() { return baro_altitude; }
         float getGroundAltitude() { return ground_altitude; }
@@ -325,6 +328,7 @@ class state{
 
         void setDrag(float drag) { this->drag = drag; }
         void setDragCoef(float drag_coefficient) { this->drag_coefficient = drag_coefficient; }
+        void setRefArea(float ref_area) { this->ref_area = ref_area; }
 
         void setBaroAltitude(float baro_altitude) { this->baro_altitude = baro_altitude; }
         void setAltitude(float altitude) { this->altitude = altitude; }
@@ -359,7 +363,7 @@ class state{
 
         void updateEulerAngles();
 
-        void updateDrag();
+        void updateDrag(); // dynamically update the drag/drag coefficient
         void updateDragCoef();
 
         void updateDeltaT();

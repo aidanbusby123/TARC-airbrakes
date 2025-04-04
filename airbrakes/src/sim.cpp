@@ -33,7 +33,7 @@ void initSim(){
     simState.setDragCoef(rocketConfig.getDragCoef());
     Serial.println("drag force coefficient: ");
     Serial.println(simState.getDragCoef());
-    simState.ref_area = rocketConfig.getRefArea();
+    simState.setRefArea(rocketConfig.getRefArea());
     simState.setMass(rocketConfig.getMass());
     Serial.println("reference area");
     Serial.println(rocketConfig.getRefArea(), 6);

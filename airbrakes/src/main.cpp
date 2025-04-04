@@ -179,7 +179,7 @@ void setup()
   Serial.println("logs initialized");
 
 
-  //rocketControl.initBrake();
+  rocketControl.initBrake();
   Serial.println("brake intialized");
   rocketControl.deployBrake(0);
   Serial.println("brake set to zero");
@@ -195,6 +195,7 @@ void setup()
 
   rocketState.setMass(rocketConfig.getMass());
   rocketState.setDragCoef(rocketConfig.getDragCoef());
+  rocketState.setRefArea(rocketConfig.getRefArea());
 
   Serial.println(rocketConfig.getDragCoef());
 
@@ -262,6 +263,9 @@ void loop()
   readSensors();
 
   rocketState.updateState();
+
+  Serial.print("Apogee");
+  Serial.println(rocketState.getApogee());
 
 
   switch (rocketState.flightPhase)
@@ -352,13 +356,13 @@ void loop()
     else
     {
       #ifdef DYNAMIC_DRAG
-      statusLight.setPixelColor(0, RED);
-      statusLight.show();
+     // statusLight.setPixelColor(0, RED);
+     // statusLight.show();
       if (airBrakeState.getPercentDeployed() > 0){
         rocketControl.deployBrake(airBrakeState.getPercentDeployed() - 5);
       }
-      statusLight.setPixelColor(0, YELLOW);
-      statusLight.show();
+      //statusLight.setPixelColor(0, YELLOW);
+      //statusLight.show();
       #else
       rocketControl.deployBrake(0);
       #endif
