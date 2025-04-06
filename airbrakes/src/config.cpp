@@ -88,7 +88,7 @@ bool config::loadConfigFromFile(){
         Serial.println("config loaded");
 
         brake_retracted = configJSON["brake_retracted"];
-        brake_deployed = configJSON["brake deployed"];
+        brake_deployed = configJSON["brake_deployed"];
 
         if (brake_retracted == brake_deployed){
             brake_retracted = BRAKE_RETRACTED;

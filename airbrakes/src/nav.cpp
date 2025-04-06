@@ -1,8 +1,8 @@
 #include "main.h"
 
 void state::updateState () { // Really only for rocketState, not for runge-kutta
-  updateAirDensity();
-  Serial.println(air_density);
+  //updateAirDensity();
+  //Serial.println(air_density);
 
   
 
@@ -200,23 +200,23 @@ void state::updateDrag(){ // needs to be called before
 }
 
 void state::updateDragCoef(){
-  if (vz_local > 5.0){
+  if (vz_local > 5.0 && az_local < 0.0){
     if ((sqrt((2 * mass * abs(az_local))/(air_density * ref_area * vz_local * vz_local))) < 10.0){
-      drag_coefficient = sqrt((2 * mass * abs(az_local))/(air_density * ref_area * vz_local * vz_local));
-      Serial.print("air_density: ");
+      drag_coefficient = (1-STATIC_DRAG_ALPHA) * rocketConfig.getDragCoef() + STATIC_DRAG_ALPHA *((2 * mass * abs(az_local))/(air_density * ref_area * vz_local * vz_local));
+     /* Serial.print("air_density: ");
       Serial.println(air_density);
       Serial.print("ref area: ");
       Serial.println(ref_area, 5);
       Serial.print("VZ local: ");
       Serial.println(vz_local);
       Serial.print("az Local: ");
-      Serial.println(az_local);
+      Serial.println(az_local);*/
     
     } else {
-      drag_coefficient = rocketConfig.getDragCoef();
+      drag_coefficient = drag_coefficient;
     }
   } else {
-    drag_coefficient = rocketConfig.getDragCoef();
+    drag_coefficient = drag_coefficient;
   }
 }
 

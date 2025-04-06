@@ -39,8 +39,8 @@
 //#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <SdFat.h>
 
-#define AIRBRAKE_V7
-#define DYNAMIC_DRAG
+//#define AIRBRAKE_V7
+//#define DYNAMIC_DRAG
 
 #pragma once
 //#include <Wire.h>
@@ -69,6 +69,10 @@
 #else
 #define BARO_GAIN 0.5
 #endif
+
+
+#define STATIC_DRAG_ALPHA 0.5
+
 
 #define STATEHISTORY_SIZE 1// size of state history buffers
 

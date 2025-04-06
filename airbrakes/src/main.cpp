@@ -181,17 +181,23 @@ void setup()
 
   rocketControl.initBrake();
   Serial.println("brake intialized");
-  rocketControl.deployBrake(0);
-  Serial.println("brake set to zero");
-  delay(100);
-  rocketControl.deployBrake(50);
-  Serial.println("brake set to 50");
-  delay(1000);
-  rocketControl.deployBrake(0);
+
+
+
 
   initConfig();
+
+
+
   Serial.println("config init");
   rocketConfig.loadConfigFromFile();
+  rocketControl.deployBrake(0);
+  Serial.println("brake set to zero");
+  delay(1000);
+  rocketControl.deployBrake(75);
+  Serial.println("brake set to 75");
+  delay(1000);
+  rocketControl.deployBrake(0);
 
   rocketState.setMass(rocketConfig.getMass());
   rocketState.setDragCoef(rocketConfig.getDragCoef());
@@ -208,11 +214,14 @@ void setup()
 
   Serial.println("config intitialized");
 
+ 
+
   airBrakeState.loadConfig(rocketConfig);
 
   Serial.println("config finished");
 
   initCalibration();
+
 
   Serial.println("Cal loaded");
 
@@ -225,6 +234,7 @@ void setup()
 
   // baro.startOneShot();
 
+
   for (int i = 0; i < (int)(5.0f / ((float)STEP_TIME / 1000.0f)); i++)
   {
     readSensors();
@@ -232,6 +242,8 @@ void setup()
     rocketState.updateState();
     rocketState.stepTime();
   }
+
+
 
   rocketState.updateTargetApogee(rocketConfig.getTargetApogee());
   Serial.println(rocketState.getBaroTemperature());
@@ -246,6 +258,7 @@ void setup()
 
   statusLight.setPixelColor(0, WHITE);
   statusLight.show();
+
 
   //runTestSim();
   //delay(1000000);
@@ -336,7 +349,7 @@ void loop()
     // Needless to say, this bit could use some work.
     if (rocketState.getApogee() >= rocketState.getTargetApogee())
     {
-      #ifdef DYNAMIC_DRAG
+      /*#ifdef DYNAMIC_DRAG
       statusLight.setPixelColor(0, RED);
       statusLight.show();
   
@@ -345,17 +358,18 @@ void loop()
       }
       statusLight.setPixelColor(0, YELLOW);
       statusLight.show();
-      #else
+      #else*/
       statusLight.setPixelColor(0, RED);
       statusLight.show();
       rocketControl.deployBrake(75);
+      //delay(100);
       statusLight.setPixelColor(0, YELLOW);
       statusLight.show();
-      #endif
+     // #endif
     }
     else
     {
-      #ifdef DYNAMIC_DRAG
+     /* #ifdef DYNAMIC_DRAG
      // statusLight.setPixelColor(0, RED);
      // statusLight.show();
       if (airBrakeState.getPercentDeployed() > 0){
@@ -363,9 +377,11 @@ void loop()
       }
       //statusLight.setPixelColor(0, YELLOW);
       //statusLight.show();
-      #else
+      #else*/
       rocketControl.deployBrake(0);
-      #endif
+      //statusLight.setPixelColor(0, RED);
+      //statusLight.show();
+      //#endif
     }
 
     if (((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
@@ -386,7 +402,7 @@ void loop()
 
       //exit(0);
     }
-    Serial.println(rocketState.getTargetApogee());
+    //Serial.println(rocketState.getTargetApogee());
 
 
     break;

@@ -3,8 +3,8 @@
 #include <SdFat.h>
 #pragma once
 
-#define BRAKE_RETRACTED 60
-#define BRAKE_DEPLOYED 155
+#define BRAKE_RETRACTED 55
+#define BRAKE_DEPLOYED 135
 
 #define DEFAULT_TARGET_APOGEE 241
 #define DEFAULT_REF_AREA 0.00343
