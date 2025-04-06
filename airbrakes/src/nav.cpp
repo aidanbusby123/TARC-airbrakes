@@ -202,7 +202,7 @@ void state::updateDrag(){ // needs to be called before
 void state::updateDragCoef(){
   if (vz_local > 5.0 && az_local < 0.0){
     if ((sqrt((2 * mass * abs(az_local))/(air_density * ref_area * vz_local * vz_local))) < 10.0){
-      drag_coefficient = (1-STATIC_DRAG_ALPHA) * rocketConfig.getDragCoef() + STATIC_DRAG_ALPHA *((2 * mass * abs(az_local))/(air_density * ref_area * vz_local * vz_local));
+      drag_coefficient = (1-STATIC_DRAG_ALPHA) * rocketConfig.getDragCoef() + STATIC_DRAG_ALPHA *((2 * mass * abs(az_local))/(getAirDensity() * ref_area * vz_local * vz_local));
      /* Serial.print("air_density: ");
       Serial.println(air_density);
       Serial.print("ref area: ");
