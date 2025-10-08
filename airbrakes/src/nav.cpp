@@ -1,7 +1,7 @@
 #include "main.h"
 
 void state::updateState () { // Really only for rocketState, not for runge-kutta
-  //updateAirDensity();
+  updateAirDensity();
   //Serial.println(air_density);
 
   
@@ -202,7 +202,7 @@ void state::updateDrag(){ // needs to be called before
 void state::updateDragCoef(){
   if (vz_local > 5.0 && az_local < 0.0){
     if ((sqrt((2 * mass * abs(az_local))/(air_density * ref_area * vz_local * vz_local))) < 10.0){
-      drag_coefficient = (1-STATIC_DRAG_ALPHA) * rocketConfig.getDragCoef() + STATIC_DRAG_ALPHA *((2 * mass * abs(az_local))/(getAirDensity() * ref_area * vz_local * vz_local));
+      drag_coefficient = (1-STATIC_DRAG_ALPHA) * rocketConfig.getDragCoef() + STATIC_DRAG_ALPHA * sqrt((2 * mass * abs(az_local))/(air_density * ref_area * vz_local * vz_local));
      /* Serial.print("air_density: ");
       Serial.println(air_density);
       Serial.print("ref area: ");
@@ -221,6 +221,6 @@ void state::updateDragCoef(){
 }
 
 void state::updateAirDensity(){
-  air_density = (((0.029 * getBaroPressure()* 100.0f) / (8.31432 * (getBaroTemperature()+273.15)))); // rho = MP/RT, gas density equation
+  air_density = (((0.029 * baro_pressure * 100.0f) / (8.31432 * (baro_temperature+273.15)))); // rho = MP/RT, gas density equation
 }
 

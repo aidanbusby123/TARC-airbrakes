@@ -176,11 +176,11 @@ void setup()
 
   initLogs(); // Initialize state history logs
 
-  Serial.println("logs initialized");
+  Serial.println("# Logs initialized");
 
 
   rocketControl.initBrake();
-  Serial.println("brake intialized");
+  Serial.println("# Brake intialized");
 
 
 
@@ -189,45 +189,45 @@ void setup()
 
 
 
-  Serial.println("config init");
+  Serial.println("# Config init");
   rocketConfig.loadConfigFromFile();
   rocketControl.deployBrake(0);
-  Serial.println("brake set to zero");
+  //Serial.println("brake set to zero");
   delay(1000);
   rocketControl.deployBrake(75);
-  Serial.println("brake set to 75");
+  //Serial.println("brake set to 75");
   delay(1000);
   rocketControl.deployBrake(0);
 
   rocketState.setMass(rocketConfig.getMass());
   rocketState.setDragCoef(rocketConfig.getDragCoef());
   rocketState.setRefArea(rocketConfig.getRefArea());
-
+  Serial.println("# Config: ");
+  Serial.print("  ## Drag Coef: ");
   Serial.println(rocketConfig.getDragCoef());
-
-  Serial.print("ref area: ");
+  Serial.print("  ##");
+  Serial.print(" Ref area: ");
   Serial.println(rocketConfig.getRefArea());
-  
+  Serial.print("  ##");
   Serial.println("rocket mass: ");
   Serial.println(rocketState.getMass());
 
 
-  Serial.println("config intitialized");
+  Serial.println("# Config intitialized");
 
  
 
   airBrakeState.loadConfig(rocketConfig);
 
-  Serial.println("config finished");
+  Serial.println("# Config loaded by airbrake state");
 
   initCalibration();
 
-
-  Serial.println("Cal loaded");
+  Serial.println("# Cal loaded");
 
   setupSensors(); // setup sensors
 
-  Serial.println("Sensors are set up");
+  Serial.println("# Sensors are set up");
 
   
   // readSensors(); // Read sensors
@@ -248,10 +248,10 @@ void setup()
   rocketState.updateTargetApogee(rocketConfig.getTargetApogee());
   Serial.println(rocketState.getBaroTemperature());
   
-  Serial.println("set altitude");
+  Serial.println("# Set altitude");
 
   initSim();
-  Serial.println("sim mass");
+  Serial.print("## Sim mass: ");
   Serial.println(simState.getMass());
 
   rocketStatus.use_lora = false;
@@ -277,7 +277,7 @@ void loop()
 
   rocketState.updateState();
 
-  Serial.print("Apogee");
+  Serial.print("# Current predicted apogee: ");
   Serial.println(rocketState.getApogee());
 
 
@@ -289,7 +289,7 @@ void loop()
     // rocketStatus.use_lora = true;
     // Serial.println("here we go!");
 
-    Serial.print("pitch: ");
+    Serial.print("# Pitch: ");
     Serial.println(360 / (2*PI) * sqrt(rocketState.getPitch() * rocketState.getPitch() + rocketState.getRoll() * rocketState.getRoll()));
     if (rocketStatus.t > LAUNCH_DELAY)
     {
@@ -315,7 +315,7 @@ void loop()
       // logSimState();
     }
 
-    Serial.println("flightphase pad");
+    Serial.println("# Flightphase pad");
     if (rocketState.getAZ() > rocketConfig.getTriggerAcceleration())
     { // If launch is detected
       rocketState.setFlightPhase(IGNITION);
@@ -392,10 +392,7 @@ void loop()
     }
     if (rocketState.time > rocketConfig.getMaxTime())
     {
-      Serial.println("flightphase land");
-      rocketState.flightPhase = LAND;
-      statusLight.setPixelColor(0, WHITE);
-      statusLight.show();
+      rocketState.setFlightPhase(LAND);
       // rocketControl.deployBrake(0);
       writeRocketStateLog();
       closeLogs();

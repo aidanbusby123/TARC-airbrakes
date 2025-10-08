@@ -35,8 +35,7 @@ bool config::loadConfigFromFile(){
     DeserializationError error = deserializeJson(configJSON, configFile);
 
     if (error){
-        Serial.println(F("Failed to read config file"));
-        statusLight.setPixelColor(0, RED);
+        handleError("Unable to read config file!");
         return false;
     } else {
 
@@ -81,6 +80,8 @@ bool config::loadConfigFromFile(){
             trigger_acceleration = DEFAULT_TRIGGER_ACCEL;
 
         max_time = configJSON["max_time"];
+        if (max_time <= 0)
+            handleError("Max time not included in config!");
 
         mass = configJSON["mass"];
         if (mass <= 0)
