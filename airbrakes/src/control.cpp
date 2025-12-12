@@ -2,10 +2,10 @@
 #include <Servo.h>
 
 
-void controller::deployBrake(float percent){
-    brake.write(rocketConfig.getBrakeRetracted() * (1-(percent/100.0f)) + rocketConfig.getBrakeDeployed()*percent/100.0f);
-    airBrakeState.setTargetPercent(percent);
+void controller::deployBrake(float angle){
+    brake.write(angle);
 }
+
         
 bool controller::initBrake(){
     if (brake.attach(SERVO_PIN) == 0){
@@ -30,14 +30,31 @@ void brakeState::setPercentDeployed(float percent){ // set the current percent d
     percentDeployed = percent;
 }
 
+void brakeState::setDeltaPercent(float delta_percent){
+    float newPercent = targetPercent + delta_percent;
+
+    if (newPercent < 0)
+        newPercent = 0;
+    if (newPercent > 100.0)
+        newPercent = 100;
+
+    targetPercent = newPercent;
+}
 void brakeState::setTargetPercent(float percent){ // set the percent deployed target
     targetPercent = percent;
 }
 
-float brakeState::getDragForceCoef(){
+float brakeState::getDeployAngle(){
+    return targetPercent;
+}
+float brakeState::getBrakeDeployCoef(){
     float dragForceCoef = 0.0f;
-    for (int i = 0; i < DRAG_FORCE_COEF_COEFS_SIZE; i++){
-        dragForceCoef += dragForceCoefCoefficients[i] * pow(percentDeployed, i);
+    if (DRAG_FORCE_COEF_COEFS_SIZE > 0){
+        for (int i = 0; i < DRAG_FORCE_COEF_COEFS_SIZE; i++){
+            dragForceCoef += dragForceCoefCoefficients[i] * pow(percentDeployed, i);
+        }
+    } else {
+        dragForceCoef = targetPercent * rocketConfig.getBrakeCoef() + (1 - targetPercent) * rocketConfig.getDragCoef();
     }
     return dragForceCoef;
 }

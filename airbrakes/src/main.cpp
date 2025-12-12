@@ -71,6 +71,8 @@ brakeState airBrakeState;
 
 controller rocketControl;
 
+PIDController PID;
+
 status rocketStatus;
 
 config rocketConfig;
@@ -118,6 +120,8 @@ float target_apogee = 0.0f;
 float test_dt = 0.0f;
 float test_dt_now = 0.0f;
 float test_dt_last = 0.0f;
+
+float pid = 0; // For storing PID temporarily
 
 uint32_t RED;
 uint32_t GREEN;
@@ -229,7 +233,9 @@ void setup()
 
   Serial.println("# Sensors are set up");
 
-  
+  PID.init();
+
+  Serial.println("# PID controller initialized");
   // readSensors(); // Read sensors
 
   // baro.startOneShot();
@@ -330,7 +336,7 @@ void loop()
     //Serial.println(rocketState.getTargetApogee());
     break;
 
-  case IGNITION:
+  case IGNITION: // Wait for the motor to finish burning before taking any action
     if ((rocketState.time) > BURN_TIME)
     {
       rocketState.setFlightPhase(COAST);
@@ -344,45 +350,14 @@ void loop()
 
     break;
 
-  case COAST:
-
-    // Needless to say, this bit could use some work.
-    if (rocketState.getApogee() >= rocketState.getTargetApogee())
-    {
-      /*#ifdef DYNAMIC_DRAG
-      statusLight.setPixelColor(0, RED);
-      statusLight.show();
+  case COAST: // If we are in the coast state of flight, meaning motor has finished burn
   
-      if (airBrakeState.getPercentDeployed() < 75){
-        rocketControl.deployBrake(airBrakeState.getPercentDeployed() + 5);
-      }
-      statusLight.setPixelColor(0, YELLOW);
-      statusLight.show();
-      #else*/
-      statusLight.setPixelColor(0, RED);
-      statusLight.show();
-      rocketControl.deployBrake(75);
-      //delay(100);
-      statusLight.setPixelColor(0, YELLOW);
-      statusLight.show();
-     // #endif
-    }
-    else
-    {
-     /* #ifdef DYNAMIC_DRAG
-     // statusLight.setPixelColor(0, RED);
-     // statusLight.show();
-      if (airBrakeState.getPercentDeployed() > 0){
-        rocketControl.deployBrake(airBrakeState.getPercentDeployed() - 5);
-      }
-      //statusLight.setPixelColor(0, YELLOW);
-      //statusLight.show();
-      #else*/
-      rocketControl.deployBrake(0);
-      //statusLight.setPixelColor(0, RED);
-      //statusLight.show();
-      //#endif
-    }
+    if (simState.getApogee() > 0)
+      pid = PID.compute(simState.getApogee(), rocketConfig.getTargetApogee());
+
+    airBrakeState.setTargetPercent(pid);
+    rocketControl.deployBrake(airBrakeState.getDeployAngle());
+    
 
     if (((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
     {

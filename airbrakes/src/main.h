@@ -376,6 +376,32 @@ class state{
         void stepTime(); // IMPORTANT, delay the main loop to ensure proper time stepping
         //void globalizeForces();
 };
+class PIDController{
+    private:
+        float kp = rocketConfig.getKP();
+        float ki = rocketConfig.getKI();
+        float kd = rocketConfig.getKD();
+
+        float p = 0;
+        float i = 0;
+        float d = 0;
+
+        float delta_apogee_prime = 0;
+
+        float pid = 0;
+
+        float last_time;
+        float delta_t;
+        float time;
+        float computeP(float predicted_apogee, float target_apogee); // calculate the P value
+        
+
+    public:
+        void init();
+        float compute(float predicted_apogee, float target_apogee);
+        void updateTime();
+        float getDeltaT();
+};
 
 class controller{
     private:
@@ -398,11 +424,13 @@ class brakeState{
         float lastTime;
     public:
         void loadConfig(config Config);
+        void setDeltaPercent(float delta_percent);
         void setPercentDeployed(float percent);
         void setTargetPercent(float percent);
-        float getDragForceCoef();
+        float getBrakeDeployCoef(); // get the coefficient of drag given current airbrake deployment, JUST FOR AIRBRAKE
         float getDeployTime(); // get amount of time that airbrake has been deploying
         float getPercentDeployed() { return percentDeployed; }
+        float getDeployAngle(); // Use this to convert percent deployed to servo angle.
         void updateDeltaT();
         void updateDeployTime();
         void updateState();

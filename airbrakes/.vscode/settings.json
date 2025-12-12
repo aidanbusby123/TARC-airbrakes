@@ -9,5 +9,6 @@
         "initializer_list": "cpp",
         "cmath": "cpp"
     },
-    "java.project.sourcePaths": []
+    "java.project.sourcePaths": [],
+    "cmake.sourceDirectory": "/home/aidan/ws_airbrakes/airbrakes/.pio/libdeps/adafruit_feather_m0/ArduinoJson/src"
 }

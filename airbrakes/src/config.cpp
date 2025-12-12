@@ -75,6 +75,11 @@ bool config::loadConfigFromFile(){
             drag_coefficient = DEFAULT_DRAG_COEF;
         }
 
+        brakeCoef = configJSON["brake_coefficient_full_deploy"];
+        if (brakeCoef < 0){
+            handleError("Unable to load brake coefficient!");
+        }
+
         trigger_acceleration = configJSON["trigger_acceleration"];
         if (trigger_acceleration <= 0)
             trigger_acceleration = DEFAULT_TRIGGER_ACCEL;
@@ -95,6 +100,15 @@ bool config::loadConfigFromFile(){
             brake_retracted = BRAKE_RETRACTED;
             brake_deployed = BRAKE_DEPLOYED;
         }
+        kp = configJSON["kp"];
+        if (kp < 0)
+            kp = DEFAULT_KP;
+        ki = configJSON["ki"];
+        if (ki < 0)
+            ki = DEFAULT_KI;
+        kd = configJSON["kd"];
+        if (kd < 0)
+            kd = DEFAULT_KD;
 
     }
     return true;

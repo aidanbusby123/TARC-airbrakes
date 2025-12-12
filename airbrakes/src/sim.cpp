@@ -67,6 +67,8 @@ void updateSim(){
 
     last_altitude = simState.getAltitude();
     simStartTime=simState.time;
+
+    simState.setDragCoef(rocketConfig.getDragCoef() + airBrakeState.getBrakeDeployCoef());
     
     /*
     simState.setAltitude(rocketState.getAltitude());
@@ -77,6 +79,7 @@ void updateSim(){
 
     while ((simState.time-simStartTime) < SIM_TIME_S){
         last_vel = simState.getVZ();
+
         stepSim();
   /*  Serial.print("Altitude: ");
         Serial.println(simState.getAltitude());
@@ -113,15 +116,7 @@ void updateSim(){
 }
 
 void stepSim(){ // do i need to update position for intermediaries?
-    //simState.setVX(0);
-    //simState.setVY(0);
 
-    //simState.localizeAcceleration(); 
-   // simState.globalizeAcceleration();    
-
-    /*simState.setAX_Local(0);
-    simState.setAY_Local(0);
-    simState.globalizeAcceleration(); // Try this?*/
 
     /* Fixed the code, assuming that the VX_Local and VY_Local start out zeroed.*/
     copyState(k1, simState);
@@ -137,7 +132,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     
     k2.setVZ_Local(k2.getVZ_Local() + k1.getAZ_Local() * k1.delta_t * 0.5f);
-    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k2.getMass());
+    k2.setAZ_Local((-0.5 * getAirDensity() * k1.getVZ_Local() * abs(k1.getVZ_Local()) * simState.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k2.getMass());
     k2.setAX_Local(0);
     k2.setAY_Local(0);
 
@@ -158,7 +153,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     
 
     k3.setVZ_Local(k3.getVZ_Local() + k2.getAZ_Local() * k1.delta_t * 0.5f);
-    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k3.getMass());
+    k3.setAZ_Local((-0.5 * getAirDensity() * k2.getVZ_Local() * abs(k2.getVZ_Local()) * simState.getDragCoef() * rocketConfig.getRefArea() / k1.getMass()) + getThrust()/k3.getMass());
     k3.setAX_Local(0);
     k3.setAY_Local(0);
 
@@ -177,7 +172,7 @@ void stepSim(){ // do i need to update position for intermediaries?
     k3.globalizeVelocity();
 
     k4.setVZ_Local(k4.getVZ_Local() + k3.getAZ_Local() * k1.delta_t);
-    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() /k1.getMass()) + getThrust()/k4.getMass());
+    k4.setAZ_Local((-0.5 * getAirDensity() * k3.getVZ_Local() * abs(k3.getVZ_Local()) * simState.getDragCoef() * rocketConfig.getRefArea() /k1.getMass()) + getThrust()/k4.getMass());
     k4.setAX_Local(0);
     k4.setAY_Local(0);
 
@@ -210,7 +205,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
     simState.globalizeVelocity();
 
-    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * rocketConfig.getDragCoef() * rocketConfig.getRefArea() /simState.getMass()));
+    simState.setAZ_Local((-0.5 * getAirDensity() * simState.getVZ_Local() * abs(simState.getVZ_Local()) * simState.getDragCoef() * rocketConfig.getRefArea() /simState.getMass()));
    
     // gotta set these to zero to avoid fucking up next round of simulation.
     simState.setAX_Local(0);
@@ -303,7 +298,7 @@ void stepSim(){ // do i need to update position for intermediaries?
 
 
 // !!!!!
-float getAirDensity(){ // IMPORTANT!!! fix this, should not be defined here, should have option to get sim air density
+float getAirDensity(){
    // Serial.println(simState.getBaroPressure());
    // Serial.println(simState.getBaroTemperature());
     return (0.029 * rocketState.getBaroPressure() * 100.0f) / (8.31432 * (rocketState.getBaroTemperature()+273.15));
