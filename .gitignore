@@ -3,3 +3,5 @@ ground-control-station/GCS/logfile.csv
 airbrakes/src/def calc_cd(row):.py
 ground-control-station/GCS/logfile.csv
 airbrakes/src/def calc_cd(row):.py
+ahrsversion/
+src/

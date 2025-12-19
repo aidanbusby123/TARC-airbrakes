@@ -1,54 +1,16 @@
-#include <Arduino.h>
-#include <Adafruit_Sensor.h>
-#include <SensorFusion.h>
-#include <Servo.h>
-#include <Adafruit_I2CDevice.h>
-//#include <Adafruit_ZeroDMA.h>
-#include <Adafruit_ADXL343.h>
-#include <Adafruit_AHTX0.h>
-#include <Adafruit_BME280.h>
-#include <Adafruit_BMP280.h>
-#include <Adafruit_DPS310.h>
-#include <Adafruit_FXAS21002C.h>
-#include <Adafruit_FXOS8700.h>
-#include <Adafruit_HTS221.h>
-#include <Adafruit_ICM20649.h>
-#include <Adafruit_ISM330DHCX.h>
-#include <Adafruit_LIS2MDL.h>
-#include <Adafruit_LIS3MDL.h>
-#include <Adafruit_LPS2X.h>
-#include <Adafruit_LSM303_Accel.h>
-#include <Adafruit_LSM6DS33.h>
-#include <Adafruit_LSM6DS3TRC.h>
-#include <Adafruit_LSM6DSOX.h>
-#include <Adafruit_LSM9DS0.h>
-#include <Adafruit_LSM9DS1.h>
-#include <Adafruit_MLX90393.h>
-#include <Adafruit_MMC56x3.h>
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_MSA301.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_MPL3115A2.h>
-#include <Adafruit_LSM6DS33.h>
-#include <Adafruit_LPS2X.h>
-#include <Adafruit_LIS3MDL.h>
-#include <Adafruit_BNO055.h>
-#include <Adafruit_BMP3XX.h>
-#include <Adafruit_NeoPixel.h>
+
 //#include <Adafruit_Sensor_Calibration.h>
 //#include <Adafruit_Sensor_Calibration_SDFat.h>
-#include <SdFat.h>
-
 //#define AIRBRAKE_V7
 //#define DYNAMIC_DRAG
 
 #pragma once
+#include <cstdint>
+#include <stdio.h>
 //#include <Wire.h>
 
 //#include"maths.h"
-#include "config.h"
-#include "sensor_calibration.h"
-#include "coms.h"
+
 
 #define STEP_TIME 10
 #define TEST_TIME 60.0f
@@ -95,7 +57,7 @@
 #define LED_PIN 3
 
 
-extern Adafruit_NeoPixel statusLight;
+
 
 extern uint32_t RED;
 extern uint32_t GREEN;
@@ -104,33 +66,6 @@ extern uint32_t YELLOW;
 extern uint32_t WHITE;
 
 
-
-extern Adafruit_MPL3115A2 baro;
-extern Adafruit_BMP3XX bmp_baro;
-
-//V1
-extern Adafruit_LSM6DS33 lsm6ds;
-extern Adafruit_LPS25 lps;
-extern Adafruit_LIS3MDL lis3mdl;
-extern Adafruit_LSM9DS1 lsm;
- 
-
-extern Adafruit_BNO055 bno055;
-
-
-extern Adafruit_Sensor *accelerometer, *gyroscope, *magnetometer;
-extern sensorCalibration cal;
-//extern Adafruit_Sensor_Calibration_SDFat cal;
-
-extern sensors_event_t accel;
-extern sensors_event_t gyro;
-extern sensors_event_t mag;
-extern sensors_event_t tempp;
-
-extern Servo brake;
-
-//extern FatVolume fatfs;
-extern SdFat sd;
 
 enum phase {
     PAD,
@@ -378,9 +313,9 @@ class state{
 };
 class PIDController{
     private:
-        float kp = rocketConfig.getKP();
-        float ki = rocketConfig.getKI();
-        float kd = rocketConfig.getKD();
+        float kp = 0;
+        float ki = 0;
+        float kd = 0;
 
         float p = 0;
         float i = 0;
@@ -404,8 +339,6 @@ class PIDController{
 };
 
 class controller{
-    private:
-        Servo brake;
     public:
         void deployBrake(float percent);
         bool initBrake();
@@ -423,7 +356,7 @@ class brakeState{
         float Now;
         float lastTime;
     public:
-        void loadConfig(config Config);
+       // void loadConfig(config Config);
         void setDeltaPercent(float delta_percent);
         void setPercentDeployed(float percent);
         void setTargetPercent(float percent);
@@ -503,14 +436,14 @@ extern stateHistory* rocketStateHistory;
 extern stateHistory* simStateHistory;
 
 
-extern SdFile errorLog;
+//extern SdFile errorLog;
 
 
-extern uint rocketStateHistory_index;
-extern uint rocketStateHistory_size;
+extern unsigned int rocketStateHistory_index;
+extern unsigned int rocketStateHistory_size;
 
-extern uint simStateHistory_index;
-extern uint simStateHistory_size;
+extern unsigned int simStateHistory_index;
+extern unsigned int simStateHistory_size;
 
 extern state rocketState; // Rocket state
 extern state simState; // Simulation state
@@ -519,7 +452,7 @@ extern brakeState airBrakeState; // airbrake state
 
 extern status rocketStatus;
 
-extern config rocketConfig;
+//extern config rocketConfig;
 
 
 void readSensors(); // Read sensor data

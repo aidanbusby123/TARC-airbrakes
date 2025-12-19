@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "airbrakes"
+		},
+		{
+			"path": "simulation"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"array": "cpp",
+			"deque": "cpp",
+			"string": "cpp",
+			"unordered_map": "cpp",
+			"vector": "cpp",
+			"string_view": "cpp",
+			"initializer_list": "cpp",
+			"cmath": "cpp"
+		},
+		"java.project.sourcePaths": []
+	}
+}
