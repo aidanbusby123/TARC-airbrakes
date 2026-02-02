@@ -440,7 +440,6 @@ void state::reset(){
     qw = 1.0f;
     qx = 0.0f;
     qy = 0.0f;
-    qx = 0.0f;
     qz = 0.0f;
     fx_local = 0.0f;
     fy_local = 0.0f;

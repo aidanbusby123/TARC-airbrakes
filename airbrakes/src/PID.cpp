@@ -23,13 +23,13 @@ float PIDController::compute(float predicted_apogee, float target_apogee){
 
     // add in the delta time aspect
     this->d = (delta_apogee - delta_apogee_prime) * this->kd;
-    this->i += delta_apogee * this->ki;
+    this->i += delta_apogee * this->ki * dt;
     this->p = delta_apogee * this->kp;
 
     this->delta_apogee_prime = delta_apogee;
     
 
-    this->pid += p + i + d;
+    this->pid = (p + i + d); 
     
     return this->pid;
 }
