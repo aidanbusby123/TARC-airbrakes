@@ -29,7 +29,7 @@ float PIDController::compute(float predicted_apogee, float target_apogee){
     this->delta_apogee_prime = delta_apogee;
     
 
-    this->pid = (p + i + d); 
+    this->pid += (p + i + d) * dt; 
     
     return this->pid;
 }
