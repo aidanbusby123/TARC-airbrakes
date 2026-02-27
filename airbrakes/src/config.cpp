@@ -101,13 +101,13 @@ bool config::loadConfigFromFile(){
             brake_deployed = BRAKE_DEPLOYED;
         }
         kp = configJSON["kp"];
-        if (kp < 0)
+        if (kp <= 0)
             kp = DEFAULT_KP;
         ki = configJSON["ki"];
-        if (ki < 0)
+        if (ki <= 0)
             ki = DEFAULT_KI;
         kd = configJSON["kd"];
-        if (kd < 0)
+        if (kd <= 0)
             kd = DEFAULT_KD;
 
     }

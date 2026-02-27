@@ -115,7 +115,7 @@ void setupSensors(void) {
       delay(10);
     rocketState.setGroundPressure(baro.getLastConversionResults(MPL3115A2_PRESSURE));
     rocketState.setBaroTemperature(baro.getLastConversionResults(MPL3115A2_TEMPERATURE));
-    rocketState.updateState();
+    rocketState.updateState(false);
     rocketState.stepTime();
   }
 
@@ -143,7 +143,7 @@ void setupSensors(void) {
   for (int i = 0; i < 1000; i++){
     rocketState.setGroundPressure(bmp_baro.readPressure());
     rocketState.setGroundTemperature(bmp_baro.readTemperature());
-    rocketState.updateState();
+    rocketState.updateState(false);
     rocketState.stepTime();
   }
   #endif

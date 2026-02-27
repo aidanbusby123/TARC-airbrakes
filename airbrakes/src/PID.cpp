@@ -17,20 +17,54 @@ float PIDController::compute(float predicted_apogee, float target_apogee){
 
     float delta_apogee = 0;
 
-        delta_apogee = predicted_apogee - target_apogee;
+    delta_apogee = predicted_apogee - target_apogee;
+
+
 
 
 
     // add in the delta time aspect
-    this->d = (delta_apogee - delta_apogee_prime) * this->kd;
+    this->d = (delta_apogee - delta_apogee_prime) / dt * this->kd;
     this->i += delta_apogee * this->ki * dt;
+    if (this->i >= 0.5){
+        this->i = 0.5;
+    }
+    if (this->i <= -0.5)
+        this->i = -0.5;
+
+        
     this->p = delta_apogee * this->kp;
 
+    if (p < 0)
+        p = 0;
+
+    
     this->delta_apogee_prime = delta_apogee;
     
 
     this->pid += (p + i + d) * dt; 
+
     
+
+    if (pid < 0)
+        pid = 0;
+
+    if (pid > 1)
+        pid = 1;
+    
+
+    Serial.println("PID constants");
+    Serial.println(this->kp);
+    Serial.println(this->ki);
+    Serial.println(this->kd);
+
+
+    Serial.print("P: ");
+    Serial.println(this->p);
+    Serial.print("I: ");
+    Serial.println(this->i);
+    Serial.print("D: ");
+    Serial.println(this->d);
     return this->pid;
 }
 

@@ -1,6 +1,7 @@
 #include "main.h"
+#include "ekf.h"
 
-void state::updateState () { // Really only for rocketState, not for runge-kutta
+void state::updateState (bool ekf_active) { // Really only for rocketState, not for runge-kutta
   updateAirDensity();
   //Serial.println(air_density);
 
@@ -15,16 +16,20 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
   }
   #endif
 
-  updateAcceleration();
+  if (!ekf_active)
+
+    updateAcceleration();
 
   updateTime();
 
   // Update velocity values
 
+
   if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH){
     vx += ax * delta_t;
     vy += ay * delta_t;
-    vz += az * delta_t;
+    if (!ekf_active)
+      vz += az * delta_t;
   // Update position values (need to implement Kalman filter, this uses simple complimentary filter)
 
     x += vx * delta_t;
@@ -40,24 +45,31 @@ void state::updateState () { // Really only for rocketState, not for runge-kutta
   updateEulerAngles();
   //
 
+
   // Very simple complimentary filter
 
-  if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
-    altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
-    #ifndef AIRBRAKE_V7
-    baroConversionFinished = false;
-    #endif
-  } else if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH) {
-    altitude = altitude + vz * delta_t;
-  }
-  else if (stateType == SIM){
-    altitude = altitude + vz * delta_t;
+
+  if (!ekf_active){
+    
+    if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
+      altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
+      #ifndef AIRBRAKE_V7
+      baroConversionFinished = false;
+      #endif
+    } else if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH) {
+      altitude = altitude + vz * delta_t;
+    }
+    else if (stateType == SIM){
+      altitude = altitude + vz * delta_t;
 
   }
 
+  }
+  
 }
 
 void state::updateAcceleration(){
+  //localizeAcceleration(); // Testing with EKF
   globalizeAcceleration();
   az -= GRAVITY;
   localizeAcceleration();

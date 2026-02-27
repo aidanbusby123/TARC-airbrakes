@@ -295,7 +295,7 @@ void draw()
      stroke(0, 255, 0);
      line(i-1+400, -accel_z_History[i-1]*5 + 110, i+400, -accel_z_History[i]*5 + 110);
      stroke(255, 255, 255);
-     line(i-1+400, -alt_History[i-1]*15 + 140, i+400, -alt_History[i]*15 + 140);
+     line(i-1+400, -alt_History[i-1]*10 + 140, i+400, -alt_History[i]*10 + 140);
   }
   } else {}
 

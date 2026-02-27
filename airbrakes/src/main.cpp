@@ -45,6 +45,9 @@
 #include "coms.h"
 #include "telemetry.h"
 
+
+#include "ekf.h"
+
 SdFile Config;
 
 Adafruit_MPL3115A2 baro;
@@ -78,6 +81,9 @@ status rocketStatus;
 config rocketConfig;
 
 Adafruit_NeoPixel statusLight(1, 20, NEO_GRB + NEO_KHZ800);
+
+
+EKF ekf;
 
 // GLOBAL SENSOR VALUES
 
@@ -133,6 +139,8 @@ float *copyQuat; // float array to copy quaternion to RocketState
 
 void initPins();
 
+
+bool ekf_active = false;
 
 
 
@@ -247,13 +255,23 @@ void setup()
   // baro.startOneShot();
 
 
+
+
+
+
   for (int i = 0; i < (int)(5.0f / ((float)STEP_TIME / 1000.0f)); i++)
   {
     readSensors();
     //rocketState.updateTime();
-    rocketState.updateState();
+    rocketState.updateState(ekf_active);
     rocketState.stepTime();
-  }
+  } 
+  
+  ekf.init(rocketConfig.getP(), rocketConfig.getQ(), rocketConfig.getR());
+  ekf.initState(&rocketState);
+
+  ekf_active = false;
+
 
 
 
@@ -275,6 +293,8 @@ void setup()
   //runTestSim();
   //delay(1000000);
 
+
+
   
   //delay(1000);
 }
@@ -287,7 +307,7 @@ void loop()
 
   readSensors();
 
-  rocketState.updateState();
+  rocketState.updateState(ekf_active);
 
   Serial.print("# Current predicted apogee: ");
   Serial.println(rocketState.getApogee());
@@ -346,6 +366,7 @@ void loop()
     if ((rocketState.time) > BURN_TIME)
     {
       rocketState.setFlightPhase(COAST);
+
     }
     if (((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)
     {
@@ -358,10 +379,13 @@ void loop()
 
   case COAST: // If we are in the coast state of flight, meaning motor has finished burn
   
-    if (simState.getApogee() > 0)
-      pid = PID.compute(simState.getApogee(), rocketConfig.getTargetApogee());
+    if (rocketState.getApogee() > 0){
+      pid = PID.compute(rocketState.getApogee(), rocketConfig.getTargetApogee());
+      Serial.print("PID: ");
+      Serial.println(pid);
+    }  
 
-    airBrakeState.setTargetPercent(pid);
+    airBrakeState.setTargetPercent(pid* 100);
     rocketControl.deployBrake(airBrakeState.getDeployAngle());
     
 
@@ -475,6 +499,7 @@ void readSensors()
   rocketState.setAZ_Local(ACC_Z);
 
 
+
   // Use Madgwick filter to update sensor filter
 
   filter_dt = sensor_filter.deltatUpdate();
@@ -488,6 +513,20 @@ void readSensors()
   rocketState.setQuatX(copyQuat[1]);
   rocketState.setQuatY(copyQuat[2]);
   rocketState.setQuatZ(copyQuat[3]);
+
+
+
+
+  if (ekf_active == true){
+  // Use the Extended Kalman Filter to update the rocket state. Experimental
+
+  rocketState.globalizeAcceleration();
+  ekf.update(&rocketState);
+  ekf.updateState(&rocketState);
+  rocketState.localizeAcceleration();
+  }
+
+
 }
 
 void brakeTest()

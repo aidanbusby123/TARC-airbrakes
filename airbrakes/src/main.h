@@ -68,21 +68,21 @@
 
 /*##########    AIRBRAKE VERSION    ##########*/
 
-#define V2
+#define V20252
 
 /*############################################*/
 
-#ifdef V0
+#ifdef V20251
 #define MPL_BARO
 #define LSM9DS1_IMU
 
 
 
-#elif defined( V1 )
+#elif defined( V2026 )
 #define MS_BARO
 #define LSM6DSOX_LIS3MDL_IMU
 
-#elif defined ( V2 )
+#elif defined ( V20252 )
 #define BMP_BARO
 #define LSM9DS1_IMU
 
@@ -261,6 +261,9 @@ class state{
 
         statetype stateType;
 
+
+        
+
         // Get state values
 
         void reset();
@@ -376,7 +379,7 @@ class state{
 
 
         void setFlightPhase(phase flightPhase);
-        void updateState();
+        void updateState(bool ekf_active);
         
         void globalizeAcceleration();
         void globalizeVelocity();
