@@ -5,6 +5,10 @@ void state::updateState (bool ekf_active) { // Really only for rocketState, not 
   updateAirDensity();
   //Serial.println(air_density);
 
+  calcDragCoefficient();
+
+  brake_drag_coefficient = airBrakeState.getDragCoef();
+
   
 
   #ifdef DYNAMIC_DRAG
@@ -236,3 +240,7 @@ void state::updateAirDensity(){
   air_density = (((0.029 * baro_pressure * 100.0f) / (8.31432 * (baro_temperature+273.15)))); // rho = MP/RT, gas density equation
 }
 
+
+void state::calcDragCoefficient(){
+  drag_coefficient = rocket_drag_coefficient + rocketState.airBrakeState.getDragCoef();
+}

@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "simulation"
+		},
+		{
+			"path": "ground-control-station/flightdata"
 		}
 	],
 	"settings": {

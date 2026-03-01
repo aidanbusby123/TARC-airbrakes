@@ -326,6 +326,15 @@ void logState(stateHistory* destHistory, uint destHistory_index, state sourceSta
 
     destHistory[destHistory_index].drag_coefficient = sourceState.getDragCoef();
 
+
+    destHistory[destHistory_index].p = sourceState.getP();
+    destHistory[destHistory_index].i = sourceState.getI();
+    destHistory[destHistory_index].d = sourceState.getD();
+
+    destHistory[destHistory_index].pid = sourceState.getPID();
+
+    destHistory[destHistory_index].brake_target_deployment = sourceState.getBrakeTargetDeployment();
+
     destHistory[destHistory_index].flightPhase = sourceState.flightPhase;
 
 }
@@ -372,11 +381,19 @@ void logTempState(stateHistory* destHistoryTemp, stateHistory* destHistory, uint
     destHistoryTemp[i].baro_pressure = destHistory[i].baro_pressure;
 
     destHistoryTemp[i].baro_temperature = destHistory[i].baro_temperature;
-    destHistoryTemp[i].air_pressure = destHistory[i].air_pressure;
+
     destHistoryTemp[i].air_density = destHistory[i].air_density;
-    destHistoryTemp[i].air_temperature = destHistory[i].air_temperature;
+
 
     destHistoryTemp[i].drag_coefficient = destHistory[i].drag_coefficient;
+
+    destHistoryTemp[i].p = destHistory[i].p;
+    destHistoryTemp[i].i = destHistory[i].i;
+    destHistoryTemp[i].d = destHistory[i].d;
+
+    destHistoryTemp[i].pid = destHistory[i].pid;
+
+    destHistoryTemp[i].brake_target_deployment = destHistory[i].brake_target_deployment;
 
     destHistoryTemp[i].flightPhase = destHistory[i].flightPhase;
 }

@@ -3,6 +3,8 @@
 #include "sim.h"
 #include "PID.h"
 
+float SIGMA_DELTA = 0.5;
+
 void PIDController::init(config configuration){
     last_time = time =   (float)(micros()) / 1000000.0f;
     this->kp = configuration.getKP();
@@ -26,17 +28,14 @@ float PIDController::compute(float predicted_apogee, float target_apogee){
     // add in the delta time aspect
     this->d = (delta_apogee - delta_apogee_prime) / dt * this->kd;
     this->i += delta_apogee * this->ki * dt;
-    if (this->i >= 0.5){
-        this->i = 0.5;
+    if (this->i >= kp * SIGMA_DELTA * 0.25){
+        this->i = kp * SIGMA_DELTA * 0.25;
     }
-    if (this->i <= -0.5)
-        this->i = -0.5;
+    if (this->i <= - 1 * kp * SIGMA_DELTA * 0.25 )
+        this->i = -1 * kp * SIGMA_DELTA * 0.25;
 
         
     this->p = delta_apogee * this->kp;
-
-    if (p < 0)
-        p = 0;
 
     
     this->delta_apogee_prime = delta_apogee;

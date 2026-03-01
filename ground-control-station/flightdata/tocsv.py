@@ -10,8 +10,8 @@ def parse_flight_data(binary_file, csv_file):
         "mass", "time", "ax", "ay", "az", "ax_local", "ay_local", "az_local",
         "pitch", "roll", "yaw", "vx", "vy", "vz", "vx_local", "vy_local", "vz_local",
         "x", "y", "z", "qw", "qx", "qy", "qz", "apogee", "baro_altitude",
-        "altitude", "baro_pressure", "baro_temperature", "air_pressure",
-        "air_density", "air_temperature", "drag_coefficient"
+        "altitude", "baro_pressure", "baro_temperature", 
+        "air_density", "drag_coefficient", "p", "i", "d", "pid", "brake_target_deployment"
     ]
     NUM_FLOATS = len(FIELD_NAMES)
     MESSAGE_SIZE = NUM_FLOATS * FLOAT_SIZE  # Total message data size

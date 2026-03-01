@@ -68,7 +68,7 @@ void updateSim(){
     last_altitude = simState.getAltitude();
     simStartTime=simState.time;
 
-    simState.setDragCoef(rocketConfig.getDragCoef() + airBrakeState.getBrakeDeployCoef());
+    simState.setDragCoef(rocketState.getDragCoef());
     
     /*
     simState.setAltitude(rocketState.getAltitude());

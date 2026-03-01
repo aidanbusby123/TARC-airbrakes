@@ -111,18 +111,17 @@
 #define LOG_TIME_STEP 0.1
 
 
-#define DEPLOYMENT_COEFS_SIZE 3
+#define DEPLOYMENT_COEFS_SIZE 1
 #define DRAG_FORCE_COEF_COEFS_SIZE 3
 #define BRAKE_DEPLOY_TIME 200
 
 #define DEFAULT_DRAG_COEF 0.35
 
-#define SERVO_PIN 23
+#define SERVO_PIN 17
 
 #define USE_LORA_PIN 5
 #define BUZZER_PIN 2
-#define LED_PIN 3
-
+#define LED_PIN 21
 
 extern Adafruit_NeoPixel statusLight;
 
@@ -175,6 +174,60 @@ enum statetype{ // What kind of state (simulation or physical)
     ROCKET,
     SIM
 };
+class brakeState{
+    private:
+
+
+        float targetServoAngle; // The target angle for the SERVO
+
+
+        float percentDeployed;
+
+        float targetDeployAngle; // The target AIRBRAKE angle (from percent) !!!! NOT THE SERVO ANGLE
+
+
+        float r = 0.025; // Radius of servo sweeper
+        float l = 0.016; // Length of flap arm from hinge to servo arm connector
+        float s = 0.02; // Length of servo arm connector
+
+        float start_angle = 0;
+        float end_angle = 60;
+
+
+        float curDragCoefficient = 0;
+        float targetDeployArea = 0.0; // The target area
+        float targetPercent = 0.0; // target brake deployment percentage
+        float dragForceCoefCoefficients[DRAG_FORCE_COEF_COEFS_SIZE] = {0}; // polynomial coefficient to calculate drag coefficient
+        float dragForceCoefCoef = 0;
+        float deploymentCoefficients[DEPLOYMENT_COEFS_SIZE] = {0};
+        float deployTime = 0.0;
+        float delta_t = 0.0; 
+        float Now = 0.0;
+        float lastTime = 0.0;
+    public:
+        void loadConfig(config Config);
+        void setDeltaPercent(float delta_percent);
+        void setPercentDeployed(float percent);
+        void setTargetPercent(float percent);
+        float getServoAngle(); // Return the target servo angle
+
+        void calcServoAngle(float angle);
+
+        float getTargetPercent() { return targetPercent; }
+        float getBrakeDeployCoef(); // get the coefficient of drag given current airbrake deployment, JUST FOR AIRBRAKE
+        float getDeployTime(); // get amount of time that airbrake has been deploying
+        float getPercentDeployed() { return percentDeployed; }
+        float getDeployArea(); // Return the target deploy percentage
+        float getDeployAngle(); // Use this to convert percent deployed to servo angle.
+
+        float getDragCoef() { return curDragCoefficient; } // Return the current drag coefficient of the brake
+        float getDragCoefCoef() { return dragForceCoefCoef; }
+
+        void calcDeployAngle(float percent); // Actually run the calculation
+        void updateDeltaT();
+        void updateDeployTime();
+        void updateState();
+};
 
 class state{
     private:
@@ -218,7 +271,18 @@ class state{
         float apogee = 0.0f;
 
         float drag = 0.0f;
+
+        float rocket_drag_coefficient = 0.0f;
+
+
+        // Drag coefficient for the brake
+        float brake_drag_coefficient = 0.0f;
+    
+
+        // The current, dynamic drag coefficient
         float drag_coefficient = 0.0f;
+
+
 
         float baro_altitude = 0.0f; // Barometric altitude
         float ground_altitude = 0.0f; // altitude measurement for ground
@@ -242,6 +306,20 @@ class state{
         float now = 0;
 
 
+
+        // PID values, should be copied from the PID controller class to here.
+        float p = 0;
+        float i = 0;
+        float d = 0;
+
+
+        float pid = 0;
+
+        // Track the target percent deployment of the airbrakes.
+
+        float brake_target_deployment = 0;
+
+
     public:
 
         // change in time, used to calculate velocity and position
@@ -261,6 +339,8 @@ class state{
 
         statetype stateType;
 
+
+        brakeState airBrakeState;
 
         
 
@@ -310,6 +390,9 @@ class state{
 
         float getDrag() { return drag; }
         float getDragCoef() { return drag_coefficient; }
+
+        float getRocketDragCoef() { return rocket_drag_coefficient; }
+        float getBrakeDragCoef() { return brake_drag_coefficient; }
         float getRefArea() { return ref_area; }
 
         float getBaroAltitude() { return baro_altitude; }
@@ -321,6 +404,15 @@ class state{
         float getBaroTemperature() { return baro_temperature; }
 
         float getTargetApogee() { return target_apogee; }
+
+        float getP() { return p; }
+        float getI() { return i; }
+        float getD() { return d; }
+
+        float getPID() { return pid; }
+
+
+        float getBrakeTargetDeployment() { return brake_target_deployment; }
 
         float getAirPressure();
         float getAirDensity() { return air_density; }
@@ -378,6 +470,15 @@ class state{
         void setTargetApogee(float target_apogee) { this->target_apogee = target_apogee; }
 
 
+
+        void setP(float p) { this-> p = p; }
+        void setI(float i) { this->i = i; }
+        void setD(float d) { this->d = d; }
+        void setPID(float pid) { this-> pid = pid; }
+
+
+        void setBrakeTargetDeployment(float brake_target_deployment) { this->brake_target_deployment = brake_target_deployment; }
+
         void setFlightPhase(phase flightPhase);
         void updateState(bool ekf_active);
         
@@ -390,6 +491,13 @@ class state{
         float calcBaroAltitude();
 
         float calcActualTargetApogee(float comp_apogee); // IMPORTANT: calculates the *actual* target altitude based off of the temperature discrepancy from the 15C standard and actual base temp
+
+
+        // Calculate the combined drag coefficient (rocket + brake) of the rocket
+
+        void calcDragCoefficient();
+
+
 
         void updateTargetApogee(float comp_apogee);
 
@@ -439,35 +547,14 @@ class PIDController{
 class controller{
     private:
         Servo brake;
+        float servo_angle;
     public:
         void deployBrake(float percent);
         bool initBrake();
 
 };
 
-class brakeState{
-    private:
-        float percentDeployed;
-        float targetPercent; // target brake deployment percentage
-        float dragForceCoefCoefficients[DRAG_FORCE_COEF_COEFS_SIZE] = {0}; // polynomial coefficient to calculate drag coefficient
-        float deploymentCoefficients[DEPLOYMENT_COEFS_SIZE] = {0};
-        float deployTime;
-        float delta_t; 
-        float Now;
-        float lastTime;
-    public:
-        void loadConfig(config Config);
-        void setDeltaPercent(float delta_percent);
-        void setPercentDeployed(float percent);
-        void setTargetPercent(float percent);
-        float getBrakeDeployCoef(); // get the coefficient of drag given current airbrake deployment, JUST FOR AIRBRAKE
-        float getDeployTime(); // get amount of time that airbrake has been deploying
-        float getPercentDeployed() { return percentDeployed; }
-        float getDeployAngle(); // Use this to convert percent deployed to servo angle.
-        void updateDeltaT();
-        void updateDeployTime();
-        void updateState();
-};
+
 struct stateHistory{
 
   float mass = INIT_MASS;
@@ -512,12 +599,24 @@ struct stateHistory{
         float baro_pressure = 0.0f; // Barometric pressure
 
         float baro_temperature = 0.0f; // temperature
-
-         float air_pressure;
         float air_density;
-        float air_temperature;
 
         float drag_coefficient = 0.0f; // Fix this
+
+
+
+        // PID values, should be copied from the PID controller class to here.
+        float p = 0;
+        float i = 0;
+        float d = 0;
+
+
+        float pid = 0;
+
+        // Track the target percent deployment of the airbrakes.
+
+        float brake_target_deployment = 0;
+
 
         phase flightPhase = PAD;
 };
@@ -547,8 +646,6 @@ extern uint simStateHistory_size;
 
 extern state rocketState; // Rocket state
 extern state simState; // Simulation state
-
-extern brakeState airBrakeState; // airbrake state
 
 extern status rocketStatus;
 

@@ -70,8 +70,6 @@ SF sensor_filter;
 
 state rocketState;
 
-brakeState airBrakeState;
-
 controller rocketControl;
 
 PIDController PID;
@@ -80,7 +78,7 @@ status rocketStatus;
 
 config rocketConfig;
 
-Adafruit_NeoPixel statusLight(1, 20, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel statusLight(1, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 
 EKF ekf;
@@ -128,6 +126,9 @@ float test_dt_now = 0.0f;
 float test_dt_last = 0.0f;
 
 float pid = 0; // For storing PID temporarily
+
+float target_percent = 0;
+
 
 uint32_t RED;
 uint32_t GREEN;
@@ -233,8 +234,8 @@ void setup()
 
  
 
-  airBrakeState.loadConfig(rocketConfig);
-
+  rocketState.airBrakeState.loadConfig(rocketConfig);
+  
   Serial.println("# Config loaded by airbrake state");
 
   initCalibration();
@@ -270,7 +271,7 @@ void setup()
   ekf.init(rocketConfig.getP(), rocketConfig.getQ(), rocketConfig.getR());
   ekf.initState(&rocketState);
 
-  ekf_active = false;
+  ekf_active = true;
 
 
 
@@ -379,14 +380,19 @@ void loop()
 
   case COAST: // If we are in the coast state of flight, meaning motor has finished burn
   
-    if (rocketState.getApogee() > 0){
+
       pid = PID.compute(rocketState.getApogee(), rocketConfig.getTargetApogee());
       Serial.print("PID: ");
       Serial.println(pid);
-    }  
+    
 
-    airBrakeState.setTargetPercent(pid* 100);
-    rocketControl.deployBrake(airBrakeState.getDeployAngle());
+    rocketState.setPID(pid);
+
+
+    rocketState.airBrakeState.setTargetPercent(pid * 100.0);
+    rocketControl.deployBrake(rocketState.airBrakeState.getDeployAngle());
+
+    rocketState.setBrakeTargetDeployment(rocketState.airBrakeState.getTargetPercent());
     
 
     if (((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)

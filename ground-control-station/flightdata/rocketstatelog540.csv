@@ -1,0 +1,1 @@
+msg_type,mass,time,ax,ay,az,ax_local,ay_local,az_local,pitch,roll,yaw,vx,vy,vz,vx_local,vy_local,vz_local,x,y,z,qw,qx,qy,qz,apogee,baro_altitude,altitude,baro_pressure,baro_temperature,air_density,drag_coefficient,p,i,d,pid,brake_target_deployment

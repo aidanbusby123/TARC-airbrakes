@@ -3,6 +3,7 @@
 
 
 void controller::deployBrake(float angle){
+    servo_angle = angle;
     brake.write(angle);
 }
 
@@ -17,10 +18,14 @@ bool controller::initBrake(){
 
 void brakeState::loadConfig(config Config){
     float *ptr;
-    ptr = Config.getDragForceCoefCoefs();
+    ptr = Config.getBrakeDragForceCoefCoefs();
     dragForceCoefCoefficients[0] = ptr[0];
     dragForceCoefCoefficients[1] = ptr[1];
     dragForceCoefCoefficients[2] = ptr[2];
+
+    dragForceCoefCoef = dragForceCoefCoefficients[0];
+
+
     Serial.print("Airbrake Drag Coefs: ");
     Serial.print(ptr[0]);
     Serial.print(", ");
@@ -45,20 +50,43 @@ void brakeState::setDeltaPercent(float delta_percent){
 }
 void brakeState::setTargetPercent(float percent){ // set the percent deployed target
     targetPercent = percent;
+    calcDeployAngle(percent);
+    calcServoAngle(targetDeployAngle);
+    
 }
 
-float brakeState::getDeployAngle(){
-    return targetPercent;
+void brakeState::calcDeployAngle(float percent){
+
+    targetDeployAngle = start_angle + percent / 100.0 * end_angle;
 }
+
+
+float brakeState::getDeployAngle(){
+
+    return targetDeployAngle;
+}
+
+void brakeState::calcServoAngle(float angle){
+    //if (sin(PI * angle / 180) > 0.)
+    //targetServoAngle = 180 / PI * acos((pow(r, 2) + 2 * pow(l, 2) * (1 + cos(PI * angle/180)) - pow(s, 2))/(2 * l * r * sin(PI * angle / 180)));
+    targetServoAngle = (float)45.0/60.0 * angle;
+}
+float brakeState::getServoAngle(){
+
+    return targetServoAngle;
+}
+
+
+
 float brakeState::getBrakeDeployCoef(){
     float dragForceCoef = 0.0f;
-    if (DRAG_FORCE_COEF_COEFS_SIZE > 0){
+    /*if (DRAG_FORCE_COEF_COEFS_SIZE > 0){
         for (int i = 0; i < DRAG_FORCE_COEF_COEFS_SIZE; i++){
             dragForceCoef += dragForceCoefCoefficients[i] * pow(percentDeployed, i);
         }
     } else {
         dragForceCoef = targetPercent * rocketConfig.getBrakeCoef() + (1 - targetPercent) * rocketConfig.getDragCoef();
-    }
+    }*/
     return dragForceCoef;
 }
 

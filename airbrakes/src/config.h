@@ -4,20 +4,22 @@
 #pragma once
 
 #define BRAKE_RETRACTED 0
-#define BRAKE_DEPLOYED 275
+#define BRAKE_DEPLOYED 45
 
 #define DEFAULT_TARGET_APOGEE 241
 #define DEFAULT_REF_AREA 0.00343
 
 #define DEFAULT_KP 0.2
-#define DEFAULT_KI 0.01
-#define DEFAULT_KD 0.1
+#define DEFAULT_KI 0.05
+#define DEFAULT_KD 0.2
 
 const float DEFAULT_DRAG_FORCE_COEF_COEFS[3] = {0, -0.00101833, 0.00051306};
 
+const float DEFAULT_DRAG_COEF = 0.5;
+
 class config {
     private:
-        float dragForceCoefCoefs[3] = {0, 0, 0};
+        float brakeDragForceCoefCoefs[1] = {DEFAULT_DRAG_COEF};
         float brakeCoef = -1.0;
         float deploymentTimeCoefs[3];    
         float ref_area;
@@ -34,9 +36,9 @@ class config {
         float ki = DEFAULT_KI;
         float kd = DEFAULT_KD;
 
-        float p_var[4] = {0.3, 0.3, 0.3, 0.3};
-        float q_var[4] = {0.1, 0.1, 0.1, 0.1};
-        float r_var[2] = {0.1, 0.25};
+        float p_var[4] = {1, 1, 1, 1};
+        float q_var[4] = {0.05, 0.05, 0.01, 0.005};
+        float r_var[2] = {0.5, 1.0};
 
     public:
         float ground_lora_address;
@@ -47,8 +49,8 @@ class config {
         void loadConfigFromPacket(char* configdata);
         void loadConfigDefaults();
 
-        float *getDragForceCoefCoefs(){
-            return dragForceCoefCoefs;
+        float *getBrakeDragForceCoefCoefs(){
+            return brakeDragForceCoefCoefs;
         }
 
         float getDragCoef() { return drag_coefficient; }

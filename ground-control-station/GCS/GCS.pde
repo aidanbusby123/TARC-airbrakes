@@ -42,6 +42,18 @@ float vy_local = 0.0F;
 float vz_local = 0.0F;
 
 
+float p = 0.0;
+float i = 0.0;
+float d = 0.0;
+
+float pid = 0.0;
+
+float brake_target_deployment = 0.0;
+
+
+float cd = 0.0;
+
+
 int MSG_START = 0xFa;
 int MSG_END = 0xFb;
 
@@ -92,6 +104,12 @@ GLabel baro_alt_Label;
 GLabel apogee_Label;
 GLabel pitchLabel;
 
+GLabel PLabel, ILabel, DLabel, PIDLabel;
+
+GLabel brakeTargetDeploymentLabel;
+
+GLabel dragCoefLabel;
+
 void setup()
 {
   size(1920, 1000, OPENGL);
@@ -139,7 +157,7 @@ void setup()
   
   time_Label = new GLabel(this, 10, 20, 200, 20, "Time: 0.0");
   alt_Label = new GLabel(this, 10, 50, 200, 20, "Altitude: 0.0");
-  baro_alt_Label=new GLabel(this, 10, 380, 200, 20, "Baro altitude: 0.0");
+  baro_alt_Label=new GLabel(this, 200, 50, 200, 20, "Baro altitude: 0.0");
   apogee_Label = new GLabel(this, 10, 80, 200, 20, "Predicted Apogee: 0.0");
  
   
@@ -154,6 +172,16 @@ void setup()
   vel_x_Label = new GLabel(this, 10, 290, 200, 20, "VX: 0.0");
   vel_y_Label = new GLabel(this, 10, 320, 200, 20, "VY: 0.0");
   vel_z_Label = new GLabel(this, 10, 350, 200, 20, "VZ: 0.0");
+  
+  PLabel = new GLabel(this, 10, 380, 200, 20, "P: 0.0");
+  ILabel = new GLabel(this, 10, 410, 200, 20, "I: 0.0");
+  DLabel = new GLabel(this, 10, 440, 200, 20, "D: 0.0");
+  
+  PIDLabel = new GLabel(this, 10, 470, 200, 20, "PID: 0.0");
+  
+  brakeTargetDeploymentLabel = new GLabel(this, 10, 500, 200, 20, "T Dep: 0.0");
+  
+  dragCoefLabel = new GLabel(this, 10, 530, 200, 20, "CD: 0.0");
   
   
   Font font = new Font("Monospaced", Font.PLAIN, 20);
@@ -174,6 +202,18 @@ void setup()
   vel_x_Label.setFont(font);
   vel_y_Label.setFont(font);
   vel_z_Label.setFont(font);
+  
+  PLabel.setFont(font);
+  ILabel.setFont(font);
+  DLabel.setFont(font);
+  
+  PIDLabel.setFont(font);
+  
+  brakeTargetDeploymentLabel.setFont(font);
+  
+  dragCoefLabel.setFont(font);
+  
+  
   
   
   
@@ -196,6 +236,18 @@ void setup()
   dataPanel.addControl(alt_Label);
   dataPanel.addControl(apogee_Label);
   dataPanel.addControl(baro_alt_Label);
+  
+  dataPanel.addControl(PLabel);
+  dataPanel.addControl(ILabel);
+  dataPanel.addControl(DLabel);
+  
+  dataPanel.addControl(PIDLabel);
+  
+  dataPanel.addControl(brakeTargetDeploymentLabel);
+  
+  dataPanel.addControl(dragCoefLabel);
+  
+  
   
   
   
@@ -246,6 +298,16 @@ void draw()
   vel_x_Label.setText("VX: " + nf(vx, 1, 2));
   vel_y_Label.setText("VY: " + nf(vy, 1, 2));
   vel_z_Label.setText("VZ: " + nf(vz, 1, 2));
+  
+  PLabel.setText("P: " + nf(p, 1, 2));
+  ILabel.setText("I: " + nf(i, 1, 2));
+  DLabel.setText("D: " + nf(d, 1, 2));
+  
+  PIDLabel.setText("PID: " + nf(pid, 1, 2));
+  
+  brakeTargetDeploymentLabel.setText("T dep: " + nf(brake_target_deployment, 1, 2));
+  
+  dragCoefLabel.setText("CD: " + nf(cd, 1, 2));
 
 
   
@@ -431,6 +493,17 @@ void processMessage(int type, byte[] data) {
         
         apogee = floatData[24];
         alt = floatData[26];
+        
+        cd = floatData[30];
+        p = floatData[31];
+        i = floatData[32];
+        d = floatData[33];
+        
+        pid = floatData[34];
+        
+        brake_target_deployment = floatData[35];
+        
+        
         
         dataHistory.add(floatData);
       //  println("Float Data: " + join(str(floatToHexString\\\(floatData)), ", "));

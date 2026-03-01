@@ -52,9 +52,9 @@ bool config::loadConfigFromFile(){
         }
 
         for (int i = 0; i < 3; i++){
-            dragForceCoefCoefs[i] = configJSON["drag_force_coef_coefs"][i];
-            if (dragForceCoefCoefs[i] < 0)
-                dragForceCoefCoefs[i] = 0;
+            brakeDragForceCoefCoefs[i] = configJSON["brake_drag_force_coef_coefs"][i];
+            if (brakeDragForceCoefCoefs[i] < 0)
+                brakeDragForceCoefCoefs[i] = 0;
         }
 
         for (int i = 0; i < 3; i++){
@@ -126,7 +126,7 @@ void config::loadConfigFromPacket(char *configdata){
     ref_area = configJSON["ref_area"];
 
     for (int i = 0; i < 3; i++){
-        dragForceCoefCoefs[i] = configJSON["drag_force_coef_coefs"][i];
+        brakeDragForceCoefCoefs[i] = configJSON["drag_force_coef_coefs"][i];
     }
     ground_lora_address = configJSON["ground_lora_address"];
     Serial.println("config loaded");
@@ -136,7 +136,7 @@ void config::loadConfigDefaults(){
     target_apogee = DEFAULT_TARGET_APOGEE;
     ref_area = DEFAULT_REF_AREA;
     for (int i = 0; i < 3; i++){
-        dragForceCoefCoefs[i] = DEFAULT_DRAG_FORCE_COEF_COEFS[i];
+        brakeDragForceCoefCoefs[i] = DEFAULT_DRAG_FORCE_COEF_COEFS[i];
     }
     pressure = 1013.25;
     temperature = 20.0;
