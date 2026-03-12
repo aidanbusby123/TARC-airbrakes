@@ -27,6 +27,14 @@ float PIDController::compute(float predicted_apogee, float target_apogee){
 
     // add in the delta time aspect
     this->d = (delta_apogee - delta_apogee_prime) / dt * this->kd;
+
+    if (this->d < -5)
+        this->d = -5;
+
+    if (this->d > 5)
+        this-> d = 5;
+
+        
     this->i += delta_apogee * this->ki * dt;
     if (this->i >= kp * SIGMA_DELTA * 0.25){
         this->i = kp * SIGMA_DELTA * 0.25;
@@ -50,6 +58,8 @@ float PIDController::compute(float predicted_apogee, float target_apogee){
 
     if (pid > 1)
         pid = 1;
+    
+    
     
 
     Serial.println("PID constants");

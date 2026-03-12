@@ -68,7 +68,7 @@
 
 /*##########    AIRBRAKE VERSION    ##########*/
 
-#define V20252
+#define V20262
 
 /*############################################*/
 
@@ -82,9 +82,13 @@
 #define MS_BARO
 #define LSM6DSOX_LIS3MDL_IMU
 
-#elif defined ( V20252 )
+#elif defined ( V20262 )
 #define BMP_BARO
 #define LSM9DS1_IMU
+
+#elif defined ( V20262_LSM6 )
+#define BMP_BARO
+#define LSM9DSOX_LIS3MDL_IMU
 
 
 #else
@@ -139,9 +143,14 @@ extern Adafruit_BMP3XX bmp_baro;
 //V1
 extern Adafruit_LSM6DS33 lsm6ds;
 extern Adafruit_LPS25 lps;
-extern Adafruit_LIS3MDL lis3mdl;
+extern Adafruit_LIS3MDL lis;
+
+#ifdef LSM9DS1_IMU
 extern Adafruit_LSM9DS1 lsm;
- 
+
+#elif defined( LSM6DSOX_LIS3MDL_IMU )
+extern Adafruit_LSM6DSOX lsm;
+#endif
 
 extern Adafruit_BNO055 bno055;
 
@@ -456,6 +465,9 @@ class state{
 
         void setDrag(float drag) { this->drag = drag; }
         void setDragCoef(float drag_coefficient) { this->drag_coefficient = drag_coefficient; }
+
+        void setBrakeDragCoef(float brake_drag_coef) { this->brake_drag_coefficient = brake_drag_coef; }
+        void setRocketDragCoef(float rocket_drag_coef) { this->rocket_drag_coefficient = rocket_drag_coef; }
         void setRefArea(float ref_area) { this->ref_area = ref_area; }
 
         void setBaroAltitude(float baro_altitude) { this->baro_altitude = baro_altitude; }

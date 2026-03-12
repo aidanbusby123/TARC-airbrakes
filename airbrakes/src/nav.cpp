@@ -7,7 +7,6 @@ void state::updateState (bool ekf_active) { // Really only for rocketState, not 
 
   calcDragCoefficient();
 
-  brake_drag_coefficient = airBrakeState.getDragCoef();
 
   
 
@@ -57,7 +56,7 @@ void state::updateState (bool ekf_active) { // Really only for rocketState, not 
     
     if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
       altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
-      #ifndef AIRBRAKE_V7
+      #ifdef V20262
       baroConversionFinished = false;
       #endif
     } else if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH) {
@@ -242,5 +241,6 @@ void state::updateAirDensity(){
 
 
 void state::calcDragCoefficient(){
-  drag_coefficient = rocket_drag_coefficient + rocketState.airBrakeState.getDragCoef();
+  drag_coefficient = rocket_drag_coefficient + airBrakeState.getDragCoef();
+  brake_drag_coefficient = airBrakeState.getDragCoef();
 }

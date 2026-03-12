@@ -208,16 +208,18 @@ void setup()
 
   Serial.println("# Config init");
   rocketConfig.loadConfigFromFile();
-  rocketControl.deployBrake(0);
+  rocketControl.deployBrake(35);
   //Serial.println("brake set to zero");
   delay(1000);
-  rocketControl.deployBrake(75);
+  //rocketControl.deployBrake(80);
   //Serial.println("brake set to 75");
   delay(1000);
-  rocketControl.deployBrake(0);
+  rocketControl.deployBrake(35);
 
   rocketState.setMass(rocketConfig.getMass());
   rocketState.setDragCoef(rocketConfig.getDragCoef());
+  rocketState.setRocketDragCoef(rocketConfig.getDragCoef());
+
   rocketState.setRefArea(rocketConfig.getRefArea());
   Serial.println("# Config: ");
   Serial.print("  ## Drag Coef: ");
@@ -235,6 +237,8 @@ void setup()
  
 
   rocketState.airBrakeState.loadConfig(rocketConfig);
+
+  rocketState.setBrakeDragCoef(rocketState.airBrakeState.getDragCoef());
   
   Serial.println("# Config loaded by airbrake state");
 
@@ -271,7 +275,7 @@ void setup()
   ekf.init(rocketConfig.getP(), rocketConfig.getQ(), rocketConfig.getR());
   ekf.initState(&rocketState);
 
-  ekf_active = true;
+  ekf_active = rocketConfig.getUseEKF();
 
 
 
@@ -480,14 +484,23 @@ void readSensors()
 
   #endif
 
-  
+  #ifdef LSM9DS1_IMU  
 
   lsm.getEvent(&accel, &mag, &gyro, &tempp);
 
+  #elif defined(LSM6DSOX_LIS3MDL_IMU)
+
+  lsm.getEvent(&accel, &gryo);
+
+  lis.getEvent(&mag);
+
+  #endif
 
 
   calibrateSensors();
   
+
+  #ifdef LSM9DS1_IMU
 
   ACC_X = -accel.acceleration.x; // float, m/s2
   ACC_Y = accel.acceleration.y;
@@ -496,6 +509,18 @@ void readSensors()
   GYRO_X = -gyro.gyro.x; // float, rad/s
   GYRO_Y = gyro.gyro.y;
   GYRO_Z = gyro.gyro.z;
+
+  #elif defined (LSM6DSOX_LIS3MDL_IMU)
+
+  ACC_X = accel.acceleration.x;
+  ACC_Y = accel.acceleration.y;
+  ACC_Z = accel.acceleration.z;
+
+  GYRO_X = gyro.gyro.x;
+  GYRO_Y = gyro.gyro.y;
+  GYRO_Z = gyro.gyro.z;
+
+  #endif
 
   MAG_X = mag.magnetic.x;
   MAG_Y = mag.magnetic.y;

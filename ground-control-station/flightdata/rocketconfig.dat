@@ -1,0 +1,1 @@
+{"ref_area": 0.00343, "drag_coefficient": 0.39, "brake_coefficient_full_deploy": 1.0, "trigger_acceleration": 10.0, "max_time":40.0, "brake_retracted": 35.0, "brake_deployed": 80.0, "kp": 0.675, "ki": 0.3, "kd": 0.05, "mass": 0.5}

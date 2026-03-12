@@ -110,6 +110,19 @@ bool config::loadConfigFromFile(){
         if (kd <= 0)
             kd = DEFAULT_KD;
 
+        
+        int ekfint = configJSON["use_ekf"];
+
+        if (ekfint <= 0){
+            use_ekf = false;
+        }
+        else if (ekfint == 1){
+            use_ekf = true;
+        }
+
+
+        
+
     }
     return true;
 }

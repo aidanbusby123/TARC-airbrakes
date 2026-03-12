@@ -1,6 +1,7 @@
 #include "main.h"
 #include <Arduino.h>
 #include <Adafruit_LSM9DS1.h>
+#include <Adafruit_LSM6DSOX.h>
 //#include <Adafruit_Sensor_Calibration.h>
 //include <Adafruit_Sensor_Calibration_SDFat.h>
 //#include <BNO055.h>
@@ -11,7 +12,18 @@
 #include <Adafruit_BNO055.h>
 
 //#define BNO055_SAMPLERATE_DELAY_MS 10
+
+#ifdef LSM9DS1_IMU
 Adafruit_LSM9DS1 lsm;
+#endif
+
+#ifdef LSM9DSOX_LIS3MDL_IMU
+Adafruit_LSM6DSOX lsm;
+
+Adafruit_LIS3MDL lis;
+
+
+#endif
 
 //Adafruit_BMP3XX bmp_baro;
 
@@ -46,7 +58,13 @@ bool initSensors(void) {
   return false;
  }*/
 
+  #ifdef LSM9DS1_IMU
   lsm = Adafruit_LSM9DS1();
+
+  #elif defined(LSM6DSOX_LIS3MDL_IMU)
+  lsm = Adafruit_LSM6DSOX();
+
+  #endif
 
   #ifdef BMP_BARO
 
@@ -77,6 +95,16 @@ bool initSensors(void) {
   }
 
   #endif
+
+  #ifdef LSM6DSOX_LIS3MDL_IMU
+
+  if (!lis.begin_I2C()){
+    handleError("Can't init magnetometer");
+  }
+
+  #endif
+
+
  return true;
   //bno055.write8(BNO055_ACCEL_DATA_X_LSB_ADDR, 0x0F); // change accel range to 16g
 }
@@ -148,11 +176,25 @@ void setupSensors(void) {
   }
   #endif
 
+  #ifdef LSM9DS1_IMU
 
   lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_16G, lsm.LSM9DS1_ACCELDATARATE_119HZ);
   lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS);
   lsm.setupGyro(lsm.LSM9DS1_GYROSCALE_2000DPS);
 
+  #elif defined(LSM6DSOX_LIS3MDL_IMU)
+
+  lis.setOperationMode(LIS3MDL_CONTINUOUSMODE);
+
+
+  lis.setPerformanceMode(LIS3MDL_MEDIUMMODE);
+
+
+  lis.setDataRate(LIS3MDL_DATARATE_155_HZ);
+
+  
+
+  #endif
 
  Serial.println("setup_sensors check 2");
 

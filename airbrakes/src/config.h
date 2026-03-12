@@ -3,8 +3,8 @@
 #include <SdFat.h>
 #pragma once
 
-#define BRAKE_RETRACTED 0
-#define BRAKE_DEPLOYED 45
+#define BRAKE_RETRACTED 35
+#define BRAKE_DEPLOYED 80
 
 #define DEFAULT_TARGET_APOGEE 241
 #define DEFAULT_REF_AREA 0.00343
@@ -37,8 +37,12 @@ class config {
         float kd = DEFAULT_KD;
 
         float p_var[4] = {1, 1, 1, 1};
-        float q_var[4] = {0.05, 0.05, 0.01, 0.005};
+        float q_var[4] = {0.5, 0.5, 0.1, 0.4};
         float r_var[2] = {0.5, 1.0};
+
+
+        bool use_ekf = false;
+
 
     public:
         float ground_lora_address;
@@ -71,6 +75,10 @@ class config {
         float* getP() { return p_var; }
         float* getQ() { return q_var; }
         float* getR() { return r_var; }
+        
+        float getUseEKF(){
+            return use_ekf;
+        }
 };
 
 //SdFile configFile;

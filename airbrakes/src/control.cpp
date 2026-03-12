@@ -32,6 +32,10 @@ void brakeState::loadConfig(config Config){
     Serial.print(ptr[1]);
     Serial.print(", ");
     Serial.println(ptr[2]);
+
+    start_angle = Config.getBrakeRetracted();
+
+    end_angle = Config.getBrakeDeployed();
 }
 
 void brakeState::setPercentDeployed(float percent){ // set the current percent deployed
@@ -52,7 +56,7 @@ void brakeState::setTargetPercent(float percent){ // set the percent deployed ta
     targetPercent = percent;
     calcDeployAngle(percent);
     calcServoAngle(targetDeployAngle);
-    
+    curDragCoefficient = dragForceCoefCoef * targetPercent/100.0f;
 }
 
 void brakeState::calcDeployAngle(float percent){
@@ -69,7 +73,7 @@ float brakeState::getDeployAngle(){
 void brakeState::calcServoAngle(float angle){
     //if (sin(PI * angle / 180) > 0.)
     //targetServoAngle = 180 / PI * acos((pow(r, 2) + 2 * pow(l, 2) * (1 + cos(PI * angle/180)) - pow(s, 2))/(2 * l * r * sin(PI * angle / 180)));
-    targetServoAngle = (float)45.0/60.0 * angle;
+    targetServoAngle = (float)(angle/60.0)*(end_angle-start_angle) + start_angle;
 }
 float brakeState::getServoAngle(){
 
