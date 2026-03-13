@@ -95,6 +95,9 @@ float BMP_TEMPERATURE;
 float LPS_PRESSURE;
 float LPS_TEMP;
 
+float PRESSURE;
+float TEMPERATURE;
+
 float ACC_X = 0.0f;
 float ACC_Y = 0.0f;
 float ACC_Z = 0.0f;
@@ -462,7 +465,7 @@ void readSensors()
   bmp_baro.performReading();
   
 
-  #else
+  #elif defined(MPL_BARO)
 
   if (baro.conversionComplete())
   {
@@ -482,6 +485,26 @@ void readSensors()
     // calibrateSensors();
   }
 
+  #elif defined(MS_BARO)
+
+  if (ms_baro.read() != MS5611_READ_OK){
+    handleError("MS BARO READ ERROR");
+  }
+
+  PRESSURE = ms_baro.getPressure();
+
+  TEMPERATURE = ms_baro.getTemperature();
+
+
+  rocketState.setBaroPressure(PRESSURE);
+  rocketState.setBaroTemperature(TEMPERATURE);
+
+  rocketState.baroConversionFinished = true;
+
+  rocketState.setBaroAltitude(rocketState.calcBaroAltitude());
+
+  rocketState.updateAirDensity();
+
   #endif
 
   #ifdef LSM9DS1_IMU  
@@ -490,7 +513,7 @@ void readSensors()
 
   #elif defined(LSM6DSOX_LIS3MDL_IMU)
 
-  lsm.getEvent(&accel, &gryo);
+  lsm.getEvent(&accel, &gyro, &tempp);
 
   lis.getEvent(&mag);
 

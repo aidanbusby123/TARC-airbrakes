@@ -35,6 +35,8 @@
 #include <Adafruit_BNO055.h>
 #include <Adafruit_BMP3XX.h>
 #include <Adafruit_NeoPixel.h>
+#include <MS5611.h>
+
 //#include <Adafruit_Sensor_Calibration.h>
 //#include <Adafruit_Sensor_Calibration_SDFat.h>
 #include <SdFat.h>
@@ -68,7 +70,7 @@
 
 /*##########    AIRBRAKE VERSION    ##########*/
 
-#define V20262
+#define V2026
 
 /*############################################*/
 
@@ -139,6 +141,12 @@ extern uint32_t WHITE;
 
 extern Adafruit_MPL3115A2 baro;
 extern Adafruit_BMP3XX bmp_baro;
+
+#ifdef MS_BARO
+
+extern MS5611 ms_baro;
+
+#endif
 
 //V1
 extern Adafruit_LSM6DS33 lsm6ds;

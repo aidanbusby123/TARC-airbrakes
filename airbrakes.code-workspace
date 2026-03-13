@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "ground-control-station/flightdata"
+		},
+		{
+			"path": "ground-control-station"
 		}
 	],
 	"settings": {

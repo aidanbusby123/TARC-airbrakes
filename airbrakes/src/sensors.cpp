@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <Adafruit_LSM9DS1.h>
 #include <Adafruit_LSM6DSOX.h>
+#include <MS5611.h>
 //#include <Adafruit_Sensor_Calibration.h>
 //include <Adafruit_Sensor_Calibration_SDFat.h>
 //#include <BNO055.h>
@@ -17,11 +18,18 @@
 Adafruit_LSM9DS1 lsm;
 #endif
 
-#ifdef LSM9DSOX_LIS3MDL_IMU
+#ifdef LSM6DSOX_LIS3MDL_IMU
 Adafruit_LSM6DSOX lsm;
 
 Adafruit_LIS3MDL lis;
 
+
+#endif
+
+
+#ifdef MS_BARO
+
+MS5611 ms_baro;
 
 #endif
 
@@ -87,10 +95,22 @@ bool initSensors(void) {
 
   #endif
 
+
+  #ifdef MS_BARO
+
+  if (!ms_baro.begin()){
+    handleError("Can't init MS5611 barometer");
+  }
+
+  ms_baro.setOversampling(OSR_ULTRA_LOW);
+
+
+  #endif
+
   #ifdef LSM9DS1_IMU
 
   if (!lsm.begin()){
-    handleError("Can't init accelerometer");
+    handleError("Can't init LSM9DS1 accelerometer");
     return false;
   }
 
@@ -98,6 +118,9 @@ bool initSensors(void) {
 
   #ifdef LSM6DSOX_LIS3MDL_IMU
 
+  if (!lsm.begin_I2C()){
+    handleError("Can't init LSM6DSOX accelerometer");
+  }
   if (!lis.begin_I2C()){
     handleError("Can't init magnetometer");
   }
@@ -192,7 +215,7 @@ void setupSensors(void) {
 
   lis.setDataRate(LIS3MDL_DATARATE_155_HZ);
 
-  
+
 
   #endif
 
