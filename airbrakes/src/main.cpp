@@ -211,13 +211,13 @@ void setup()
 
   Serial.println("# Config init");
   rocketConfig.loadConfigFromFile();
-  rocketControl.deployBrake(35);
+  rocketControl.deployBrake(rocketConfig.getBrakeRetracted());
   //Serial.println("brake set to zero");
   delay(1000);
   //rocketControl.deployBrake(80);
   //Serial.println("brake set to 75");
-  delay(1000);
-  rocketControl.deployBrake(35);
+  //delay(1000);
+  //rocketControl.deployBrake(35);
 
   rocketState.setMass(rocketConfig.getMass());
   rocketState.setDragCoef(rocketConfig.getDragCoef());
@@ -320,6 +320,8 @@ void loop()
   Serial.print("# Current predicted apogee: ");
   Serial.println(rocketState.getApogee());
 
+
+  readSerial();
 
   switch (rocketState.flightPhase)
   {

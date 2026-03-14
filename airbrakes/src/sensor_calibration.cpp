@@ -62,7 +62,7 @@ bool sensorCalibration::saveCalibration(){
 }
 
 bool sensorCalibration::loadCalibrationFromFile(){
-    if (!calfile.open(calfilename, O_READ | O_CREAT )){
+    if (!calfile.open(calfilename, O_RDWR | O_CREAT )){
         sd.errorHalt("unable to open calibration file");
         return false;
     }
@@ -70,7 +70,7 @@ bool sensorCalibration::loadCalibrationFromFile(){
     DeserializationError error = deserializeJson(calibJSON, calfile);
     if (error) {
         Serial.println(F("Failed to read file"));
-        return false;
+        
     }
 
     calfile.close();

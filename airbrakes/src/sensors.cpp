@@ -72,6 +72,7 @@ bool initSensors(void) {
   #elif defined(LSM6DSOX_LIS3MDL_IMU)
   lsm = Adafruit_LSM6DSOX();
 
+
   #endif
 
   #ifdef BMP_BARO

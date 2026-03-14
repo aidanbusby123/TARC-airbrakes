@@ -70,7 +70,7 @@
 
 /*##########    AIRBRAKE VERSION    ##########*/
 
-#define V2026
+#define V20262_LSM6
 
 /*############################################*/
 
@@ -90,7 +90,7 @@
 
 #elif defined ( V20262_LSM6 )
 #define BMP_BARO
-#define LSM9DSOX_LIS3MDL_IMU
+#define LSM6DSOX_LIS3MDL_IMU
 
 
 #else
