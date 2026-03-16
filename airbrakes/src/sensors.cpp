@@ -126,6 +126,8 @@ bool initSensors(void) {
     handleError("Can't init magnetometer");
   }
 
+
+
   #endif
 
 
@@ -215,6 +217,14 @@ void setupSensors(void) {
 
 
   lis.setDataRate(LIS3MDL_DATARATE_155_HZ);
+
+  lis.setRange(LIS3MDL_RANGE_4_GAUSS);
+
+
+
+  lsm.setAccelRange(LSM6DS_ACCEL_RANGE_16_G);
+  lsm.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);
+
 
 
 
