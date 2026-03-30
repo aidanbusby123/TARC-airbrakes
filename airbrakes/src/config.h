@@ -26,6 +26,7 @@ class config {
         float target_apogee;
         float temperature;
         float pressure;
+        float baro_gain;
         float max_time;
         float drag_coefficient;
         float trigger_acceleration;
@@ -36,12 +37,20 @@ class config {
         float ki = DEFAULT_KI;
         float kd = DEFAULT_KD;
 
-        float p_var[4] = {1, 1, 1, 1};
-        float q_var[4] = {0.5, 0.5, 0.1, 0.4};
+        float p_var[5] = {1, 1, 1, 1, 1};
+        float q_var[5] = {0.5, 0.5, 0.1, 0.01, 0.1};
         float r_var[2] = {0.5, 1.0};
 
 
+        float s;
+        float l;
+        float r;
+        float w;
+        float h;
+
         bool use_ekf = false;
+
+        bool use_brake_formula = false;
 
 
     public:
@@ -64,6 +73,7 @@ class config {
         float getTargetApogee();
         float getTemperature() { return temperature; }
         float getPressure() { return pressure; }
+        float getBaroGain() { return baro_gain; }
         float getMaxTime() { return max_time; }
         float getTriggerAcceleration() { return trigger_acceleration; }
         float getBrakeRetracted() { return brake_retracted; }
@@ -75,10 +85,18 @@ class config {
         float* getP() { return p_var; }
         float* getQ() { return q_var; }
         float* getR() { return r_var; }
-        
+
+        float getr() { return r; }
+        float gets() { return s; }
+        float getl() { return l; }
+        float getw() { return w; }
+        float geth() { return h; }
+
         float getUseEKF(){
             return use_ekf;
         }
+
+        float getUseBrakeFormula(){ return use_brake_formula; }
 };
 
 //SdFile configFile;

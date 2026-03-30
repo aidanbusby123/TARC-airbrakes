@@ -3,6 +3,14 @@
 #include <SdFat.h>
 #include <ArduinoJson.h>
 SdFile configFile;
+
+
+#define R_DEFAULT 0.025
+#define S_DEFAULT 0.02
+#define L_DEFAULT 0.016
+#define H_DEFAULT 0.016
+#define W_DEFAULT 0.03
+
 bool initConfig(){
     /*if (!configFile.exists("config.dat")){
         sd.errorHalt("Config file does not exist!");
@@ -70,12 +78,52 @@ bool config::loadConfigFromFile(){
             ground_lora_address = 0;
         }
 
+        baro_gain = configJSON["baro_gain"];
+
+        if (baro_gain <= 0){
+            baro_gain = BARO_GAIN;
+        }
+
+        int int_brake_formula = configJSON["use_brake_formula"];
+        
+        if (int_brake_formula == 0)
+            use_brake_formula = false;
+        else
+            use_brake_formula = true;
+
+
+        r = configJSON["r"];
+
+        if (r <= 0){
+            r = R_DEFAULT;
+        }
+        s = configJSON["s"];
+
+        if (s <= 0)
+            s = S_DEFAULT;
+        l = configJSON["l"];
+
+        if (l <= 0)
+            l = L_DEFAULT;
+        w = configJSON["w"];
+
+        if (w <= 0)
+            w = W_DEFAULT;
+        h = configJSON["h"];
+
+        if (h <= 0)
+            h = H_DEFAULT;
+
+
+
         drag_coefficient = configJSON["drag_coefficient"];
         if (drag_coefficient <= 0){
             drag_coefficient = DEFAULT_DRAG_COEF;
         }
 
         brakeCoef = configJSON["brake_coefficient_full_deploy"];
+
+
         if (brakeCoef < 0){
             handleError("Unable to load brake coefficient!");
         }

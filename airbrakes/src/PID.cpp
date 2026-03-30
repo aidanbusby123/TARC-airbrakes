@@ -6,6 +6,7 @@
 float SIGMA_DELTA = 0.5;
 
 void PIDController::init(config configuration){
+    
     last_time = time =   (float)(micros()) / 1000000.0f;
     this->kp = configuration.getKP();
     this->ki = configuration.getKI();
@@ -79,6 +80,10 @@ float PIDController::compute(float predicted_apogee, float target_apogee){
 
 void PIDController::updateTime(){
     time = (float)(micros()) / 1000000.0f;
+    if (first_run == true){
+        last_time = time;
+        first_run = false;
+    }
     delta_t = time - last_time;
     last_time = time;
 }

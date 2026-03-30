@@ -388,6 +388,9 @@ void loop()
     break;
 
   case COAST: // If we are in the coast state of flight, meaning motor has finished burn
+
+  //rocketState.setBrakeTargetDeployment(100);
+  
   
 
       pid = PID.compute(rocketState.getApogee(), rocketConfig.getTargetApogee());
@@ -402,6 +405,7 @@ void loop()
     rocketControl.deployBrake(rocketState.airBrakeState.getDeployAngle());
 
     rocketState.setBrakeTargetDeployment(rocketState.airBrakeState.getTargetPercent());
+    
     
 
     if (((rocketStatus.t * 1000000) / (LOG_TIME_STEP * 1000000) - ((rocketStatus.t_last * 1000000) / (LOG_TIME_STEP * 1000000))) >= 1)

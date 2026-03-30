@@ -55,7 +55,7 @@ void state::updateState (bool ekf_active) { // Really only for rocketState, not 
   if (!ekf_active){
     
     if (stateType == ROCKET && flightPhase != PAD && flightPhase != LAUNCH && baroConversionFinished == true){
-      altitude = (1-BARO_GAIN) * (altitude + vz * delta_t) + BARO_GAIN * baro_altitude; 
+      altitude = (1-rocketConfig.getBaroGain()) * (altitude + vz * delta_t) + rocketConfig.getBaroGain() * baro_altitude; 
       #ifdef V20262
       baroConversionFinished = false;
       #endif

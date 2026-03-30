@@ -57,7 +57,7 @@
 #define START_TIME 20.0f
 
 #define INIT_MASS 0.478
-#define BURN_TIME 1.2
+#define BURN_TIME 1.5
 
 #define LAUNCH_DELAY 4
 
@@ -66,7 +66,7 @@
 #define AIR_MOLAR_MASS 0.029
 #define BOLTZMANN_COST 1.381
 
-#define BARO_GAIN 0.5
+#define BARO_GAIN 0.1
 
 /*##########    AIRBRAKE VERSION    ##########*/
 
@@ -206,9 +206,15 @@ class brakeState{
         float r = 0.025; // Radius of servo sweeper
         float l = 0.016; // Length of flap arm from hinge to servo arm connector
         float s = 0.02; // Length of servo arm connector
+        float w;
+        float h;
+
+        float use_brake_formula = false;
 
         float start_angle = 0;
         float end_angle = 60;
+
+
 
 
         float curDragCoefficient = 0;
@@ -239,6 +245,8 @@ class brakeState{
 
         float getDragCoef() { return curDragCoefficient; } // Return the current drag coefficient of the brake
         float getDragCoefCoef() { return dragForceCoefCoef; }
+
+        float getFormulaBrakeAngle(float theta);
 
         void calcDeployAngle(float percent); // Actually run the calculation
         void updateDeltaT();
@@ -554,6 +562,11 @@ class PIDController{
         float last_time;
         float delta_t;
         float time;
+
+
+        bool first_run = true;
+
+        
         float computeP(float predicted_apogee, float target_apogee); // calculate the P value
         
 

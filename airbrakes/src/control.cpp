@@ -2,6 +2,18 @@
 #include <Servo.h>
 
 
+float brakeState::getFormulaBrakeAngle(float theta){
+    float angle = 0.0;
+    if (r != 0 && w != 0 && s != 0 && h != 0 && l != 0){
+        float num = pow(h - l * cos (-1 * theta/180.0), 2) + pow(w - l * sin (-1 * theta/180.0), 2) + pow(r, 2) - pow(s, 2);
+        float denom = 2 * r * (w - l * sin(-1 * theta/180.0));
+
+        if (denom >= 0.001){
+            angle = acos(num / denom) * 180.0 / PI;
+        }
+    }
+    return angle;
+}
 void controller::deployBrake(float angle){
     servo_angle = angle;
     brake.write(angle);
@@ -23,7 +35,7 @@ void brakeState::loadConfig(config Config){
     dragForceCoefCoefficients[1] = ptr[1];
     dragForceCoefCoefficients[2] = ptr[2];
 
-    dragForceCoefCoef = dragForceCoefCoefficients[0];
+    dragForceCoefCoef = Config.getBrakeCoef();
 
 
     Serial.print("Airbrake Drag Coefs: ");
@@ -36,6 +48,14 @@ void brakeState::loadConfig(config Config){
     start_angle = Config.getBrakeRetracted();
 
     end_angle = Config.getBrakeDeployed();
+
+
+
+    if (Config.getUseBrakeFormula() == true){
+        use_brake_formula = true;
+        start_angle = getFormulaBrakeAngle(0);
+        end_angle = 90 - getFormulaBrakeAngle(50);
+    }
 }
 
 void brakeState::setPercentDeployed(float percent){ // set the current percent deployed
@@ -51,12 +71,14 @@ void brakeState::setDeltaPercent(float delta_percent){
         newPercent = 100;
 
     targetPercent = newPercent;
+
+    
 }
 void brakeState::setTargetPercent(float percent){ // set the percent deployed target
     targetPercent = percent;
     calcDeployAngle(percent);
     calcServoAngle(targetDeployAngle);
-    curDragCoefficient = dragForceCoefCoef * targetPercent/100.0f;
+    curDragCoefficient = dragForceCoefCoef * sin(targetPercent/100.0f * 50.0 / 180.0 * PI);
 }
 
 void brakeState::calcDeployAngle(float percent){
@@ -71,9 +93,13 @@ float brakeState::getDeployAngle(){
 }
 
 void brakeState::calcServoAngle(float angle){
+
+    if (use_brake_formula == true){
+        targetServoAngle = getFormulaBrakeAngle(angle);
+    } else 
     //if (sin(PI * angle / 180) > 0.)
     //targetServoAngle = 180 / PI * acos((pow(r, 2) + 2 * pow(l, 2) * (1 + cos(PI * angle/180)) - pow(s, 2))/(2 * l * r * sin(PI * angle / 180)));
-    targetServoAngle = (float)(angle/60.0)*(end_angle-start_angle) + start_angle;
+        targetServoAngle = (float)(angle/60.0)*(end_angle-start_angle) + start_angle;
 }
 float brakeState::getServoAngle(){
 
